@@ -34,7 +34,19 @@ export default function SignUp() {
 
       router.push('/dashboard');
     } catch (err: any) {
-      setError(err.message);
+      switch (err.code) {
+        case 'auth/email-already-in-use':
+          setError('This email is already registered. Please login instead.');
+          break;
+        case 'auth/weak-password':
+          setError('Password should be at least 6 characters long.');
+          break;
+        case 'auth/invalid-email':
+          setError('Please enter a valid email address.');
+          break;
+        default:
+          setError('An error occurred during registration.');
+      }
     }
   };
 
