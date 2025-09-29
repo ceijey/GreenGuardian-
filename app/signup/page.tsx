@@ -28,7 +28,8 @@ export default function SignUp() {
         badges: [],
         completedChallenges: 0,
         carbonSaved: 0,
-        itemsSwapped: 0
+        itemsSwapped: 0,
+        hasCompletedOnboarding: false  // Add this field
       });
 
       router.push('/dashboard');
