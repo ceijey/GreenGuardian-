@@ -137,7 +137,7 @@ export default function EcoScannerDialog({ isOpen, onClose }: EcoScannerDialogPr
     detect();
 
     return () => cancelAnimationFrame(animationFrameId);
-  }, [model, isOpen]);
+  }, [model, isOpen, loggedItems]);
 
   return (
     <Dialog open={isOpen} onClose={onClose} className="relative z-50">
