@@ -61,13 +61,17 @@ body {
   overflow-x: hidden;
   margin: 0;
   padding: 0;
-  padding-top: 70px; /* Space for fixed header on mobile */
 }
 
-/* Adjust body padding for different screen sizes */
-@media (min-width: 768px) {
-  body {
-    padding-top: 80px; /* More space for larger header on desktop */
+/* Add padding for pages with fixed header */
+.main-content {
+  padding-top: 80px; /* Space for fixed header */
+}
+
+/* Responsive adjustments for mobile */
+@media (max-width: 767px) {
+  .main-content {
+    padding-top: 70px; /* Less space on mobile */
   }
 }
 

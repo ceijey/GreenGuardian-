@@ -14,8 +14,9 @@ export default function DashboardPage() {
   return (
     <>
       <Header logo="fas fa-leaf" title="GREENGUARDIAN" />
-      <GlobalAnnouncements position="top" maxVisible={2} />
-      <Dashboard />
+      <main className="main-content">
+        <GlobalAnnouncements position="top" maxVisible={2} />
+        <Dashboard />
 
       <div className="flex justify-center gap-4 mt-8">
         <button
@@ -34,6 +35,13 @@ export default function DashboardPage() {
         </button>
       </div>
 
+      <ActionLogger
+        isOpen={isActionLoggerOpen}
+        onClose={() => setIsActionLoggerOpen(false)}
+      />
+
+      </main>
+      
       <ActionLogger
         isOpen={isActionLoggerOpen}
         onClose={() => setIsActionLoggerOpen(false)}
