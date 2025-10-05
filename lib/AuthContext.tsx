@@ -17,6 +17,7 @@ interface AuthContextType {
   signup: (email: string, password: string) => Promise<void>;
   login: (email: string, password: string) => Promise<void>;
   logout: () => Promise<void>;
+  resendVerification: () => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType>({} as AuthContextType);
@@ -48,28 +49,39 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     const userCredential = await createUserWithEmailAndPassword(auth, email, password);
     const user = userCredential.user;
 
-    // Send a verification email
+    // Send verification email
     await sendEmailVerification(user);
 
-    // Sign out immediately to force them to verify
+    // Sign out to force verification
     await signOut(auth);
 
-    alert('A verification email has been sent. Please check your inbox and verify before logging in.');
+    throw new Error('Please check your email and click the verification link before logging in.');
   };
 
-  // ✅ Prevent login if email not verified
+  // ✅ Login with email verification check
   const login = async (email: string, password: string) => {
     const userCredential = await signInWithEmailAndPassword(auth, email, password);
     const user = userCredential.user;
 
+    // Reload user to get latest verification status
+    await user.reload();
+
     if (!user.emailVerified) {
       await signOut(auth);
-      throw new Error('Email not verified. Please check your inbox before logging in.');
+      throw new Error('Please verify your email before logging in. Check your inbox for the verification link.');
     }
   };
 
   const logout = async () => {
     await signOut(auth);
+  };
+
+  const resendVerification = async () => {
+    if (user) {
+      await sendEmailVerification(user);
+    } else {
+      throw new Error('No user is currently logged in.');
+    }
   };
 
   const value = {
@@ -78,6 +90,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     signup,
     login,
     logout,
+    resendVerification,
   };
 
   return (

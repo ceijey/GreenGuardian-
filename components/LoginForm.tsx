@@ -10,7 +10,8 @@ export default function LoginForm() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
-  const { login } = useAuth();
+  const [showResendButton, setShowResendButton] = useState(false);
+  const { login, resendVerification } = useAuth();
   const router = useRouter();
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -18,13 +19,43 @@ export default function LoginForm() {
 
     try {
       setError('');
+      setShowResendButton(false);
+      console.log('Attempting login...');
       await login(email, password);
+      console.log('Login successful, redirecting to dashboard...');
       router.push('/dashboard');
     } catch (err: Error | unknown) {
+      console.error('Login error:', err);
       if (err instanceof Error) {
         setError(err.message);
+        // Show resend button if it's a verification error
+        if (err.message.includes('verify your email')) {
+          setShowResendButton(true);
+        }
       } else {
         setError('Failed to login. Please check your credentials.');
+      }
+    }
+  };
+
+  const handleResendVerification = async () => {
+    try {
+      setError('Sending verification email...');
+      // Use the auth from our firebase config
+      const { signInWithEmailAndPassword, sendEmailVerification, signOut } = await import('firebase/auth');
+      const { auth } = await import('@/lib/firebase');
+      
+      const userCredential = await signInWithEmailAndPassword(auth, email, password);
+      await sendEmailVerification(userCredential.user);
+      await signOut(auth);
+      
+      setError('Verification email sent! Please check your inbox and click the link.');
+      setShowResendButton(false);
+    } catch (err: Error | unknown) {
+      if (err instanceof Error) {
+        setError('Failed to resend verification email: ' + err.message);
+      } else {
+        setError('Failed to resend verification email.');
       }
     }
   };
@@ -41,7 +72,22 @@ export default function LoginForm() {
         </div>
 
         <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
-          {error && <div className="text-red-500 text-center text-sm bg-red-50 p-2 rounded-md">{error}</div>}
+          {error && (
+            <div className="text-red-500 text-center text-sm bg-red-50 p-2 rounded-md">
+              {error}
+              {showResendButton && (
+                <div className="mt-2">
+                  <button
+                    type="button"
+                    onClick={handleResendVerification}
+                    className="text-green-600 hover:text-green-700 underline text-sm"
+                  >
+                    Resend Verification Email
+                  </button>
+                </div>
+              )}
+            </div>
+          )}
 
           <div className="space-y-4">
             <div>

@@ -27,13 +27,20 @@ export default function SignupForm() {
       setMessage('');
       await signup(email, password);
       
+      // This won't execute because signup throws an error after sending verification
       setMessage('Account created successfully!');
-      // Optionally redirect to login after a few seconds
-      setTimeout(() => router.push('/login'), 4000);
     } catch (err: Error | unknown) {
       if (err instanceof Error) {
-        console.error(err.message);
-        setError(err.message);
+        // If it's the verification message, show it as a message, not an error
+        if (err.message.includes('verification link')) {
+          setMessage(err.message);
+          setError('');
+          // Redirect to login after showing the message
+          setTimeout(() => router.push('/login'), 5000);
+        } else {
+          console.error(err.message);
+          setError(err.message);
+        }
       } else {
         setError('Failed to create an account.');
       }
