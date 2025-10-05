@@ -1,7 +1,113 @@
+/* Landing Page Header Styles */
+.landingHeader {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(10px);
+  border-bottom: 1px solid rgba(76, 175, 80, 0.1);
+  z-index: 1000;
+  transition: all 0.3s ease;
+}
+
+.navbar {
+  max-width: 1200px;
+  margin: 0 auto;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 15px 20px;
+}
+
+.navBrand {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  cursor: pointer;
+  text-decoration: none;
+}
+
+.brandText {
+  font-size: 24px;
+  font-weight: 800;
+  color: #2d5a2d;
+  letter-spacing: -0.5px;
+}
+
+.navLinks {
+  display: flex;
+  align-items: center;
+  gap: 30px;
+}
+
+.navLink {
+  color: #2d5a2d;
+  text-decoration: none;
+  font-weight: 500;
+  font-size: 16px;
+  transition: all 0.3s ease;
+  position: relative;
+}
+
+.navLink:hover {
+  color: #4caf50;
+}
+
+.navLink::after {
+  content: '';
+  position: absolute;
+  bottom: -5px;
+  left: 0;
+  width: 0;
+  height: 2px;
+  background: #4caf50;
+  transition: width 0.3s ease;
+}
+
+.navLink:hover::after {
+  width: 100%;
+}
+
+.navButton {
+  padding: 10px 20px;
+  border: 1px solid #e0e0e0;
+  background: transparent;
+  color: #2d5a2d;
+  border-radius: 25px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.navButton:hover {
+  background: #f5f5f5;
+  border-color: #4caf50;
+  color: #4caf50;
+}
+
+.navButtonPrimary {
+  padding: 10px 25px;
+  border: none;
+  background: linear-gradient(135deg, #4caf50, #66bb6a);
+  color: white;
+  border-radius: 25px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 15px rgba(76, 175, 80, 0.3);
+}
+
+.navButtonPrimary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(76, 175, 80, 0.4);
+}
+
 .container {
   max-width: 1200px;
   margin: 0 auto;
   padding: 0 20px;
+  margin-top: 80px; /* Add top margin to account for fixed header */
 }
 
 .hero {
@@ -180,7 +286,40 @@
   color: #666;
 }
 
+.statDescription {
+  font-size: 12px;
+  color: #999;
+  margin-top: 5px;
+  font-style: italic;
+}
+
 @media (max-width: 768px) {
+  .navbar {
+    padding: 12px 15px;
+  }
+
+  .navLinks {
+    gap: 15px;
+  }
+
+  .navLink {
+    font-size: 14px;
+  }
+
+  .navButton,
+  .navButtonPrimary {
+    padding: 8px 16px;
+    font-size: 14px;
+  }
+
+  .brandText {
+    font-size: 20px;
+  }
+
+  .container {
+    margin-top: 70px;
+  }
+
   .hero {
     flex-direction: column;
     padding: 40px 0;
@@ -212,5 +351,25 @@
     grid-template-columns: repeat(2, 1fr);
     gap: 20px;
     padding: 0 20px;
+  }
+}
+
+@media (max-width: 480px) {
+  .navLinks {
+    gap: 10px;
+  }
+
+  .navLink {
+    display: none;
+  }
+
+  .brandText {
+    font-size: 18px;
+  }
+
+  .navButton,
+  .navButtonPrimary {
+    padding: 6px 12px;
+    font-size: 13px;
   }
 }

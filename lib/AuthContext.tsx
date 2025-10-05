@@ -9,7 +9,8 @@ import {
   signOut,
   User
 } from 'firebase/auth';
-import { auth } from './firebase';
+import { doc, setDoc, increment, serverTimestamp } from 'firebase/firestore';
+import { auth, db } from './firebase';
 
 interface AuthContextType {
   user: User | null;
@@ -49,6 +50,17 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const signup = async (email: string, password: string) => {
     const userCredential = await createUserWithEmailAndPassword(auth, email, password);
     const user = userCredential.user;
+
+    // Update global user count
+    try {
+      const globalStatsRef = doc(db, 'globalStats', 'aggregate');
+      await setDoc(globalStatsRef, {
+        totalUsers: increment(1),
+        lastUpdated: serverTimestamp()
+      }, { merge: true });
+    } catch (error) {
+      console.error('Error updating user count:', error);
+    }
 
     // Send verification email
     await sendEmailVerification(user);

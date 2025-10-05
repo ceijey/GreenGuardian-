@@ -1,0 +1,227 @@
+.chartContainer {
+  background: white;
+  border-radius: 16px;
+  padding: 24px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+}
+
+.emptyChart {
+  text-align: center;
+  padding: 40px 20px;
+  color: #666;
+}
+
+.emptyChart i {
+  font-size: 3rem;
+  color: #ddd;
+  margin-bottom: 16px;
+}
+
+.chartHeader {
+  margin-bottom: 24px;
+}
+
+.chartTitle {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.chartTitle h3 {
+  font-size: 1.5rem;
+  color: #333;
+  margin: 0;
+}
+
+.trendIndicator {
+  font-weight: 600;
+  font-size: 0.9rem;
+}
+
+.positive {
+  color: #4CAF50;
+}
+
+.negative {
+  color: #f44336;
+}
+
+.chart {
+  display: flex;
+  height: 300px;
+  margin-bottom: 20px;
+}
+
+.yAxis {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  width: 60px;
+  padding-right: 12px;
+  font-size: 0.8rem;
+  color: #666;
+}
+
+.axisLabel {
+  display: flex;
+  align-items: center;
+  height: 20px;
+}
+
+.chartArea {
+  flex: 1;
+  position: relative;
+}
+
+.gridLines {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 30px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  pointer-events: none;
+}
+
+.gridLine {
+  height: 1px;
+  background: #f0f0f0;
+  width: 100%;
+}
+
+.lineChart {
+  width: 100%;
+  height: calc(100% - 30px);
+}
+
+.scoreLine {
+  fill: none;
+  stroke: #4CAF50;
+  stroke-width: 3;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.scorePoint {
+  fill: #4CAF50;
+  stroke: white;
+  stroke-width: 2;
+}
+
+.actionsLine {
+  fill: none;
+  stroke: #2196F3;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-dasharray: 5,5;
+}
+
+.actionPoint {
+  fill: #2196F3;
+  stroke: white;
+  stroke-width: 2;
+}
+
+.xAxisLabels {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 8px;
+  font-size: 0.8rem;
+  color: #666;
+}
+
+.xLabel {
+  text-align: center;
+  flex: 1;
+}
+
+.legend {
+  display: flex;
+  justify-content: center;
+  gap: 24px;
+  margin-bottom: 20px;
+}
+
+.legendItem {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.9rem;
+  color: #666;
+}
+
+.legendColor {
+  width: 12px;
+  height: 12px;
+  border-radius: 2px;
+}
+
+.chartSummary {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 16px;
+  padding: 16px;
+  background: #f8f9fa;
+  border-radius: 8px;
+}
+
+.summaryItem {
+  text-align: center;
+}
+
+.summaryLabel {
+  display: block;
+  font-size: 0.8rem;
+  color: #666;
+  margin-bottom: 4px;
+}
+
+.summaryValue {
+  font-size: 1.1rem;
+  font-weight: bold;
+  color: #333;
+}
+
+@media (max-width: 768px) {
+  .chartTitle {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+  }
+  
+  .chart {
+    height: 250px;
+  }
+  
+  .yAxis {
+    width: 50px;
+    padding-right: 8px;
+  }
+  
+  .legend {
+    flex-direction: column;
+    gap: 12px;
+  }
+  
+  .chartSummary {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 480px) {
+  .chart {
+    height: 200px;
+  }
+  
+  .xAxisLabels {
+    font-size: 0.7rem;
+  }
+  
+  .yAxis {
+    width: 40px;
+    font-size: 0.7rem;
+  }
+}

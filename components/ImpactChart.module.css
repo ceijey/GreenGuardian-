@@ -1,0 +1,261 @@
+.chartContainer {
+  width: 100%;
+}
+
+.metricSelector {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 32px;
+  justify-content: center;
+}
+
+.metricButton {
+  padding: 8px 16px;
+  border: 2px solid;
+  background: white;
+  border-radius: 20px;
+  cursor: pointer;
+  font-size: 0.9rem;
+  font-weight: 500;
+  transition: all 0.2s ease;
+}
+
+.metricButton:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.metricButton.active {
+  color: white !important;
+}
+
+.chart {
+  display: flex;
+  height: 300px;
+  margin-bottom: 24px;
+}
+
+.yAxis {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  padding-right: 16px;
+  width: 80px;
+  font-size: 0.8rem;
+  color: #666;
+}
+
+.axisLabel {
+  display: flex;
+  align-items: center;
+  height: 20px;
+}
+
+.chartArea {
+  flex: 1;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+}
+
+.gridLines {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 30px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  pointer-events: none;
+}
+
+.gridLine {
+  height: 1px;
+  background: #e0e0e0;
+  width: 100%;
+}
+
+.bars {
+  display: flex;
+  align-items: flex-end;
+  gap: 8px;
+  height: calc(100% - 30px);
+  padding: 0 4px;
+}
+
+.barContainer {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  height: 100%;
+}
+
+.bar {
+  width: 100%;
+  max-width: 60px;
+  border-radius: 4px 4px 0 0;
+  transition: all 0.3s ease;
+  cursor: pointer;
+  position: relative;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  padding: 4px;
+  animation: growBar 0.8s ease-out both;
+  min-height: 4px;
+}
+
+@keyframes growBar {
+  from {
+    transform: scaleY(0);
+  }
+  to {
+    transform: scaleY(1);
+  }
+}
+
+.bar:hover {
+  opacity: 0.8;
+  transform: scaleY(1.02);
+}
+
+.barValue {
+  font-size: 0.7rem;
+  font-weight: 600;
+  color: white;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+  opacity: 0;
+  transition: opacity 0.2s ease;
+}
+
+.bar:hover .barValue {
+  opacity: 1;
+}
+
+.barLabel {
+  margin-top: 8px;
+  font-size: 0.75rem;
+  color: #666;
+  text-align: center;
+  transform: rotate(-45deg);
+  transform-origin: center;
+  width: 60px;
+}
+
+.chartSummary {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 16px;
+  padding: 20px;
+  background: #f8f9fa;
+  border-radius: 12px;
+  margin-top: 20px;
+}
+
+.summaryItem {
+  text-align: center;
+}
+
+.summaryLabel {
+  display: block;
+  font-size: 0.85rem;
+  color: #666;
+  margin-bottom: 4px;
+  font-weight: 500;
+}
+
+.summaryValue {
+  font-size: 1.2rem;
+  font-weight: bold;
+  color: #333;
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+  .metricSelector {
+    justify-content: flex-start;
+    overflow-x: auto;
+    padding-bottom: 8px;
+  }
+  
+  .chart {
+    height: 250px;
+  }
+  
+  .yAxis {
+    width: 60px;
+    padding-right: 8px;
+  }
+  
+  .bars {
+    gap: 4px;
+    padding: 0 2px;
+  }
+  
+  .bar {
+    max-width: 40px;
+  }
+  
+  .barLabel {
+    font-size: 0.7rem;
+    width: 50px;
+  }
+  
+  .chartSummary {
+    grid-template-columns: 1fr;
+    gap: 12px;
+    padding: 16px;
+  }
+  
+  .summaryItem {
+    padding: 8px;
+    background: white;
+    border-radius: 8px;
+  }
+}
+
+@media (max-width: 480px) {
+  .chart {
+    height: 200px;
+  }
+  
+  .yAxis {
+    width: 50px;
+    font-size: 0.7rem;
+  }
+  
+  .bars {
+    gap: 2px;
+  }
+  
+  .bar {
+    max-width: 30px;
+  }
+  
+  .barLabel {
+    font-size: 0.65rem;
+    width: 40px;
+  }
+  
+  .metricButton {
+    font-size: 0.8rem;
+    padding: 6px 12px;
+  }
+}
+
+/* Animation delays for bars */
+.barContainer:nth-child(1) .bar { animation-delay: 0.1s; }
+.barContainer:nth-child(2) .bar { animation-delay: 0.15s; }
+.barContainer:nth-child(3) .bar { animation-delay: 0.2s; }
+.barContainer:nth-child(4) .bar { animation-delay: 0.25s; }
+.barContainer:nth-child(5) .bar { animation-delay: 0.3s; }
+.barContainer:nth-child(6) .bar { animation-delay: 0.35s; }
+.barContainer:nth-child(7) .bar { animation-delay: 0.4s; }
+.barContainer:nth-child(8) .bar { animation-delay: 0.45s; }
+.barContainer:nth-child(9) .bar { animation-delay: 0.5s; }
+.barContainer:nth-child(10) .bar { animation-delay: 0.55s; }
+.barContainer:nth-child(11) .bar { animation-delay: 0.6s; }
+.barContainer:nth-child(12) .bar { animation-delay: 0.65s; }

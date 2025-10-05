@@ -1,0 +1,368 @@
+.container {
+  width: 100%;
+  z-index: 100;
+}
+
+.container.top {
+  position: fixed;
+  top: 80px;
+  left: 0;
+  right: 0;
+  padding: 0 2rem;
+}
+
+.container.bottom {
+  position: fixed;
+  bottom: 2rem;
+  left: 2rem;
+  right: 2rem;
+}
+
+.container.sidebar {
+  position: relative;
+  margin-bottom: 1rem;
+}
+
+.announcement {
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+  margin-bottom: 1rem;
+  padding: 1.5rem;
+  border-left: 4px solid;
+  animation: slideIn 0.3s ease-out;
+  transition: all 0.3s ease;
+}
+
+.announcement:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 25px rgba(0, 0, 0, 0.15);
+}
+
+.announcement.info {
+  border-left-color: #2196f3;
+  background: linear-gradient(135deg, #ffffff 0%, #f8fffe 100%);
+}
+
+.announcement.success {
+  border-left-color: #4caf50;
+  background: linear-gradient(135deg, #ffffff 0%, #f8fff8 100%);
+}
+
+.announcement.warning {
+  border-left-color: #ff9800;
+  background: linear-gradient(135deg, #ffffff 0%, #fffdf8 100%);
+}
+
+.announcement.urgent {
+  border-left-color: #f44336;
+  background: linear-gradient(135deg, #ffffff 0%, #fff8f8 100%);
+  animation: pulse 2s infinite;
+}
+
+.announcement.critical {
+  box-shadow: 0 0 20px rgba(244, 67, 54, 0.3);
+}
+
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateY(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes pulse {
+  0%, 100% {
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+  }
+  50% {
+    box-shadow: 0 4px 20px rgba(244, 67, 54, 0.2);
+  }
+}
+
+.announcementHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 0.75rem;
+}
+
+.titleSection {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  flex: 1;
+}
+
+.icon {
+  font-size: 1.25rem;
+  flex-shrink: 0;
+}
+
+.title {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #333;
+  margin: 0;
+  flex: 1;
+}
+
+.priority {
+  padding: 0.25rem 0.5rem;
+  border-radius: 12px;
+  font-size: 0.75rem;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.announcement.critical .priority {
+  background: #f44336;
+  color: white;
+}
+
+.announcement.high .priority {
+  background: #ff9800;
+  color: white;
+}
+
+.announcement.medium .priority {
+  background: #2196f3;
+  color: white;
+}
+
+.announcement.low .priority {
+  background: #4caf50;
+  color: white;
+}
+
+.dismissButton {
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  font-size: 1.2rem;
+  color: #999;
+  padding: 0.25rem;
+  border-radius: 4px;
+  transition: all 0.3s ease;
+  flex-shrink: 0;
+}
+
+.dismissButton:hover {
+  background: #f0f0f0;
+  color: #666;
+}
+
+.message {
+  margin: 0 0 1rem 0;
+  color: #666;
+  line-height: 1.5;
+}
+
+.announcementFooter {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
+.meta {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  font-size: 0.85rem;
+  color: #999;
+}
+
+.author {
+  font-weight: 500;
+}
+
+.timestamp {
+  font-style: italic;
+}
+
+.actionButton {
+  padding: 0.5rem 1rem;
+  background: linear-gradient(135deg, #4caf50, #66bb6a);
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: 500;
+  transition: all 0.3s ease;
+  font-size: 0.9rem;
+}
+
+.actionButton:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(76, 175, 80, 0.3);
+}
+
+/* Create Section */
+.createSection {
+  margin-top: 1rem;
+}
+
+.createButton {
+  width: 100%;
+  padding: 1rem;
+  background: linear-gradient(135deg, #4caf50, #66bb6a);
+  color: white;
+  border: none;
+  border-radius: 12px;
+  cursor: pointer;
+  font-weight: 600;
+  font-size: 1rem;
+  transition: all 0.3s ease;
+}
+
+.createButton:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(76, 175, 80, 0.3);
+}
+
+.createForm {
+  background: white;
+  border-radius: 12px;
+  padding: 1.5rem;
+  margin-top: 1rem;
+  border: 2px solid #e0f0e0;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+}
+
+.input,
+.textarea,
+.select {
+  width: 100%;
+  padding: 0.75rem;
+  border: 2px solid #e0e0e0;
+  border-radius: 8px;
+  font-size: 1rem;
+  margin-bottom: 1rem;
+  transition: all 0.3s ease;
+  box-sizing: border-box;
+}
+
+.input:focus,
+.textarea:focus,
+.select:focus {
+  outline: none;
+  border-color: #4caf50;
+  box-shadow: 0 0 0 3px rgba(76, 175, 80, 0.1);
+}
+
+.textarea {
+  resize: vertical;
+  min-height: 80px;
+}
+
+.formRow {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.formActions {
+  display: flex;
+  gap: 1rem;
+  justify-content: flex-end;
+}
+
+.submitButton {
+  padding: 0.75rem 1.5rem;
+  background: linear-gradient(135deg, #4caf50, #66bb6a);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 600;
+  transition: all 0.3s ease;
+}
+
+.submitButton:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(76, 175, 80, 0.3);
+}
+
+.cancelButton {
+  padding: 0.75rem 1.5rem;
+  background: transparent;
+  color: #666;
+  border: 2px solid #e0e0e0;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 600;
+  transition: all 0.3s ease;
+}
+
+.cancelButton:hover {
+  background: #f0f0f0;
+  border-color: #ccc;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .container.top,
+  .container.bottom {
+    padding: 0 1rem;
+  }
+
+  .announcement {
+    padding: 1rem;
+  }
+
+  .titleSection {
+    gap: 0.5rem;
+  }
+
+  .title {
+    font-size: 1rem;
+  }
+
+  .announcementFooter {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.75rem;
+  }
+
+  .formRow {
+    grid-template-columns: 1fr;
+    gap: 0.5rem;
+  }
+
+  .formActions {
+    flex-direction: column;
+  }
+
+  .submitButton,
+  .cancelButton {
+    width: 100%;
+  }
+}
+
+@media (max-width: 480px) {
+  .container.top {
+    top: 70px;
+  }
+
+  .announcement {
+    padding: 0.75rem;
+  }
+
+  .titleSection {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.25rem;
+  }
+
+  .priority {
+    align-self: flex-start;
+  }
+}

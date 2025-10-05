@@ -1,0 +1,233 @@
+.badgeDisplay {
+  position: relative;
+  background: white;
+  border-radius: 12px;
+  padding: 20px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  transition: all 0.3s ease;
+  overflow: hidden;
+}
+
+.badgeDisplay:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+}
+
+.badgeDisplay.small {
+  padding: 12px;
+}
+
+.badgeDisplay.medium {
+  padding: 20px;
+}
+
+.badgeDisplay.large {
+  padding: 28px;
+}
+
+.badgeContainer {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  position: relative;
+  z-index: 2;
+}
+
+.badgeDisplay.small .badgeContainer {
+  gap: 12px;
+}
+
+.badgeDisplay.large .badgeContainer {
+  gap: 20px;
+}
+
+.badgeIcon {
+  width: 60px;
+  height: 60px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  font-size: 1.8rem;
+  position: relative;
+  border: 3px solid currentColor;
+}
+
+.badgeDisplay.small .badgeIcon {
+  width: 40px;
+  height: 40px;
+  font-size: 1.2rem;
+  border-width: 2px;
+}
+
+.badgeDisplay.large .badgeIcon {
+  width: 80px;
+  height: 80px;
+  font-size: 2.4rem;
+  border-width: 4px;
+}
+
+.badgeIcon::after {
+  content: '';
+  position: absolute;
+  top: -3px;
+  left: -3px;
+  right: -3px;
+  bottom: -3px;
+  border-radius: 50%;
+  background: conic-gradient(
+    from 0deg,
+    currentColor 0deg 60deg,
+    transparent 60deg 120deg,
+    currentColor 120deg 180deg,
+    transparent 180deg 240deg,
+    currentColor 240deg 300deg,
+    transparent 300deg 360deg
+  );
+  opacity: 0.3;
+  animation: rotate 3s linear infinite;
+  z-index: -1;
+}
+
+@keyframes rotate {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.badgeInfo {
+  flex: 1;
+  min-width: 0;
+}
+
+.badgeName {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: #333;
+  margin: 0 0 4px 0;
+  line-height: 1.3;
+}
+
+.badgeDisplay.small .badgeName {
+  font-size: 0.95rem;
+}
+
+.badgeDisplay.large .badgeName {
+  font-size: 1.3rem;
+}
+
+.earnedDate {
+  font-size: 0.85rem;
+  color: #666;
+  margin: 0;
+}
+
+.badgeDisplay.small .earnedDate {
+  font-size: 0.8rem;
+}
+
+.badgeDisplay.large .earnedDate {
+  font-size: 0.9rem;
+}
+
+/* Shine effect */
+.shine {
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(255, 255, 255, 0.4),
+    transparent
+  );
+  transition: left 0.5s;
+  pointer-events: none;
+}
+
+.badgeDisplay:hover .shine {
+  left: 100%;
+}
+
+/* Special effects for newly earned badges */
+.badgeDisplay.newlyEarned {
+  animation: celebrateBadge 0.6s ease-out;
+}
+
+@keyframes celebrateBadge {
+  0% {
+    transform: scale(0.8);
+    opacity: 0;
+  }
+  50% {
+    transform: scale(1.05);
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+  .badgeDisplay {
+    padding: 16px;
+  }
+  
+  .badgeDisplay.small {
+    padding: 10px;
+  }
+  
+  .badgeDisplay.large {
+    padding: 20px;
+  }
+  
+  .badgeContainer {
+    gap: 12px;
+  }
+  
+  .badgeIcon {
+    width: 50px;
+    height: 50px;
+    font-size: 1.5rem;
+  }
+  
+  .badgeDisplay.small .badgeIcon {
+    width: 35px;
+    height: 35px;
+    font-size: 1rem;
+  }
+  
+  .badgeDisplay.large .badgeIcon {
+    width: 65px;
+    height: 65px;
+    font-size: 2rem;
+  }
+  
+  .badgeName {
+    font-size: 1rem;
+  }
+}
+
+/* Badge rarity effects */
+.badgeDisplay.common {
+  border-left: 4px solid #9E9E9E;
+}
+
+.badgeDisplay.rare {
+  border-left: 4px solid #2196F3;
+}
+
+.badgeDisplay.epic {
+  border-left: 4px solid #9C27B0;
+}
+
+.badgeDisplay.legendary {
+  border-left: 4px solid #FF9800;
+  background: linear-gradient(135deg, rgba(255, 152, 0, 0.05), rgba(255, 193, 7, 0.05));
+}

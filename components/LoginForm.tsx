@@ -5,13 +5,14 @@ import { useAuth } from '@/lib/AuthContext';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import Image from 'next/image';
+import styles from './LoginForm.module.css';
 
 export default function LoginForm() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [showResendButton, setShowResendButton] = useState(false);
-  const { login, resendVerification } = useAuth();
+  const { login } = useAuth();
   const router = useRouter();
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -66,26 +67,30 @@ export default function LoginForm() {
   };
 
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center bg-gradient-to-b from-green-50 to-white py-12 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-md w-full space-y-8 bg-white p-8 rounded-xl shadow-lg">
-        <div className="flex flex-col items-center">
-          <div className="w-20 h-20 relative mb-4">
-            <Image src="/window.svg" alt="Green Guardian Logo" fill className="object-contain" />
+    <div className={styles.container}>
+      <Link href="/" className={styles.backButton} aria-label="Back to home">
+        <i className="fas fa-arrow-left"></i>
+      </Link>
+      
+      <div className={styles.formWrapper}>
+        <div className={styles.header}>
+          <div className={styles.logoContainer}>
+            <Image src="/window.svg" alt="Green Guardian Logo" width={60} height={60} />
           </div>
-          <h2 className="text-center text-3xl font-extrabold text-gray-900">Welcome Back</h2>
-          <p className="mt-2 text-center text-sm text-gray-600">Sign in to continue to Green Guardian</p>
+          <h2 className={styles.title}>Welcome Back</h2>
+          <p className={styles.subtitle}>Sign in to continue to Green Guardian</p>
         </div>
 
-        <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
+        <form className={styles.form} onSubmit={handleSubmit}>
           {error && (
-            <div className="text-red-500 text-center text-sm bg-red-50 p-2 rounded-md">
+            <div className={styles.errorMessage}>
               {error}
               {showResendButton && (
-                <div className="mt-2">
+                <div>
                   <button
                     type="button"
                     onClick={handleResendVerification}
-                    className="text-green-600 hover:text-green-700 underline text-sm"
+                    className={styles.resendButton}
                   >
                     Resend Verification Email
                   </button>
@@ -94,31 +99,31 @@ export default function LoginForm() {
             </div>
           )}
 
-          <div className="space-y-4">
-            <div>
-              <label htmlFor="email-address" className="text-sm font-medium text-gray-700">
+          <div className={styles.formFields}>
+            <div className={styles.field}>
+              <label htmlFor="email-address" className={styles.label}>
                 Email address
               </label>
               <input
                 id="email-address"
                 type="email"
                 required
-                className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-green-500 focus:border-green-500 sm:text-sm"
+                className={styles.input}
                 placeholder="Enter your email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
               />
             </div>
 
-            <div>
-              <label htmlFor="password" className="text-sm font-medium text-gray-700">
+            <div className={styles.field}>
+              <label htmlFor="password" className={styles.label}>
                 Password
               </label>
               <input
                 id="password"
                 type="password"
                 required
-                className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-green-500 focus:border-green-500 sm:text-sm"
+                className={styles.input}
                 placeholder="Enter your password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
@@ -126,17 +131,14 @@ export default function LoginForm() {
             </div>
           </div>
 
-          <button
-            type="submit"
-            className="group relative w-full flex justify-center py-3 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-green-600 hover:bg-green-700 focus:ring-2 focus:ring-offset-2 focus:ring-green-500"
-          >
+          <button type="submit" className={styles.submitButton}>
             Sign in
           </button>
 
-          <div className="text-center">
-            <p className="text-sm text-gray-600">
+          <div className={styles.footer}>
+            <p className={styles.footerText}>
               Don&apos;t have an account?{' '}
-              <Link href="/signup" className="font-medium text-green-600 hover:text-green-500">
+              <Link href="/signup" className={styles.footerLink}>
                 Sign up here
               </Link>
             </p>

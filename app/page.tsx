@@ -1,7 +1,7 @@
 'use client'
 
 import { useRouter } from 'next/navigation'
-import Header from '@/components/Header'
+import ImpactStats from '../components/ImpactStats'
 import styles from './page.module.css'
 
 export default function HomePage() {
@@ -9,7 +9,31 @@ export default function HomePage() {
 
   return (
     <>
-      <Header logo="fas fa-leaf" title="GREENGUARDIAN" />
+      {/* Custom Landing Page Header */}
+      <header className={styles.landingHeader}>
+        <nav className={styles.navbar}>
+          <div className={styles.navBrand}>
+            <i className="fas fa-leaf" style={{ color: '#22c55e', fontSize: '24px' }}></i>
+            <span className={styles.brandText}>GREENGUARDIAN</span>
+          </div>
+          <div className={styles.navLinks}>
+            <a href="#features" className={styles.navLink}>Features</a>
+            <a href="#impact" className={styles.navLink}>Our Impact</a>
+            <button 
+              onClick={() => router.push('/login')} 
+              className={styles.navButton}
+            >
+              Sign In
+            </button>
+            <button 
+              onClick={() => router.push('/signup')} 
+              className={styles.navButtonPrimary}
+            >
+              Join Now
+            </button>
+          </div>
+        </nav>
+      </header>
       
       <div className={styles.container}>
         <section className={styles.hero}>
@@ -37,7 +61,7 @@ export default function HomePage() {
           </div>
         </section>
 
-        <section className={styles.features}>
+        <section id="features" className={styles.features}>
           <h2>What We Offer</h2>
           <div className={styles.featuresGrid}>
             <div className={styles.featureCard} onClick={() => router.push('/scanner')}>
@@ -63,27 +87,7 @@ export default function HomePage() {
           </div>
         </section>
 
-        <section className={styles.stats}>
-          <h2>Our Impact Together</h2>
-          <div className={styles.statsGrid}>
-            <div className={styles.statCard}>
-              <div className={styles.statValue}>1,247</div>
-              <div className={styles.statLabel}>Active Members</div>
-            </div>
-            <div className={styles.statCard}>
-              <div className={styles.statValue}>15,432</div>
-              <div className={styles.statLabel}>Trees Planted</div>
-            </div>
-            <div className={styles.statCard}>
-              <div className={styles.statValue}>8,921</div>
-              <div className={styles.statLabel}>Items Swapped</div>
-            </div>
-            <div className={styles.statCard}>
-              <div className={styles.statValue}>45,678</div>
-              <div className={styles.statLabel}>Challenges Completed</div>
-            </div>
-          </div>
-        </section>
+        <ImpactStats />
       </div>
     </>
   )

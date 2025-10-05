@@ -1,0 +1,287 @@
+.challengeCard {
+  background: white;
+  border-radius: 16px;
+  padding: 24px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+  transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.challengeCard:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+}
+
+.challengeCard.active {
+  border-left: 4px solid #4CAF50;
+}
+
+.challengeCard.upcoming {
+  border-left: 4px solid #FF9800;
+}
+
+.challengeCard.completed {
+  border-left: 4px solid #757575;
+  opacity: 0.8;
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.categoryBadge {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: #f0f8f0;
+  padding: 6px 12px;
+  border-radius: 20px;
+  font-size: 0.85rem;
+  color: #2E7D32;
+  font-weight: 500;
+}
+
+.categoryBadge i {
+  font-size: 0.9rem;
+}
+
+.statusBadge span {
+  padding: 4px 12px;
+  border-radius: 12px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.statusBadge .active {
+  background: #E8F5E8;
+  color: #2E7D32;
+}
+
+.statusBadge .upcoming {
+  background: #FFF3E0;
+  color: #F57C00;
+}
+
+.statusBadge .completed {
+  background: #F5F5F5;
+  color: #616161;
+}
+
+.content {
+  margin-bottom: 20px;
+}
+
+.title {
+  font-size: 1.5rem;
+  font-weight: bold;
+  color: #333;
+  margin-bottom: 12px;
+  line-height: 1.3;
+}
+
+.description {
+  color: #666;
+  line-height: 1.5;
+  margin-bottom: 20px;
+}
+
+.details {
+  margin-bottom: 16px;
+}
+
+.dateInfo {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.date {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.9rem;
+  color: #666;
+}
+
+.date i {
+  color: #4CAF50;
+  width: 16px;
+}
+
+.timeRemaining {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: #FFF3E0;
+  padding: 8px 12px;
+  border-radius: 8px;
+  font-size: 0.9rem;
+  color: #F57C00;
+  font-weight: 500;
+}
+
+.timeRemaining i {
+  color: #FF9800;
+}
+
+.stats {
+  display: flex;
+  gap: 20px;
+  margin-bottom: 20px;
+}
+
+.stat {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.9rem;
+  color: #666;
+}
+
+.stat i {
+  color: #4CAF50;
+  width: 16px;
+}
+
+.badge {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: #f8f9fa;
+  padding: 16px;
+  border-radius: 12px;
+  margin-bottom: 20px;
+}
+
+.badgeIcon {
+  width: 48px;
+  height: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(76, 175, 80, 0.1);
+  border-radius: 50%;
+  font-size: 1.5rem;
+}
+
+.badgeInfo {
+  flex: 1;
+}
+
+.badgeName {
+  font-weight: 600;
+  color: #333;
+  display: block;
+  margin-bottom: 4px;
+}
+
+.earned {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  color: #4CAF50;
+  font-size: 0.85rem;
+  font-weight: 500;
+}
+
+.earned i {
+  font-size: 0.9rem;
+}
+
+.actions {
+  margin-top: auto;
+}
+
+.joinButton,
+.loginButton,
+.completedButton {
+  width: 100%;
+  padding: 12px 24px;
+  border: none;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.joinButton {
+  background: #4CAF50;
+  color: white;
+}
+
+.joinButton:hover:not(:disabled) {
+  background: #45a049;
+  transform: translateY(-1px);
+}
+
+.joinButton:disabled {
+  background: #ccc;
+  cursor: not-allowed;
+}
+
+.loginButton {
+  background: #2196F3;
+  color: white;
+}
+
+.loginButton:hover {
+  background: #1976D2;
+}
+
+.completedButton {
+  background: #f5f5f5;
+  color: #999;
+  cursor: not-allowed;
+}
+
+.participantStatus {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 12px 24px;
+  background: #E8F5E8;
+  color: #2E7D32;
+  border-radius: 8px;
+  font-weight: 500;
+}
+
+.participantStatus i {
+  color: #4CAF50;
+}
+
+@media (max-width: 768px) {
+  .challengeCard {
+    padding: 16px;
+  }
+  
+  .header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+  }
+  
+  .stats {
+    flex-direction: column;
+    gap: 8px;
+  }
+  
+  .dateInfo {
+    flex-direction: column;
+  }
+  
+  .title {
+    font-size: 1.25rem;
+  }
+}
