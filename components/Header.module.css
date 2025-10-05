@@ -1,0 +1,107 @@
+.header {
+  background-color: #2d5a2d;
+  color: white;
+  padding: 20px 0;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+}
+
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 20px;
+}
+
+.headerContent {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.logo {
+  font-size: 32px;
+  font-weight: bold;
+  display: flex;
+  align-items: center;
+  color: white;
+}
+
+.logo i {
+  margin-right: 10px;
+  color: #8bc34a;
+}
+
+.header nav ul {
+  display: flex;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.header nav li {
+  margin-left: 25px;
+}
+
+.header nav a {
+  color: white;
+  text-decoration: none;
+  font-weight: 500;
+  font-size: 18px;
+  transition: color 0.3s;
+}
+
+.header nav a:hover,
+.header nav a.active {
+  color: #8bc34a;
+}
+
+.active {
+  color: #8bc34a;
+}
+
+.userActions {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+}
+
+.userProfile {
+  display: flex;
+  align-items: center;
+  background: #f0f9f0;
+  padding: 8px 15px;
+  border-radius: 20px;
+  cursor: pointer;
+  color: #333;
+}
+
+.userAvatar {
+  width: 35px;
+  height: 35px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #4CAF50, #45a049);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  margin-right: 10px;
+  font-weight: bold;
+}
+
+@media (max-width: 768px) {
+  .headerContent {
+    flex-direction: column;
+    text-align: center;
+  }
+
+  .header nav ul {
+    margin-top: 15px;
+  }
+
+  .header nav li {
+    margin: 0 10px;
+  }
+
+  .userActions {
+    margin-top: 15px;
+  }
+}
