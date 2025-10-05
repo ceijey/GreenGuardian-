@@ -8,8 +8,28 @@ import styles from './Dashboard.module.css';
 
 export default function Dashboard() {
   const router = useRouter();
-  const { user, logout } = useAuth();
+  const { user, logout, loading } = useAuth();
   const [isScannerOpen, setIsScannerOpen] = useState(false); // ✅ dialog state
+
+  // Redirect to login if not authenticated
+  if (!loading && !user) {
+    console.log('Dashboard: No user found, redirecting to login');
+    router.push('/login');
+    return <div>Redirecting...</div>;
+  }
+
+  // Show loading while checking auth
+  if (loading) {
+    return (
+      <div className={styles.container}>
+        <div className="flex items-center justify-center min-h-screen">
+          <div className="text-center">
+            <div className="text-xl text-gray-600">Loading...</div>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   const handleLogout = async () => {
     try {

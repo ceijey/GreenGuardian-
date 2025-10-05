@@ -23,7 +23,12 @@ export default function LoginForm() {
       console.log('Attempting login...');
       await login(email, password);
       console.log('Login successful, redirecting to dashboard...');
-      router.push('/dashboard');
+      
+      // Add a small delay to ensure auth state is updated
+      setTimeout(() => {
+        console.log('Executing redirect to dashboard...');
+        router.push('/dashboard');
+      }, 500);
     } catch (err: Error | unknown) {
       console.error('Login error:', err);
       if (err instanceof Error) {
