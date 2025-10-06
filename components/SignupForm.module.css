@@ -6,17 +6,7 @@
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  background: 
-    linear-gradient(180deg, #065f46 0%, transparent 15%),
-    linear-gradient(135deg, 
-      #065f46 0%, 
-      #0f766e 15%, 
-      #059669 30%, 
-      #047857 45%, 
-      #064e3b 60%, 
-      #065f46 75%, 
-      #022c22 90%, 
-      #1f2937 100%);
+  background: linear-gradient(135deg, #f0f9ff 0%, #e0f7fa 100%);
   background-attachment: fixed;
   background-repeat: no-repeat;
   background-size: 100% 100%, 100% 120%;

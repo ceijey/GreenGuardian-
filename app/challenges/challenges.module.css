@@ -1,7 +1,12 @@
 .container {
+  padding: 20px;
+  background: linear-gradient(135deg, #f0f9ff 0%, #e0f7fa 100%);
+  min-height: 100vh;
+}
+
+.contentWrapper {
   max-width: 1200px;
   margin: 0 auto;
-  padding: 20px;
 }
 
 .hero {

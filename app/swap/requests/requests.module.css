@@ -1,10 +1,14 @@
 /* Swap Requests Page - Mobile First */
 .container {
-  max-width: 1200px;
-  margin: 0 auto;
   padding: var(--spacing-md);
   margin-top: 80px;
   min-height: 100vh;
+  background: linear-gradient(135deg, #f0f9ff 0%, #e0f7fa 100%);
+}
+
+.contentWrapper {
+  max-width: 1200px;
+  margin: 0 auto;
 }
 
 .header {

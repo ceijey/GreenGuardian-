@@ -52,7 +52,7 @@
 
 /* Base Typography - Mobile First */
 body {
-  background: var(--background);
+  background: linear-gradient(135deg, #f0f9ff 0%, #e0f7fa 100%);
   color: var(--foreground);
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
   line-height: 1.6;
