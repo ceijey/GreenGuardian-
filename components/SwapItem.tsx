@@ -26,9 +26,21 @@ interface SwapItemProps {
   item: SwapItemData;
   currentUser: User | null;
   onSwapRequest: (itemId: string) => void;
+  onDelete?: (itemId: string) => void;
 }
 
-export default function SwapItem({ item, currentUser, onSwapRequest }: SwapItemProps) {
+export default function SwapItem({ item, currentUser, onSwapRequest, onDelete }: SwapItemProps) {
+  const [deleting, setDeleting] = useState(false);
+
+  const handleDelete = async () => {
+    if (!onDelete) return;
+    setDeleting(true);
+    try {
+      await onDelete(item.id);
+    } finally {
+      setDeleting(false);
+    }
+  };
   const [imageError, setImageError] = useState(false);
   const [requesting, setRequesting] = useState(false);
 
@@ -160,7 +172,6 @@ export default function SwapItem({ item, currentUser, onSwapRequest }: SwapItemP
                 {item.swapRequests.length} request{item.swapRequests.length !== 1 ? 's' : ''}
               </span>
             )}
-            
             <button
               onClick={handleSwapRequest}
               disabled={
@@ -179,6 +190,21 @@ export default function SwapItem({ item, currentUser, onSwapRequest }: SwapItemP
                 <><i className="fas fa-exchange-alt"></i> Request Swap</>
               )}
             </button>
+            {/* Owner-only delete button */}
+            {currentUser?.uid === item.ownerId && onDelete && (
+              <button
+                onClick={handleDelete}
+                disabled={deleting}
+                className={styles.deleteButton}
+                style={{ marginLeft: '0.5rem', background: '#ff4d4f', color: '#fff' }}
+              >
+                {deleting ? (
+                  <><i className="fas fa-spinner fa-spin"></i> Deleting...</>
+                ) : (
+                  <><i className="fas fa-trash"></i> Delete</>
+                )}
+              </button>
+            )}
           </div>
         </div>
       </div>

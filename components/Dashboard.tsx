@@ -6,6 +6,7 @@ import { useState, useEffect } from 'react';
 import { doc, getDoc, collection, query, where, getDocs, orderBy, limit } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
 import { useStatsTracker } from '@/lib/useStatsTracker';
+import { onSnapshot } from 'firebase/firestore';
 import EcoScannerDialog from '@/app/dashboard/EcoScannerDialog';
 import styles from './Dashboard.module.css';
 
@@ -32,6 +33,7 @@ export default function Dashboard() {
     itemsScanned: 0,
     itemsSwapped: 0,
     pointsEarned: 0,
+    challengesCompleted: 0,
     loading: true
   });
   
@@ -39,198 +41,140 @@ export default function Dashboard() {
   const [recentActivity, setRecentActivity] = useState<any[]>([]);
   const [activityLoading, setActivityLoading] = useState(true);
 
-  // Fetch real user statistics
+  // Real-time user statistics
   useEffect(() => {
-    const fetchUserStats = async () => {
-      if (!user) return;
-      
-      try {
-        // Get user's personal stats
-        const userStatsRef = doc(db, 'userStats', user.uid);
-        const userStatsDoc = await getDoc(userStatsRef);
-        
-        let itemsScanned = 0;
-        let itemsSwapped = 0;
-        let pointsEarned = 0;
-        
-        if (userStatsDoc.exists()) {
-          const data = userStatsDoc.data();
-          itemsScanned = data.itemsScanned || 0;
-          itemsSwapped = data.itemsSwapped || 0;
-          // Calculate points: 10 points per scan, 50 points per swap, 5 points per challenge
-          pointsEarned = (itemsScanned * 10) + (itemsSwapped * 50) + ((data.challengesCompleted || 0) * 5);
-        }
-        
-        // Also get scan count from userProductScans collection for more accuracy
-        try {
-          const scansQuery = query(
-            collection(db, 'userProductScans'),
-            where('userId', '==', user.uid)
-          );
-          const scansSnapshot = await getDocs(scansQuery);
-          itemsScanned = Math.max(itemsScanned, scansSnapshot.size);
-        } catch (error) {
-          // Product scans collection not available, using fallback data
-          console.debug('Product scans collection not accessible:', error);
-        }
-        
-        // Get user's swap items count from swapItems collection
-        try {
-          const swapQuery = query(
-            collection(db, 'swapItems'),
-            where('userId', '==', user.uid)
-          );
-          const swapSnapshot = await getDocs(swapQuery);
-          itemsSwapped = Math.max(itemsSwapped, swapSnapshot.size);
-        } catch (error) {
-          // Swap collection not available, using fallback data
-          console.debug('Swap collection not accessible:', error);
-        }
-        
-        // Get scan count from scanner usage (you can track this when scanner is used)
-        // For now, we'll estimate based on community activity
-        try {
-          const messagesQuery = query(
-            collection(db, 'communityMessages'),
-            where('userId', '==', user.uid)
-          );
-          const messagesSnapshot = await getDocs(messagesQuery);
-          // Estimate: 1 scan per 2 community messages (engagement correlation)
-          itemsScanned = Math.max(itemsScanned, Math.floor(messagesSnapshot.size / 2));
-        } catch (error) {
-          // Community messages collection not available, using fallback data
-          console.debug('Community messages collection not accessible:', error);
-        }
-        
-        setUserStats({
-          itemsScanned,
-          itemsSwapped,
-          pointsEarned,
+    if (!user || loading) return;
+    // Listen to userStats document
+    const userStatsRef = doc(db, 'userStats', user.uid);
+    const unsubscribeStats = onSnapshot(userStatsRef, (userStatsDoc) => {
+      if (userStatsDoc.exists()) {
+        const data = userStatsDoc.data();
+        setUserStats((prev) => ({
+          ...prev,
+          challengesCompleted: data.challengesCompleted || 0,
           loading: false
-        });
-        
-      } catch (error) {
-        console.error('Error fetching user stats:', error);
-        setUserStats({
-          itemsScanned: 0,
-          itemsSwapped: 0,
-          pointsEarned: 0,
-          loading: false
-        });
+        }));
       }
+    });
+    // Listen to userProductScans collection
+    const scansQuery = query(collection(db, 'userProductScans'), where('userId', '==', user.uid));
+    const unsubscribeScans = onSnapshot(scansQuery, (scansSnapshot) => {
+      setUserStats((prev) => {
+        const itemsScanned = scansSnapshot.size;
+        const pointsEarned = (itemsScanned * 10) + (prev.itemsSwapped * 50) + (prev.challengesCompleted * 5);
+        return {
+          ...prev,
+          itemsScanned,
+          pointsEarned
+        };
+      });
+    });
+    // Listen to swapItems collection
+    const swapQuery = query(collection(db, 'swapItems'), where('userId', '==', user.uid));
+    const unsubscribeSwaps = onSnapshot(swapQuery, (swapSnapshot) => {
+      setUserStats((prev) => {
+        const itemsSwapped = swapSnapshot.size;
+        const pointsEarned = (prev.itemsScanned * 10) + (itemsSwapped * 50) + (prev.challengesCompleted * 5);
+        return {
+          ...prev,
+          itemsSwapped,
+          pointsEarned
+        };
+      });
+    });
+    // Listen to communityMessages collection
+    const messagesQuery = query(collection(db, 'communityMessages'), where('userId', '==', user.uid));
+    const unsubscribeMessages = onSnapshot(messagesQuery, (messagesSnapshot: any) => {
+      setUserStats((prev) => ({
+        ...prev,
+        itemsScanned: Math.max(prev.itemsScanned, Math.floor(messagesSnapshot.size / 2))
+      }));
+    });
+    return () => {
+      unsubscribeStats();
+      unsubscribeScans();
+      unsubscribeSwaps();
+      unsubscribeMessages();
     };
-    
-    if (user && !loading) {
-      fetchUserStats();
-    }
   }, [user, loading]);
   
-  // Fetch recent activity
+  // Real-time recent activity
   useEffect(() => {
-    const fetchRecentActivity = async () => {
-      if (!user) return;
-      
-      try {
-        const activities: any[] = [];
-        
-        // Get recent community messages
-        try {
-          const messagesQuery = query(
-            collection(db, 'communityMessages'),
-            where('userId', '==', user.uid),
-            orderBy('timestamp', 'desc'),
-            limit(2)
-          );
-          const messagesSnapshot = await getDocs(messagesQuery);
-          
-          messagesSnapshot.forEach(doc => {
-            const data = doc.data();
-            activities.push({
-              id: doc.id,
-              type: 'community',
-              icon: '💬',
-              title: 'Community Engagement',
-              description: 'Posted in community chat',
-              time: data.timestamp?.toDate() || new Date()
-            });
-          });
-        } catch (error) {
-          // Community messages not available for recent activity, using fallback
-          console.debug('Community messages not accessible for recent activity');
-        }
-        
-        // Get recent swap items
-        try {
-          const swapQuery = query(
-            collection(db, 'swapItems'),
-            where('userId', '==', user.uid),
-            orderBy('createdAt', 'desc'),
-            limit(2)
-          );
-          const swapSnapshot = await getDocs(swapQuery);
-          
-          swapSnapshot.forEach(doc => {
-            const data = doc.data();
-            activities.push({
-              id: doc.id,
-              type: 'swap',
-              icon: '♻️',
-              title: 'Item Listed for Swap',
-              description: `Listed "${data.title || 'item'}" for exchange`,
-              time: data.createdAt?.toDate() || new Date()
-            });
-          });
-        } catch (error) {
-          // Swap items not available for recent activity, using fallback
-          console.debug('Swap items not accessible for recent activity');
-        }
-        
-        // Add some default achievements if no activities
-        if (activities.length === 0) {
-          activities.push(
-            {
-              id: 'welcome',
-              type: 'achievement',
-              icon: '🌟',
-              title: 'Welcome to GreenGuardian!',
-              description: 'Start your sustainable journey today',
-              time: new Date()
-            },
-            {
-              id: 'first-login',
-              type: 'achievement', 
-              icon: '🌱',
-              title: 'Account Created',
-              description: 'Joined the eco-friendly community',
-              time: new Date()
-            }
-          );
-        }
-        
-        // Sort by time and take most recent 3
-        activities.sort((a, b) => b.time.getTime() - a.time.getTime());
-        setRecentActivity(activities.slice(0, 3));
-        setActivityLoading(false);
-        
-      } catch (error) {
-        console.error('Error fetching recent activity:', error);
-        setRecentActivity([
+    if (!user || loading) return;
+    setActivityLoading(true);
+    const activities: any[] = [];
+    // Listen to recent community messages
+    const messagesQuery = query(
+      collection(db, 'communityMessages'),
+      where('userId', '==', user.uid),
+      orderBy('timestamp', 'desc'),
+      limit(2)
+    );
+    const unsubscribeMessages = onSnapshot(messagesQuery, (messagesSnapshot) => {
+      activities.length = 0;
+      messagesSnapshot.forEach(doc => {
+        const data = doc.data();
+        activities.push({
+          id: doc.id,
+          type: 'community',
+          icon: '💬',
+          title: 'Community Engagement',
+          description: 'Posted in community chat',
+          time: data.timestamp?.toDate() || new Date()
+        });
+      });
+      setRecentActivity([...activities]);
+      setActivityLoading(false);
+    });
+    // Listen to recent swap items
+    const swapQuery = query(
+      collection(db, 'swapItems'),
+      where('userId', '==', user.uid),
+      orderBy('createdAt', 'desc'),
+      limit(2)
+    );
+    const unsubscribeSwaps = onSnapshot(swapQuery, (swapSnapshot) => {
+      swapSnapshot.forEach(doc => {
+        const data = doc.data();
+        activities.push({
+          id: doc.id,
+          type: 'swap',
+          icon: '♻️',
+          title: 'Item Listed for Swap',
+          description: `Listed "${data.title || 'item'}" for exchange`,
+          time: data.createdAt?.toDate() || new Date()
+        });
+      });
+      // Add some default achievements if no activities
+      if (activities.length === 0) {
+        activities.push(
           {
-            id: 'fallback',
+            id: 'welcome',
             type: 'achievement',
             icon: '🌟',
-            title: 'Getting Started',
-            description: 'Explore GreenGuardian features',
+            title: 'Welcome to GreenGuardian!',
+            description: 'Start your sustainable journey today',
+            time: new Date()
+          },
+          {
+            id: 'first-login',
+            type: 'achievement', 
+            icon: '🌱',
+            title: 'Account Created',
+            description: 'Joined the eco-friendly community',
             time: new Date()
           }
-        ]);
-        setActivityLoading(false);
+        );
       }
+      // Sort by time and take most recent 3
+      activities.sort((a, b) => b.time.getTime() - a.time.getTime());
+      setRecentActivity(activities.slice(0, 3));
+      setActivityLoading(false);
+    });
+    return () => {
+      unsubscribeMessages();
+      unsubscribeSwaps();
     };
-    
-    if (user && !loading) {
-      fetchRecentActivity();
-    }
   }, [user, loading]);
 
   // Redirect to login if not authenticated
