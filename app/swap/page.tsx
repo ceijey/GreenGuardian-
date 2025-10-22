@@ -66,12 +66,13 @@ export default function SwapPage() {
     return () => unsubscribe();
   }, []);
 
-  // Calculate landfill savings
+  // Calculate landfill savings in PHP (Philippine Pesos)
   useEffect(() => {
     const totalSavings = items
       .filter(item => !item.isAvailable) // Items that have been swapped
       .reduce((total, item) => total + (item.estimatedValue || 0), 0);
-    setLandfillSavings(totalSavings);
+    // Convert USD to PHP (approximate rate: 1 USD = 56 PHP)
+    setLandfillSavings(totalSavings * 56);
   }, [items]);
 
   // Count pending requests for current user's items
@@ -107,20 +108,50 @@ export default function SwapPage() {
     setFilteredItems(filtered);
   }, [items, selectedCategory, searchTerm]);
 
-  const handleSwapRequest = async (itemId: string) => {
+  const handleSwapRequest = async (itemId: string, offerDetails: string, offerValue: number, offerImage?: string) => {
     if (!user) return;
     
     try {
       const itemRef = doc(db, 'swapItems', itemId);
+      
+      // Create a swap request object with offer details
+      const swapRequest = {
+        userId: user.uid,
+        userEmail: user.email,
+        offerDetails: offerDetails,
+        offerValue: offerValue,
+        offerImage: offerImage || null,
+        requestedAt: new Date().toISOString(),
+        status: 'pending'
+      };
+      
+      // Update the item with the detailed swap request
       await updateDoc(itemRef, {
-        swapRequests: arrayUnion(user.uid)
+        swapRequests: arrayUnion(user.uid),
+        [`swapRequestDetails.${user.uid}`]: swapRequest
       });
       
-      // You could add notification system here
-      alert('Swap request sent! The item owner will be notified.');
+      alert('Swap request sent! The item owner will review your offer.');
     } catch (error) {
       console.error('Error sending swap request:', error);
       alert('Failed to send swap request. Please try again.');
+    }
+  };
+
+  const handleDeleteItem = async (itemId: string) => {
+    if (!user) return;
+    
+    if (!confirm('Are you sure you want to delete this item?')) {
+      return;
+    }
+    
+    try {
+      const { deleteDoc } = await import('firebase/firestore');
+      await deleteDoc(doc(db, 'swapItems', itemId));
+      alert('Item deleted successfully!');
+    } catch (error) {
+      console.error('Error deleting item:', error);
+      alert('Failed to delete item. Please try again.');
     }
   };
 
@@ -145,7 +176,7 @@ export default function SwapPage() {
                 <div className={styles.statLabel}>Items Available</div>
               </div>
               <div className={styles.statCard}>
-                <div className={styles.statValue}>${landfillSavings}</div>
+                <div className={styles.statValue}>₱{landfillSavings.toLocaleString('en-PH', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</div>
                 <div className={styles.statLabel}>Landfill Savings</div>
               </div>
               <div className={styles.statCard}>
@@ -233,6 +264,7 @@ export default function SwapPage() {
                   item={item}
                   currentUser={user}
                   onSwapRequest={handleSwapRequest}
+                  onDelete={handleDeleteItem}
                 />
               ))}
             </div>

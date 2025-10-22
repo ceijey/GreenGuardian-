@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '@/lib/AuthContext';
 import Header from '../../../components/Header';
+import ContactSwapperModal from '../../../components/ContactSwapperModal';
 import { 
   collection, 
   query, 
@@ -37,6 +38,11 @@ interface SwapRequest {
   createdAt: any;
   swapRequests?: string[];
   acceptedRequests?: string[];
+  offerDetails?: string;
+  offerValue?: number;
+  offerImage?: string;
+  ownerConfirmed?: boolean;
+  requesterConfirmed?: boolean;
 }
 
 export default function SwapRequestsPage() {
@@ -48,6 +54,9 @@ export default function SwapRequestsPage() {
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState<'received' | 'sent' | 'completed'>('received');
   const [processingRequests, setProcessingRequests] = useState<Set<string>>(new Set());
+  const [showContactModal, setShowContactModal] = useState(false);
+  const [selectedRequest, setSelectedRequest] = useState<SwapRequest | null>(null);
+  const [contactUserRole, setContactUserRole] = useState<'owner' | 'requester'>('owner');
 
   // Load items with requests that I own
   useEffect(() => {
@@ -74,11 +83,20 @@ export default function SwapRequestsPage() {
         for (const docSnap of docs) {
           const item = { id: docSnap.id, ...docSnap.data() } as any;
           
-          if (item.swapRequests && item.swapRequests.length > 0) {
+          // Combine both pending and accepted requests
+          const allRequesterIds = new Set([
+            ...(item.swapRequests || []),
+            ...(item.acceptedRequests || [])
+          ]);
+          
+          if (allRequesterIds.size > 0) {
             // Get details of each requester
-            for (const requesterId of item.swapRequests) {
+            for (const requesterId of Array.from(allRequesterIds)) {
               // Determine request status
               const isAccepted = item.acceptedRequests && item.acceptedRequests.includes(requesterId);
+              
+              // Get offer details from swapRequestDetails
+              const requestDetails = item.swapRequestDetails?.[requesterId];
               
               // Create request entry without async user fetch for faster updates
               const requestEntry: SwapRequest = {
@@ -95,7 +113,12 @@ export default function SwapRequestsPage() {
                 acceptedAt: item.acceptedAt,
                 createdAt: item.createdAt,
                 swapRequests: item.swapRequests,
-                acceptedRequests: item.acceptedRequests
+                acceptedRequests: item.acceptedRequests,
+                offerDetails: requestDetails?.offerDetails,
+                offerValue: requestDetails?.offerValue,
+                offerImage: requestDetails?.offerImage,
+                ownerConfirmed: requestDetails?.ownerConfirmed || false,
+                requesterConfirmed: requestDetails?.requesterConfirmed || false
               };
               
               itemsWithRequests.push(requestEntry);
@@ -153,6 +176,7 @@ export default function SwapRequestsPage() {
         
         if (isPending || isAccepted) {
           const status = isAccepted ? 'accepted' : 'pending';
+          const requestDetails = item.swapRequestDetails?.[user.uid];
           
           myRequestsList.push({
             id: `${item.id}_${user.uid}`,
@@ -168,7 +192,9 @@ export default function SwapRequestsPage() {
             acceptedAt: item.acceptedAt,
             createdAt: item.createdAt,
             swapRequests: item.swapRequests,
-            acceptedRequests: item.acceptedRequests
+            acceptedRequests: item.acceptedRequests,
+            ownerConfirmed: requestDetails?.ownerConfirmed || false,
+            requesterConfirmed: requestDetails?.requesterConfirmed || false
           });
         }
       });
@@ -216,7 +242,10 @@ export default function SwapRequestsPage() {
             createdAt: swap.completedAt || swap.createdAt,
             acceptedAt: swap.acceptedAt,
             swapRequests: [],
-            acceptedRequests: []
+            acceptedRequests: [],
+            offerDetails: swap.offerDetails,
+            offerValue: swap.offerValue,
+            offerImage: swap.offerImage
           });
         }
       });
@@ -264,7 +293,7 @@ export default function SwapRequestsPage() {
           acceptedAt: serverTimestamp()
         });
         
-        alert('Request accepted! You can now complete the swap when ready.');
+        alert('Request accepted! You can now contact and confirm the swap when ready.');
       } else {
         alert('Item not found.');
       }
@@ -280,33 +309,168 @@ export default function SwapRequestsPage() {
     }
   };
 
+  const handleConfirmSwap = async (request: SwapRequest, userRole: 'owner' | 'requester') => {
+    const requestId = request.id;
+    setProcessingRequests(prev => new Set(prev).add(requestId));
+    
+    try {
+      const itemRef = doc(db, 'swapItems', request.itemId);
+      const itemDoc = await getDoc(itemRef);
+      
+      if (!itemDoc.exists()) {
+        alert('Item not found.');
+        return;
+      }
+
+      const data = itemDoc.data();
+      const requestDetails = data.swapRequestDetails?.[request.requesterId] || {};
+      
+      // Update confirmation status
+      if (userRole === 'owner') {
+        requestDetails.ownerConfirmed = true;
+      } else {
+        requestDetails.requesterConfirmed = true;
+      }
+      
+      await updateDoc(itemRef, {
+        [`swapRequestDetails.${request.requesterId}`]: requestDetails
+      });
+      
+      // Check if both confirmed - if yes, auto-complete the swap
+      if (requestDetails.ownerConfirmed && requestDetails.requesterConfirmed) {
+        // Auto-complete the swap
+        await completeSwapTransaction(request, itemRef, data);
+        alert('Both parties confirmed! Swap completed successfully and moved to completed swaps.');
+      } else {
+        const waitingFor = userRole === 'owner' ? 'requester' : 'owner';
+        alert(`You confirmed the swap! Waiting for ${waitingFor} to confirm.`);
+      }
+    } catch (error) {
+      console.error('Error confirming swap:', error);
+      alert('Failed to confirm swap. Please try again.');
+    } finally {
+      setProcessingRequests(prev => {
+        const newSet = new Set(prev);
+        newSet.delete(requestId);
+        return newSet;
+      });
+    }
+  };
+
+  const completeSwapTransaction = async (request: SwapRequest, itemRef: any, data: any) => {
+    const currentRequests = data.swapRequests || [];
+    const currentAccepted = data.acceptedRequests || [];
+    
+    // Remove from both pending and accepted requests
+    const updatedRequests = currentRequests.filter((id: string) => id !== request.requesterId);
+    const updatedAccepted = currentAccepted.filter((id: string) => id !== request.requesterId);
+
+    // Update item to mark as swapped and remove from availability
+    await updateDoc(itemRef, {
+      isAvailable: false,
+      swappedWith: request.requesterId,
+      swappedAt: serverTimestamp(),
+      status: 'completed',
+      swapRequests: updatedRequests,
+      acceptedRequests: updatedAccepted
+    });
+
+    // Get offer details from swapRequestDetails
+    const requestDetails = data.swapRequestDetails?.[request.requesterId];
+
+    // Create a swap completion record - only include fields that have values
+    const completedSwapData: any = {
+      itemId: request.itemId,
+      itemTitle: request.itemTitle,
+      itemDescription: request.itemDescription || '',
+      itemCategory: request.itemCategory || 'other',
+      itemImageUrl: request.itemImageUrl || '',
+      ownerId: request.ownerId,
+      requesterId: request.requesterId,
+      requesterEmail: request.requesterEmail || '',
+      completedAt: serverTimestamp()
+    };
+
+    // Only add optional fields if they have values
+    if (requestDetails?.offerDetails) {
+      completedSwapData.offerDetails = requestDetails.offerDetails;
+    }
+    if (requestDetails?.offerValue) {
+      completedSwapData.offerValue = requestDetails.offerValue;
+    }
+    if (requestDetails?.offerImage) {
+      completedSwapData.offerImage = requestDetails.offerImage;
+    }
+
+    await addDoc(collection(db, 'completedSwaps'), completedSwapData);
+
+    // Track stats for both users
+    await trackItemSwapped(1);
+  };
+
   const handleCompleteSwap = async (request: SwapRequest) => {
     const requestId = request.id;
     setProcessingRequests(prev => new Set(prev).add(requestId));
     
     try {
-      // Update item to mark as swapped and remove from availability
       const itemRef = doc(db, 'swapItems', request.itemId);
+      const itemDoc = await getDoc(itemRef);
+      
+      if (!itemDoc.exists()) {
+        alert('Item not found.');
+        return;
+      }
+
+      const data = itemDoc.data();
+      const currentRequests = data.swapRequests || [];
+      const currentAccepted = data.acceptedRequests || [];
+      
+      // Remove from both pending and accepted requests
+      const updatedRequests = currentRequests.filter((id: string) => id !== request.requesterId);
+      const updatedAccepted = currentAccepted.filter((id: string) => id !== request.requesterId);
+
+      // Update item to mark as swapped and remove from availability
       await updateDoc(itemRef, {
         isAvailable: false,
         swappedWith: request.requesterId,
         swappedAt: serverTimestamp(),
-        status: 'completed'
+        status: 'completed',
+        swapRequests: updatedRequests,
+        acceptedRequests: updatedAccepted
       });
 
-      // Create a swap completion record
-      await addDoc(collection(db, 'completedSwaps'), {
+      // Get offer details from swapRequestDetails
+      const requestDetails = data.swapRequestDetails?.[request.requesterId];
+
+      // Create a swap completion record - only include fields that have values
+      const completedSwapData: any = {
         itemId: request.itemId,
         itemTitle: request.itemTitle,
+        itemDescription: request.itemDescription || '',
+        itemCategory: request.itemCategory || 'other',
+        itemImageUrl: request.itemImageUrl || '',
         ownerId: request.ownerId,
         requesterId: request.requesterId,
+        requesterEmail: request.requesterEmail || '',
         completedAt: serverTimestamp()
-      });
+      };
+
+      if (requestDetails?.offerDetails) {
+        completedSwapData.offerDetails = requestDetails.offerDetails;
+      }
+      if (requestDetails?.offerValue) {
+        completedSwapData.offerValue = requestDetails.offerValue;
+      }
+      if (requestDetails?.offerImage) {
+        completedSwapData.offerImage = requestDetails.offerImage;
+      }
+
+      await addDoc(collection(db, 'completedSwaps'), completedSwapData);
 
       // Track stats for both users
       await trackItemSwapped(1);
 
-      alert('Swap completed successfully! The item has been marked as unavailable.');
+      alert('Swap completed successfully! The item has been marked as unavailable and moved to completed swaps.');
     } catch (error) {
       console.error('Error completing swap:', error);
       alert('Failed to complete swap. Please try again.');
@@ -331,6 +495,7 @@ export default function SwapRequestsPage() {
         const data = itemDoc.data();
         const currentRequests = data.swapRequests || [];
         const currentAccepted = data.acceptedRequests || [];
+        const wasAccepted = request.status === 'accepted';
         
         // Remove from both pending and accepted requests
         const updatedRequests = currentRequests.filter((id: string) => id !== request.requesterId);
@@ -341,14 +506,126 @@ export default function SwapRequestsPage() {
           acceptedRequests: updatedAccepted
         });
         
-        const action = request.status === 'accepted' ? 'cancelled' : 'declined';
-        alert(`Request ${action} successfully.`);
+        // If withdrawing from an accepted request, move to completed swaps
+        if (wasAccepted) {
+          const requestDetails = data.swapRequestDetails?.[request.requesterId];
+          
+          const completedSwapData: any = {
+            itemId: request.itemId,
+            itemTitle: request.itemTitle,
+            itemDescription: request.itemDescription || '',
+            itemCategory: request.itemCategory || 'other',
+            itemImageUrl: request.itemImageUrl || '',
+            ownerId: request.ownerId,
+            requesterId: request.requesterId,
+            requesterEmail: request.requesterEmail || '',
+            status: 'withdrawn',
+            completedAt: serverTimestamp()
+          };
+
+          if (requestDetails?.offerDetails) {
+            completedSwapData.offerDetails = requestDetails.offerDetails;
+          }
+          if (requestDetails?.offerValue) {
+            completedSwapData.offerValue = requestDetails.offerValue;
+          }
+          if (requestDetails?.offerImage) {
+            completedSwapData.offerImage = requestDetails.offerImage;
+          }
+
+          await addDoc(collection(db, 'completedSwaps'), completedSwapData);
+          
+          alert('Request withdrawn successfully and moved to completed swaps.');
+        } else {
+          alert('Request declined successfully.');
+        }
       } else {
         alert('Item not found.');
       }
     } catch (error) {
       console.error('Error declining/cancelling request:', error);
       alert('Failed to process request. Please try again.');
+    } finally {
+      setProcessingRequests(prev => {
+        const newSet = new Set(prev);
+        newSet.delete(requestId);
+        return newSet;
+      });
+    }
+  };
+
+  const handleContactSwapper = (request: SwapRequest, role: 'owner' | 'requester') => {
+    setSelectedRequest(request);
+    setContactUserRole(role);
+    setShowContactModal(true);
+  };
+
+  const handleCompleteSwapAsRequester = async (request: SwapRequest) => {
+    const requestId = request.id;
+    setProcessingRequests(prev => new Set(prev).add(requestId));
+    
+    try {
+      const itemRef = doc(db, 'swapItems', request.itemId);
+      const itemDoc = await getDoc(itemRef);
+      
+      if (!itemDoc.exists()) {
+        alert('Item not found.');
+        return;
+      }
+
+      const data = itemDoc.data();
+      const currentRequests = data.swapRequests || [];
+      const currentAccepted = data.acceptedRequests || [];
+      
+      // Remove from both pending and accepted requests
+      const updatedRequests = currentRequests.filter((id: string) => id !== user?.uid);
+      const updatedAccepted = currentAccepted.filter((id: string) => id !== user?.uid);
+
+      // Update item to mark as swapped and remove from availability
+      await updateDoc(itemRef, {
+        isAvailable: false,
+        swappedWith: user?.uid,
+        swappedAt: serverTimestamp(),
+        status: 'completed',
+        swapRequests: updatedRequests,
+        acceptedRequests: updatedAccepted
+      });
+
+      // Get offer details from swapRequestDetails
+      const requestDetails = data.swapRequestDetails?.[user?.uid || ''];
+
+      // Create a swap completion record - only include fields that have values
+      const completedSwapData: any = {
+        itemId: request.itemId,
+        itemTitle: request.itemTitle,
+        itemDescription: request.itemDescription || '',
+        itemCategory: request.itemCategory || 'other',
+        itemImageUrl: request.itemImageUrl || '',
+        ownerId: request.ownerId,
+        requesterId: user?.uid,
+        requesterEmail: user?.email || '',
+        completedAt: serverTimestamp()
+      };
+
+      if (requestDetails?.offerDetails) {
+        completedSwapData.offerDetails = requestDetails.offerDetails;
+      }
+      if (requestDetails?.offerValue) {
+        completedSwapData.offerValue = requestDetails.offerValue;
+      }
+      if (requestDetails?.offerImage) {
+        completedSwapData.offerImage = requestDetails.offerImage;
+      }
+
+      await addDoc(collection(db, 'completedSwaps'), completedSwapData);
+
+      // Track stats for both users
+      await trackItemSwapped(1);
+
+      alert('Swap completed successfully! The transaction has been marked as complete and moved to completed swaps.');
+    } catch (error) {
+      console.error('Error completing swap:', error);
+      alert('Failed to complete swap. Please try again.');
     } finally {
       setProcessingRequests(prev => {
         const newSet = new Set(prev);
@@ -368,14 +645,53 @@ export default function SwapRequestsPage() {
       const itemDoc = await getDoc(itemRef);
       
       if (itemDoc.exists()) {
-        const currentRequests = itemDoc.data().swapRequests || [];
+        const data = itemDoc.data();
+        const currentRequests = data.swapRequests || [];
+        const currentAccepted = data.acceptedRequests || [];
+        const wasAccepted = request.status === 'accepted';
+        
+        // Remove from both pending and accepted requests
         const updatedRequests = currentRequests.filter((id: string) => id !== user?.uid);
+        const updatedAccepted = currentAccepted.filter((id: string) => id !== user?.uid);
         
         await updateDoc(itemRef, {
-          swapRequests: updatedRequests
+          swapRequests: updatedRequests,
+          acceptedRequests: updatedAccepted
         });
         
-        alert('Request cancelled successfully.');
+        // If withdrawing from an accepted request, move to completed swaps
+        if (wasAccepted) {
+          const requestDetails = data.swapRequestDetails?.[user?.uid || ''];
+          
+          const completedSwapData: any = {
+            itemId: request.itemId,
+            itemTitle: request.itemTitle,
+            itemDescription: request.itemDescription || '',
+            itemCategory: request.itemCategory || 'other',
+            itemImageUrl: request.itemImageUrl || '',
+            ownerId: request.ownerId,
+            requesterId: user?.uid,
+            requesterEmail: user?.email || '',
+            status: 'withdrawn',
+            completedAt: serverTimestamp()
+          };
+
+          if (requestDetails?.offerDetails) {
+            completedSwapData.offerDetails = requestDetails.offerDetails;
+          }
+          if (requestDetails?.offerValue) {
+            completedSwapData.offerValue = requestDetails.offerValue;
+          }
+          if (requestDetails?.offerImage) {
+            completedSwapData.offerImage = requestDetails.offerImage;
+          }
+
+          await addDoc(collection(db, 'completedSwaps'), completedSwapData);
+          
+          alert('Withdrawn from accepted request successfully and moved to completed swaps.');
+        } else {
+          alert('Request cancelled successfully.');
+        }
       } else {
         alert('Item not found.');
       }
@@ -517,11 +833,41 @@ export default function SwapRequestsPage() {
                           : `Requested ${formatDate(request.createdAt)}`
                         }
                       </div>
+                      {request.offerDetails && (
+                        <div className={styles.offerInfo}>
+                          <div className={styles.offerLabel}>
+                            <i className="fas fa-exchange-alt"></i>
+                            <strong>Offering:</strong>
+                          </div>
+                          {request.offerImage && (
+                            <div className={styles.offerImageContainer}>
+                              <img 
+                                src={request.offerImage} 
+                                alt="Offer" 
+                                className={styles.offerImage}
+                              />
+                            </div>
+                          )}
+                          <p className={styles.offerDetails}>{request.offerDetails}</p>
+                          {request.offerValue && (
+                            <p className={styles.offerValue}>
+                              <i className="fas fa-tag"></i>
+                              Estimated Value: ₱{request.offerValue.toLocaleString()}
+                            </p>
+                          )}
+                        </div>
+                      )}
                     </div>
 
                     <div className={styles.actions}>
                       {request.status === 'pending' ? (
                         <>
+                          <button
+                            onClick={() => handleContactSwapper(request, 'owner')}
+                            className={`${styles.actionBtn} ${styles.contactBtn}`}
+                          >
+                            <i className="fas fa-envelope"></i>Contact Swapper
+                          </button>
                           <button
                             onClick={() => handleAcceptRequest(request)}
                             className={`${styles.actionBtn} ${styles.acceptBtn}`}
@@ -548,14 +894,20 @@ export default function SwapRequestsPage() {
                       ) : request.status === 'accepted' ? (
                         <>
                           <button
+                            onClick={() => handleContactSwapper(request, 'owner')}
+                            className={`${styles.actionBtn} ${styles.contactBtn}`}
+                          >
+                            <i className="fas fa-envelope"></i>Contact Swapper
+                          </button>
+                          <button
                             onClick={() => handleCompleteSwap(request)}
-                            className={`${styles.actionBtn} ${styles.completeBtn} ${styles.primary}`}
+                            className={`${styles.actionBtn} ${styles.confirmBtn}`}
                             disabled={processingRequests.has(request.id)}
                           >
                             {processingRequests.has(request.id) ? (
                               <><i className="fas fa-spinner fa-spin"></i>Processing...</>
                             ) : (
-                              <><i className="fas fa-handshake"></i>✅ Complete Swap Now</>
+                              <><i className="fas fa-check-circle"></i>Complete Swap</>
                             )}
                           </button>
                           <button
@@ -632,20 +984,90 @@ export default function SwapRequestsPage() {
                     </div>
 
                     <div className={styles.actions}>
-                      <button
-                        onClick={() => handleCancelRequest(request)}
-                        className={`${styles.actionBtn} ${styles.cancelBtn}`}
-                        disabled={processingRequests.has(request.id)}
-                      >
-                        {processingRequests.has(request.id) ? (
-                          <><i className="fas fa-spinner fa-spin"></i>Processing...</>
-                        ) : (
-                          <>
-                            <i className="fas fa-trash"></i>
-                            {request.status === 'accepted' ? 'Withdraw from Accepted' : 'Cancel Request'}
-                          </>
-                        )}
-                      </button>
+                      {request.status === 'accepted' ? (
+                        <>
+                          <button
+                            onClick={() => handleContactSwapper(request, 'requester')}
+                            className={`${styles.actionBtn} ${styles.contactBtn}`}
+                          >
+                            <i className="fas fa-envelope"></i>Contact Owner
+                          </button>
+                          {request.requesterConfirmed ? (
+                            <>
+                              <div className={styles.confirmedBadge}>
+                                <i className="fas fa-check-double"></i>
+                                You Confirmed - Waiting for Owner
+                              </div>
+                              <button
+                                onClick={() => handleCompleteSwapAsRequester(request)}
+                                className={`${styles.actionBtn} ${styles.confirmBtn}`}
+                                disabled={processingRequests.has(request.id)}
+                              >
+                                {processingRequests.has(request.id) ? (
+                                  <><i className="fas fa-spinner fa-spin"></i>Processing...</>
+                                ) : (
+                                  <><i className="fas fa-check-circle"></i>Complete Swap Now</>
+                                )}
+                              </button>
+                            </>
+                          ) : request.ownerConfirmed ? (
+                            <button
+                              onClick={() => handleConfirmSwap(request, 'requester')}
+                              className={`${styles.actionBtn} ${styles.confirmBtn}`}
+                              disabled={processingRequests.has(request.id)}
+                            >
+                              {processingRequests.has(request.id) ? (
+                                <><i className="fas fa-spinner fa-spin"></i>Processing...</>
+                              ) : (
+                                <><i className="fas fa-handshake"></i>Confirm Swap (Owner Ready!)</>
+                              )}
+                            </button>
+                          ) : (
+                            <button
+                              onClick={() => handleConfirmSwap(request, 'requester')}
+                              className={`${styles.actionBtn} ${styles.confirmBtn}`}
+                              disabled={processingRequests.has(request.id)}
+                            >
+                              {processingRequests.has(request.id) ? (
+                                <><i className="fas fa-spinner fa-spin"></i>Processing...</>
+                              ) : (
+                                <><i className="fas fa-handshake"></i>Confirm Swap</>
+                              )}
+                            </button>
+                          )}
+                          <button
+                            onClick={() => handleCancelRequest(request)}
+                            className={`${styles.actionBtn} ${styles.cancelBtn}`}
+                            disabled={processingRequests.has(request.id)}
+                          >
+                            {processingRequests.has(request.id) ? (
+                              <><i className="fas fa-spinner fa-spin"></i>Processing...</>
+                            ) : (
+                              <><i className="fas fa-trash"></i>Withdraw</>
+                            )}
+                          </button>
+                        </>
+                      ) : (
+                        <>
+                          <button
+                            onClick={() => handleContactSwapper(request, 'requester')}
+                            className={`${styles.actionBtn} ${styles.contactBtn}`}
+                          >
+                            <i className="fas fa-envelope"></i>Contact Owner
+                          </button>
+                          <button
+                            onClick={() => handleCancelRequest(request)}
+                            className={`${styles.actionBtn} ${styles.cancelBtn}`}
+                            disabled={processingRequests.has(request.id)}
+                          >
+                            {processingRequests.has(request.id) ? (
+                              <><i className="fas fa-spinner fa-spin"></i>Processing...</>
+                            ) : (
+                              <><i className="fas fa-trash"></i>Cancel Request</>
+                            )}
+                          </button>
+                        </>
+                      )}
                     </div>
                   </div>
                 ))
@@ -685,6 +1107,31 @@ export default function SwapRequestsPage() {
                       </div>
                     </div>
                     
+                    {swap.offerDetails && (
+                      <div className={styles.offerInfo}>
+                        <div className={styles.offerLabel}>
+                          <i className="fas fa-exchange-alt"></i>
+                          <strong>Offer Details:</strong>
+                        </div>
+                        {swap.offerImage && (
+                          <div className={styles.offerImageContainer}>
+                            <img 
+                              src={swap.offerImage} 
+                              alt="Offer" 
+                              className={styles.offerImage}
+                            />
+                          </div>
+                        )}
+                        <p className={styles.offerDetails}>{swap.offerDetails}</p>
+                        {swap.offerValue && (
+                          <p className={styles.offerValue}>
+                            <i className="fas fa-tag"></i>
+                            Estimated Value: ₱{swap.offerValue.toLocaleString()}
+                          </p>
+                        )}
+                      </div>
+                    )}
+                    
                     <div className={styles.statusInfo}>
                       <div className={styles.status}>
                         <i className="fas fa-check-double"></i>
@@ -706,6 +1153,25 @@ export default function SwapRequestsPage() {
           )}
         </div>
       </div>
+
+      {/* Contact Swapper Modal */}
+      {selectedRequest && (
+        <ContactSwapperModal
+          isOpen={showContactModal}
+          onClose={() => {
+            setShowContactModal(false);
+            setSelectedRequest(null);
+          }}
+          swapRequest={{
+            itemId: selectedRequest.itemId,
+            itemTitle: selectedRequest.itemTitle,
+            ownerId: selectedRequest.ownerId,
+            requesterId: selectedRequest.requesterId
+          }}
+          currentUser={user}
+          userRole={contactUserRole}
+        />
+      )}
     </>
   );
 }

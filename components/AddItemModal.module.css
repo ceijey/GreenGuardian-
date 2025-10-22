@@ -227,6 +227,150 @@
   100% { transform: rotate(360deg); }
 }
 
+/* Image Upload Styles */
+.imageUploadZone {
+  border: 3px dashed #e0e0e0;
+  border-radius: 15px;
+  padding: 40px 20px;
+  text-align: center;
+  background: #fafafa;
+  transition: all 0.3s;
+  cursor: pointer;
+}
+
+.imageUploadZone:hover {
+  border-color: #4caf50;
+  background: #f9fff9;
+}
+
+.imageUploadZone.dragging {
+  border-color: #4caf50;
+  background: #e8f5e9;
+  transform: scale(1.02);
+}
+
+.imageUploadZone i.fa-cloud-upload-alt {
+  font-size: 48px;
+  color: #4caf50;
+  margin-bottom: 15px;
+}
+
+.imageUploadZone p {
+  margin: 10px 0;
+  color: #666;
+  font-size: 16px;
+}
+
+.orText {
+  color: #999;
+  font-size: 14px;
+  margin: 15px 0 !important;
+}
+
+.uploadButtons {
+  display: flex;
+  gap: 10px;
+  justify-content: center;
+  margin: 20px 0;
+}
+
+.uploadButton {
+  padding: 10px 20px;
+  border: 2px solid #4caf50;
+  background: white;
+  color: #4caf50;
+  border-radius: 25px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  transition: all 0.3s;
+}
+
+.uploadButton:hover {
+  background: #4caf50;
+  color: white;
+  transform: translateY(-2px);
+}
+
+.uploadButton i {
+  font-size: 16px;
+}
+
+.uploadingState {
+  padding: 20px;
+}
+
+.uploadingState i {
+  font-size: 36px;
+  color: #4caf50;
+  margin-bottom: 10px;
+}
+
+.uploadingState p {
+  color: #666;
+  margin: 0;
+}
+
+.imagePreviewContainer {
+  position: relative;
+  border-radius: 15px;
+  overflow: hidden;
+  background: #f5f5f5;
+  border: 2px solid #e0e0e0;
+}
+
+.imagePreview {
+  width: 100%;
+  height: auto;
+  max-height: 300px;
+  object-fit: contain;
+  display: block;
+}
+
+.removeImageButton {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  background: rgba(255, 87, 34, 0.9);
+  color: white;
+  border: none;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  font-size: 18px;
+  transition: all 0.3s;
+  z-index: 2;
+}
+
+.removeImageButton:hover {
+  background: rgba(255, 87, 34, 1);
+  transform: scale(1.1);
+}
+
+.imageInfo {
+  padding: 12px;
+  background: #e8f5e9;
+  color: #2e7d32;
+  text-align: center;
+  font-size: 14px;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.imageInfo i {
+  color: #4caf50;
+}
+
 @media (max-width: 768px) {
   .overlay {
     padding: 10px;
@@ -267,6 +411,24 @@
 
   .cancelButton,
   .submitButton {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .imageUploadZone {
+    padding: 30px 15px;
+  }
+
+  .imageUploadZone i.fa-cloud-upload-alt {
+    font-size: 36px;
+  }
+
+  .uploadButtons {
+    flex-direction: column;
+    width: 100%;
+  }
+
+  .uploadButton {
     width: 100%;
     justify-content: center;
   }

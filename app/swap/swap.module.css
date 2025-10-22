@@ -274,3 +274,68 @@
     grid-template-columns: 1fr;
   }
 }
+
+/* Offer Info Styles */
+.offerInfo {
+  margin-top: 15px;
+  padding: 12px;
+  background: linear-gradient(135deg, #fff8e1 0%, #fff3cd 100%);
+  border-radius: 8px;
+  border-left: 4px solid #ffa726;
+}
+
+.offerLabel {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 8px;
+  color: #f57c00;
+  font-size: 14px;
+}
+
+.offerLabel i {
+  font-size: 16px;
+}
+
+.offerImageContainer {
+  margin: 10px 0;
+  border-radius: 8px;
+  overflow: hidden;
+  background: white;
+  border: 2px solid #fff3cd;
+}
+
+.offerImage {
+  width: 100%;
+  height: auto;
+  max-height: 250px;
+  object-fit: contain;
+  display: block;
+}
+
+.offerDetails {
+  margin: 8px 0;
+  padding: 8px;
+  background: white;
+  border-radius: 6px;
+  color: #333;
+  font-size: 14px;
+  line-height: 1.5;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+.offerValue {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 8px;
+  color: #2e7d32;
+  font-weight: 600;
+  font-size: 14px;
+}
+
+.offerValue i {
+  color: #4caf50;
+  font-size: 13px;
+}

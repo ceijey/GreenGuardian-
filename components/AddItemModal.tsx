@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import { User } from 'firebase/auth';
 import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
@@ -23,6 +23,11 @@ export default function AddItemModal({ isOpen, onClose, currentUser }: AddItemMo
   });
   const [loading, setLoading] = useState(false);
   const [errors, setErrors] = useState<{ [key: string]: string }>({});
+  const [imagePreview, setImagePreview] = useState<string>('');
+  const [isDragging, setIsDragging] = useState(false);
+  const [uploadingImage, setUploadingImage] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const cameraInputRef = useRef<HTMLInputElement>(null);
 
   const categories = [
     { value: 'electronics', label: 'Electronics' },
@@ -52,6 +57,119 @@ export default function AddItemModal({ isOpen, onClose, currentUser }: AddItemMo
     }
   };
 
+  // Compress image to base64 (max 500KB for Firestore)
+  const compressImage = (file: File): Promise<string> => {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.readAsDataURL(file);
+      reader.onload = (event) => {
+        const img = new Image();
+        img.src = event.target?.result as string;
+        img.onload = () => {
+          const canvas = document.createElement('canvas');
+          let width = img.width;
+          let height = img.height;
+          
+          // Resize to max 800px width while maintaining aspect ratio
+          const maxWidth = 800;
+          if (width > maxWidth) {
+            height = (height * maxWidth) / width;
+            width = maxWidth;
+          }
+          
+          canvas.width = width;
+          canvas.height = height;
+          
+          const ctx = canvas.getContext('2d')!;
+          ctx.drawImage(img, 0, 0, width, height);
+          
+          // Compress to JPEG with quality adjustment
+          let quality = 0.7;
+          let compressedDataUrl = canvas.toDataURL('image/jpeg', quality);
+          
+          // If still too large, reduce quality further
+          while (compressedDataUrl.length > 500000 && quality > 0.1) {
+            quality -= 0.1;
+            compressedDataUrl = canvas.toDataURL('image/jpeg', quality);
+          }
+          
+          if (compressedDataUrl.length > 500000) {
+            reject(new Error('Image is too large even after compression. Please use a smaller image.'));
+          } else {
+            resolve(compressedDataUrl);
+          }
+        };
+        img.onerror = () => reject(new Error('Failed to load image'));
+      };
+      reader.onerror = () => reject(new Error('Failed to read file'));
+    });
+  };
+
+  const handleImageUpload = async (file: File) => {
+    if (!file) return;
+    
+    // Validate file type
+    if (!file.type.startsWith('image/')) {
+      setErrors(prev => ({ ...prev, imageUrl: 'Please upload an image file' }));
+      return;
+    }
+    
+    // Validate file size (max 5MB before compression)
+    if (file.size > 5 * 1024 * 1024) {
+      setErrors(prev => ({ ...prev, imageUrl: 'Image must be smaller than 5MB' }));
+      return;
+    }
+    
+    setUploadingImage(true);
+    try {
+      const compressedImage = await compressImage(file);
+      setFormData(prev => ({ ...prev, imageUrl: compressedImage }));
+      setImagePreview(compressedImage);
+      setErrors(prev => ({ ...prev, imageUrl: '' }));
+    } catch (error) {
+      console.error('Error compressing image:', error);
+      setErrors(prev => ({ 
+        ...prev, 
+        imageUrl: error instanceof Error ? error.message : 'Failed to process image' 
+      }));
+    } finally {
+      setUploadingImage(false);
+    }
+  };
+
+  const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      handleImageUpload(file);
+    }
+  };
+
+  const handleDragOver = (e: React.DragEvent) => {
+    e.preventDefault();
+    setIsDragging(true);
+  };
+
+  const handleDragLeave = () => {
+    setIsDragging(false);
+  };
+
+  const handleDrop = (e: React.DragEvent) => {
+    e.preventDefault();
+    setIsDragging(false);
+    
+    const file = e.dataTransfer.files[0];
+    if (file) {
+      handleImageUpload(file);
+    }
+  };
+
+  const removeImage = () => {
+    setFormData(prev => ({ ...prev, imageUrl: '' }));
+    setImagePreview('');
+    if (fileInputRef.current) fileInputRef.current.value = '';
+    if (cameraInputRef.current) cameraInputRef.current.value = '';
+  };
+
   const validateForm = () => {
     const newErrors: { [key: string]: string } = {};
 
@@ -67,21 +185,8 @@ export default function AddItemModal({ isOpen, onClose, currentUser }: AddItemMo
       newErrors.estimatedValue = 'Please enter a valid estimated value';
     }
 
-    if (formData.imageUrl && !isValidUrl(formData.imageUrl)) {
-      newErrors.imageUrl = 'Please enter a valid URL';
-    }
-
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
-  };
-
-  const isValidUrl = (url: string) => {
-    try {
-      new URL(url);
-      return true;
-    } catch {
-      return false;
-    }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -174,7 +279,7 @@ export default function AddItemModal({ isOpen, onClose, currentUser }: AddItemMo
             </div>
 
             <div className={styles.formGroup}>
-              <label htmlFor="estimatedValue">Estimated Value ($) *</label>
+              <label htmlFor="estimatedValue">Estimated Value (₱) *</label>
               <input
                 type="number"
                 id="estimatedValue"
@@ -226,18 +331,79 @@ export default function AddItemModal({ isOpen, onClose, currentUser }: AddItemMo
           </div>
 
           <div className={styles.formGroup}>
-            <label htmlFor="imageUrl">Image URL (optional)</label>
-            <input
-              type="url"
-              id="imageUrl"
-              name="imageUrl"
-              value={formData.imageUrl}
-              onChange={handleInputChange}
-              placeholder="https://example.com/image.jpg"
-              className={errors.imageUrl ? styles.error : ''}
-            />
+            <label>Item Photo</label>
+            {!imagePreview ? (
+              <div
+                className={`${styles.imageUploadZone} ${isDragging ? styles.dragging : ''}`}
+                onDragOver={handleDragOver}
+                onDragLeave={handleDragLeave}
+                onDrop={handleDrop}
+              >
+                {uploadingImage ? (
+                  <div className={styles.uploadingState}>
+                    <i className="fas fa-spinner fa-spin"></i>
+                    <p>Compressing image...</p>
+                  </div>
+                ) : (
+                  <>
+                    <i className="fas fa-cloud-upload-alt"></i>
+                    <p>Drag & drop image here</p>
+                    <p className={styles.orText}>or</p>
+                    <div className={styles.uploadButtons}>
+                      <button
+                        type="button"
+                        onClick={() => fileInputRef.current?.click()}
+                        className={styles.uploadButton}
+                      >
+                        <i className="fas fa-folder-open"></i>
+                        Choose File
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => cameraInputRef.current?.click()}
+                        className={styles.uploadButton}
+                      >
+                        <i className="fas fa-camera"></i>
+                        Take Photo
+                      </button>
+                    </div>
+                    <small>Max 5MB • Will be compressed for storage</small>
+                  </>
+                )}
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  accept="image/*"
+                  onChange={handleFileSelect}
+                  style={{ display: 'none' }}
+                />
+                <input
+                  ref={cameraInputRef}
+                  type="file"
+                  accept="image/*"
+                  capture="environment"
+                  onChange={handleFileSelect}
+                  style={{ display: 'none' }}
+                />
+              </div>
+            ) : (
+              <div className={styles.imagePreviewContainer}>
+                <img src={imagePreview} alt="Preview" className={styles.imagePreview} />
+                <button
+                  type="button"
+                  onClick={removeImage}
+                  className={styles.removeImageButton}
+                  title="Remove image"
+                >
+                  <i className="fas fa-times"></i>
+                </button>
+                <div className={styles.imageInfo}>
+                  <i className="fas fa-check-circle"></i>
+                  Image compressed and ready
+                </div>
+              </div>
+            )}
             {errors.imageUrl && <span className={styles.errorText}>{errors.imageUrl}</span>}
-            <small>Tip: Upload your image to a service like Imgur or use a product image URL</small>
           </div>
 
           <div className={styles.actions}>
