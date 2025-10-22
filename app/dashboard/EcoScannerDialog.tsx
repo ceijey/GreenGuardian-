@@ -304,23 +304,25 @@ export default function EcoScannerDialog({ isOpen, onClose }: EcoScannerDialogPr
         }
 
         // Progressive camera constraints (try back camera first, then front, then any)
+        // Increased resolution for better detection accuracy
         const constraints = [
           { 
             video: { 
               facingMode: 'environment',
-              width: { ideal: 640 },
-              height: { ideal: 480 },
+              width: { ideal: 1280, min: 640 },
+              height: { ideal: 720, min: 480 },
               frameRate: { ideal: 30 }
             } 
           },
           { 
             video: { 
               facingMode: 'user',
-              width: { ideal: 640 },
-              height: { ideal: 480 },
+              width: { ideal: 1280, min: 640 },
+              height: { ideal: 720, min: 480 },
               frameRate: { ideal: 30 }
             } 
           },
+          { video: { width: { ideal: 1280 }, height: { ideal: 720 } } },
           { video: { width: { ideal: 640 }, height: { ideal: 480 } } },
           { video: true }
         ];
@@ -525,7 +527,7 @@ export default function EcoScannerDialog({ isOpen, onClose }: EcoScannerDialogPr
         category: 'packaging'
       },
       book: {
-        label: 'Paper Product',
+        label: 'Paper Product / Book',
         recyclable: true,
         carbonFootprint: 2.71, // kg CO2 per kg
         waterFootprint: 13, // liters per kg
@@ -533,6 +535,66 @@ export default function EcoScannerDialog({ isOpen, onClose }: EcoScannerDialogPr
         ecoScore: 6,
         alternatives: ['Digital books', 'Library books', 'Recycled paper'],
         category: 'paper'
+      },
+      'teddy bear': {
+        label: 'Paper/Cardboard Product',
+        recyclable: true,
+        carbonFootprint: 1.5, // kg CO2
+        waterFootprint: 10, // liters
+        recyclability: '75% recyclable',
+        ecoScore: 6,
+        alternatives: ['Recycled paper products', 'Digital alternatives'],
+        category: 'paper'
+      },
+      vase: {
+        label: 'Container/Bottle',
+        recyclable: true,
+        carbonFootprint: 0.5, // kg CO2
+        waterFootprint: 2.5, // liters
+        recyclability: '90% recyclable',
+        ecoScore: 7,
+        alternatives: ['Reusable containers', 'Glass bottles'],
+        category: 'packaging'
+      },
+      'cell phone': {
+        label: 'Electronic Device',
+        recyclable: true,
+        carbonFootprint: 55, // kg CO2
+        waterFootprint: 12760, // liters
+        recyclability: '50% recyclable',
+        ecoScore: 3,
+        alternatives: ['Repair existing device', 'Buy refurbished', 'Trade-in programs'],
+        category: 'electronics'
+      },
+      keyboard: {
+        label: 'Electronic Device',
+        recyclable: true,
+        carbonFootprint: 4.5, // kg CO2
+        waterFootprint: 500, // liters
+        recyclability: '60% recyclable',
+        ecoScore: 4,
+        alternatives: ['Mechanical keyboards (longer lifespan)', 'Bamboo keyboards'],
+        category: 'electronics'
+      },
+      mouse: {
+        label: 'Electronic Device',
+        recyclable: true,
+        carbonFootprint: 2.5, // kg CO2
+        waterFootprint: 300, // liters
+        recyclability: '60% recyclable',
+        ecoScore: 4,
+        alternatives: ['Durable wired mouse', 'Rechargeable wireless mouse'],
+        category: 'electronics'
+      },
+      laptop: {
+        label: 'Electronic Device - Laptop',
+        recyclable: true,
+        carbonFootprint: 270, // kg CO2
+        waterFootprint: 28000, // liters
+        recyclability: '45% recyclable',
+        ecoScore: 2,
+        alternatives: ['Repair existing laptop', 'Buy refurbished', 'Upgrade components'],
+        category: 'electronics'
       },
       banana: {
         label: 'Banana',
@@ -580,8 +642,9 @@ export default function EcoScannerDialog({ isOpen, onClose }: EcoScannerDialogPr
       ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
 
       // Filter out people and animals, and only show highest confidence prediction
+      // Lowered threshold from 0.6 to 0.4 (40%) for better detection of papers and bottles
       const validPredictions = predictions.filter(pred => 
-        !ignoredObjects.includes(pred.class.toLowerCase()) && pred.score > 0.6
+        !ignoredObjects.includes(pred.class.toLowerCase()) && pred.score > 0.4
       );
 
       if (validPredictions.length > 0) {
@@ -611,8 +674,9 @@ export default function EcoScannerDialog({ isOpen, onClose }: EcoScannerDialogPr
         ctx.fillText(`${label}`, x + 5, y > 25 ? y - 5 : 25);
         ctx.fillText(`Confidence: ${Math.round(bestPrediction.score * 100)}%`, x + 5, y > 50 ? y - 25 : 45);
 
-        // Show confirmation if new product detected and not already logged
-        if (productData && !loggedItems.has(label) && !showConfirmation && !isPaused) {
+        // Show confirmation if new product detected
+        // Allow scanning the same product multiple times
+        if (productData && !showConfirmation && !isPaused) {
           setPendingProduct(productData);
           setShowConfirmation(true);
           setIsPaused(true);
@@ -637,14 +701,8 @@ export default function EcoScannerDialog({ isOpen, onClose }: EcoScannerDialogPr
     if (!pendingProduct || !user) return;
 
     try {
-      // Add to scanned products list
-      setScannedProducts(prev => {
-        const exists = prev.find(p => p.label === pendingProduct.label);
-        if (!exists) {
-          return [...prev, pendingProduct];
-        }
-        return prev;
-      });
+      // Always add to scanned products list (allow duplicates)
+      setScannedProducts(prev => [...prev, pendingProduct]);
 
       // Log to Firebase with user-specific collection
       await addDoc(collection(db, 'userProductScans'), {
@@ -674,7 +732,7 @@ export default function EcoScannerDialog({ isOpen, onClose }: EcoScannerDialogPr
         totalWaterTracked: prev.totalWaterTracked + pendingProduct.waterFootprint
       }));
 
-      setLoggedItems(prev => new Set(prev.add(pendingProduct.label)));
+      // Note: Removed loggedItems tracking to allow re-scanning same products
       
       console.log(`✅ Confirmed and logged: ${pendingProduct.label}`);
     } catch (error) {
@@ -855,8 +913,8 @@ export default function EcoScannerDialog({ isOpen, onClose }: EcoScannerDialogPr
                 )}
               </div>
               <p className="text-sm text-gray-600">
-                Point camera at products to analyze their environmental impact. 
-                Scanner will pause when a product is detected for confirmation.
+                📱 Point camera at: Bottles, Cans, Cups, Paper products, Books, Boxes, Electronics, Food items.
+                Hold steady for 1-2 seconds. You can scan the same product multiple times.
                 {isPaused && <span className="text-yellow-600 font-medium"> • Scanner Paused</span>}
               </p>
             </div>

@@ -65,12 +65,17 @@ body {
 
 /* Add padding for pages with fixed header */
 .main-content {
+  padding-top: 0; /* Default no padding */
+}
+
+/* Only add padding to pages that have a header */
+.with-header .main-content {
   padding-top: 80px; /* Space for fixed header */
 }
 
 /* Responsive adjustments for mobile */
 @media (max-width: 767px) {
-  .main-content {
+  .with-header .main-content {
     padding-top: 70px; /* Less space on mobile */
   }
 }
@@ -244,10 +249,35 @@ p {
   border: 0;
 }
 
-/* Focus Styles */
-*:focus {
-  outline: 2px solid var(--primary-green);
-  outline-offset: 2px;
+/* Skip link visible when focused */
+.skip-link {
+  position: absolute;
+  left: -999px;
+  top: auto;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  z-index: 1000;
+  background: var(--primary-green);
+  color: white;
+  padding: 8px 12px;
+  border-radius: 6px;
+  text-decoration: none;
+}
+
+.skip-link:focus {
+  left: 16px;
+  top: 16px;
+  width: auto;
+  height: auto;
+  overflow: visible;
+}
+
+/* Focus Styles - apply to interactive elements only (no global selector) */
+a:focus, button:focus, input:focus, textarea:focus, select:focus {
+  outline: 3px solid var(--primary-green);
+  outline-offset: 3px;
+  box-shadow: 0 0 0 6px rgba(76, 175, 80, 0.12);
 }
 
 /* Touch Improvements */

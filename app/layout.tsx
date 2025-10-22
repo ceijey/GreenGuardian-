@@ -36,7 +36,14 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
-        <AuthProvider>{children}</AuthProvider>
+        {/* Skip link for keyboard users */}
+        <a href="#main-content" className="skip-link">Skip to main content</a>
+
+        <AuthProvider>
+          <main id="main-content" className="main-content" tabIndex={-1} aria-label="Main content">
+            {children}
+          </main>
+        </AuthProvider>
       </body>
     </html>
   );

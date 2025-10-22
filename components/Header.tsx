@@ -48,89 +48,111 @@ export default function Header({ logo, title, showUserProfile = false }: HeaderP
           <button 
             className={styles.mobileMenuButton}
             onClick={toggleMenu}
-            aria-label="Toggle navigation menu"
+            onKeyDown={(e) => {
+              if (e.key === 'Enter' || e.key === ' ') {
+                e.preventDefault();
+                toggleMenu();
+              }
+            }}
+            aria-label={isMenuOpen ? 'Close navigation menu' : 'Open navigation menu'}
+            aria-expanded={isMenuOpen}
+            aria-controls="primary-navigation"
+            type="button"
           >
-            <i className={isMenuOpen ? "fas fa-times" : "fas fa-bars"}></i>
+            <i className={isMenuOpen ? "fas fa-times" : "fas fa-bars"} aria-hidden="true"></i>
           </button>
 
-          <nav className={`${styles.nav} ${isMenuOpen ? styles.navOpen : ''}`}>
-            <ul className={styles.navList}>
-              <li>
+          <nav id="primary-navigation" className={`${styles.nav} ${isMenuOpen ? styles.navOpen : ''}`} role="navigation" aria-label="Primary">
+            <ul className={styles.navList} role="menubar">
+              <li role="none">
                 <Link 
                   href="/dashboard" 
-                  className={pathname === '/' ? styles.active : ''}
+                  className={pathname === '/dashboard' ? styles.active : ''}
                   onClick={closeMenu}
+                  role="menuitem"
+                  aria-current={pathname === '/dashboard' ? 'page' : undefined}
                 >
-                  <i className="fas fa-home"></i>
+                  <i className="fas fa-home" aria-hidden="true"></i>
                   <span>Home</span>
                 </Link>
               </li>
-              <li className={styles.dropdown}>
+              <li className={styles.dropdown} role="none">
                 <Link 
                   href="/swap" 
-                  className={pathname.startsWith('/') ? styles.active : ''}
+                  className={pathname.startsWith('/swap') ? styles.active : ''}
                   onClick={closeMenu}
+                  role="menuitem"
+                  aria-current={pathname.startsWith('/swap') ? 'page' : undefined}
+                  aria-haspopup="true"
+                  aria-expanded={isMenuOpen}
                 >
-                  <i className="fas fa-exchange-alt"></i>
+                  <i className="fas fa-exchange-alt" aria-hidden="true"></i>
                   <span>Swap</span>
-                  <i className="fas fa-caret-down"></i>
+                  <i className="fas fa-caret-down" aria-hidden="true"></i>
                 </Link>
-                <div className={styles.dropdownMenu}>
-                  <Link href="/swap" className={styles.dropdownItem} onClick={closeMenu}>
-                    <i className="fas fa-exchange-alt"></i>
+                <div className={styles.dropdownMenu} role="menu">
+                  <Link href="/swap" className={styles.dropdownItem} onClick={closeMenu} role="menuitem">
+                    <i className="fas fa-exchange-alt" aria-hidden="true"></i>
                     Browse Items
                   </Link>
-                  <Link href="/swap/requests" className={styles.dropdownItem} onClick={closeMenu}>
-                    <i className="fas fa-inbox"></i>
+                  <Link href="/swap/requests" className={styles.dropdownItem} onClick={closeMenu} role="menuitem">
+                    <i className="fas fa-inbox" aria-hidden="true"></i>
                     My Requests
                   </Link>
                 </div>
               </li>
-              <li>
+              <li role="none">
                 <Link 
                   href="/challenges" 
-                  className={pathname === '/' ? styles.active : ''}
+                  className={pathname === '/challenges' ? styles.active : ''}
                   onClick={closeMenu}
+                  role="menuitem"
+                  aria-current={pathname === '/challenges' ? 'page' : undefined}
                 >
-                  <i className="fas fa-medal"></i>
+                  <i className="fas fa-medal" aria-hidden="true"></i>
                   <span>Challenges</span>
                 </Link>
               </li>
-              <li>
+              <li role="none">
                 <Link 
                   href="/community" 
-                  className={pathname === '/' ? styles.active : ''}
+                  className={pathname === '/community' ? styles.active : ''}
                   onClick={closeMenu}
+                  role="menuitem"
+                  aria-current={pathname === '/community' ? 'page' : undefined}
                 >
-                  <i className="fas fa-users"></i>
+                  <i className="fas fa-users" aria-hidden="true"></i>
                   <span>Community</span>
                 </Link>
               </li>
-              <li>
+              <li role="none">
                 <Link 
                   href="/profile" 
-                  className={pathname === '/' ? styles.active : ''}
+                  className={pathname === '/profile' ? styles.active : ''}
                   onClick={closeMenu}
+                  role="menuitem"
+                  aria-current={pathname === '/profile' ? 'page' : undefined}
                 >
-                  <i className="fas fa-user"></i>
+                  <i className="fas fa-user" aria-hidden="true"></i>
                   <span>Profile</span>
                 </Link>
               </li>
               {user && (
                 <>
-                  <li className={styles.notificationItem}>
+                  <li className={styles.notificationItem} role="none">
                     <CommunityNotifications position="top-right" />
                   </li>
-                  <li>
+                  <li role="none">
                     <button 
                       onClick={() => {
                         handleLogout()
                         closeMenu()
                       }} 
                       className={styles.logoutButton} 
-                      title="Logout"
+                      aria-label="Log out of your account"
+                      type="button"
                     >
-                      <i className="fas fa-sign-out-alt"></i>
+                      <i className="fas fa-sign-out-alt" aria-hidden="true"></i>
                       <span>Logout</span>
                     </button>
                   </li>
@@ -149,7 +171,20 @@ export default function Header({ logo, title, showUserProfile = false }: HeaderP
           )}
         </div>
       </div>
-      {isMenuOpen && <div className={styles.mobileOverlay} onClick={closeMenu}></div>}
+      {isMenuOpen && (
+        <div 
+          className={styles.mobileOverlay} 
+          onClick={closeMenu}
+          onKeyDown={(e) => {
+            if (e.key === 'Escape') {
+              closeMenu();
+            }
+          }}
+          role="button"
+          tabIndex={0}
+          aria-label="Close navigation menu"
+        ></div>
+      )}
     </header>
   )
 }
