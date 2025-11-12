@@ -290,3 +290,9 @@ a:focus, button:focus, input:focus, textarea:focus, select:focus {
 html {
   scroll-behavior: smooth;
 }
+
+/* Spinner Animation */
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}

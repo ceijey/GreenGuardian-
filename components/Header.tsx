@@ -103,14 +103,14 @@ export default function Header({ logo, title, showUserProfile = false }: HeaderP
               </li>
               <li role="none">
                 <Link 
-                  href="/challenges" 
-                  className={pathname === '/challenges' ? styles.active : ''}
+                  href="/community-hub" 
+                  className={pathname === '/community-hub' ? styles.active : ''}
                   onClick={closeMenu}
                   role="menuitem"
-                  aria-current={pathname === '/challenges' ? 'page' : undefined}
+                  aria-current={pathname === '/community-hub' ? 'page' : undefined}
                 >
                   <i className="fas fa-medal" aria-hidden="true"></i>
-                  <span>Challenges</span>
+                  <span>Community Hub</span>
                 </Link>
               </li>
               <li role="none">
@@ -122,39 +122,47 @@ export default function Header({ logo, title, showUserProfile = false }: HeaderP
                   aria-current={pathname === '/community' ? 'page' : undefined}
                 >
                   <i className="fas fa-users" aria-hidden="true"></i>
-                  <span>Community</span>
+                  <span>Community Messages</span>
                 </Link>
               </li>
-              <li className={styles.dropdown} role="none">
-                <button 
-                  className={pathname.startsWith('/community-dashboard') || pathname.startsWith('/waste-tracker') || pathname.startsWith('/volunteer') ? styles.active : ''}
+              <li role="none">
+                <Link 
+                  href="/waste-tracker" 
+                  className={pathname === '/waste-tracker' ? styles.active : ''}
+                  onClick={closeMenu}
                   role="menuitem"
-                  aria-haspopup="true"
-                  aria-expanded={isMenuOpen}
+                  aria-current={pathname === '/waste-tracker' ? 'page' : undefined}
                 >
-                  <i className="fas fa-leaf" aria-hidden="true"></i>
-                  <span>Green Actions</span>
-                  <i className="fas fa-caret-down" aria-hidden="true"></i>
-                </button>
-                <div className={styles.dropdownMenu} role="menu">
-                  <Link href="/community-dashboard" className={styles.dropdownItem} onClick={closeMenu} role="menuitem">
-                    <i className="fas fa-chart-bar" aria-hidden="true"></i>
-                    Community Dashboard
-                  </Link>
-                  <Link href="/waste-tracker" className={styles.dropdownItem} onClick={closeMenu} role="menuitem">
-                    <i className="fas fa-trash-alt" aria-hidden="true"></i>
-                    Waste Tracker
-                  </Link>
-                  <Link href="/volunteer" className={styles.dropdownItem} onClick={closeMenu} role="menuitem">
-                    <i className="fas fa-hands-helping" aria-hidden="true"></i>
-                    Volunteer Events
-                  </Link>
-                  <Link href="/community-hub" className={styles.dropdownItem} onClick={closeMenu} role="menuitem">
-                    <i className="fas fa-globe" aria-hidden="true"></i>
-                    Community Hub
-                  </Link>
-                </div>
+                  <i className="fas fa-recycle" aria-hidden="true"></i>
+                  <span>Waste Tracker</span>
+                </Link>
               </li>
+              <li role="none">
+                <Link 
+                  href="/report-incident" 
+                  className={pathname === '/report-incident' ? styles.active : ''}
+                  onClick={closeMenu}
+                  role="menuitem"
+                  aria-current={pathname === '/report-incident' ? 'page' : undefined}
+                >
+                  <i className="fas fa-bullhorn" aria-hidden="true"></i>
+                  <span>Report Incident</span>
+                </Link>
+              </li>
+              {user?.email?.endsWith('@gov.ph') && (
+                <li role="none">
+                  <Link 
+                    href="/gov-portal" 
+                    className={pathname === '/gov-portal' ? styles.active : ''}
+                    onClick={closeMenu}
+                    role="menuitem"
+                    aria-current={pathname === '/gov-portal' ? 'page' : undefined}
+                  >
+                    <i className="fas fa-landmark" aria-hidden="true"></i>
+                    <span>Gov Portal</span>
+                  </Link>
+                </li>
+              )}
               <li role="none">
                 <Link 
                   href="/profile" 
@@ -221,10 +229,15 @@ export default function Header({ logo, title, showUserProfile = false }: HeaderP
           <Link href="/swap" onClick={closeMenu}>🔄 Swap</Link>
           <Link href="/challenges" onClick={closeMenu}>🏆 Challenges</Link>
           <Link href="/community" onClick={closeMenu}>🌍 Community</Link>
+          <Link href="/community-hub" onClick={closeMenu}>🏅 Community Hub</Link>
+          <Link href="/waste-tracker" onClick={closeMenu}>♻️ Waste Tracker</Link>
+          <Link href="/report-incident" onClick={closeMenu}>📢 Report Incident</Link>
+          {user?.email?.endsWith('@gov.ph') && (
+            <Link href="/gov-portal" onClick={closeMenu}>🏛️ Gov Portal</Link>
+          )}
           <Link href="/profile" onClick={closeMenu}>👤 Profile</Link>
           <Link href="/settings" onClick={closeMenu}>⚙️ Settings</Link>
           <Link href="/help" onClick={closeMenu}>❓ Help</Link>
-          <Link href="/community-hub" onClick={closeMenu}>🌍 Community Hub</Link>
           {user ? (
             <button 
               onClick={() => {
@@ -241,9 +254,6 @@ export default function Header({ logo, title, showUserProfile = false }: HeaderP
           ) : (
             <Link href="/login" onClick={closeMenu}>🔑 Login</Link>
           )}
-          <Link href="/community-dashboard" onClick={closeMenu}>🌍 Community Dashboard</Link>
-          <Link href="/waste-tracker" onClick={closeMenu}>♻️ Waste Tracker</Link>
-          <Link href="/volunteer" onClick={closeMenu}>🤝 Volunteer</Link>
         </nav>
       )}
     </header>
