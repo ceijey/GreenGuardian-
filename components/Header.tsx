@@ -125,6 +125,36 @@ export default function Header({ logo, title, showUserProfile = false }: HeaderP
                   <span>Community</span>
                 </Link>
               </li>
+              <li className={styles.dropdown} role="none">
+                <button 
+                  className={pathname.startsWith('/community-dashboard') || pathname.startsWith('/waste-tracker') || pathname.startsWith('/volunteer') ? styles.active : ''}
+                  role="menuitem"
+                  aria-haspopup="true"
+                  aria-expanded={isMenuOpen}
+                >
+                  <i className="fas fa-leaf" aria-hidden="true"></i>
+                  <span>Green Actions</span>
+                  <i className="fas fa-caret-down" aria-hidden="true"></i>
+                </button>
+                <div className={styles.dropdownMenu} role="menu">
+                  <Link href="/community-dashboard" className={styles.dropdownItem} onClick={closeMenu} role="menuitem">
+                    <i className="fas fa-chart-bar" aria-hidden="true"></i>
+                    Community Dashboard
+                  </Link>
+                  <Link href="/waste-tracker" className={styles.dropdownItem} onClick={closeMenu} role="menuitem">
+                    <i className="fas fa-trash-alt" aria-hidden="true"></i>
+                    Waste Tracker
+                  </Link>
+                  <Link href="/volunteer" className={styles.dropdownItem} onClick={closeMenu} role="menuitem">
+                    <i className="fas fa-hands-helping" aria-hidden="true"></i>
+                    Volunteer Events
+                  </Link>
+                  <Link href="/community-hub" className={styles.dropdownItem} onClick={closeMenu} role="menuitem">
+                    <i className="fas fa-globe" aria-hidden="true"></i>
+                    Community Hub
+                  </Link>
+                </div>
+              </li>
               <li role="none">
                 <Link 
                   href="/profile" 
@@ -184,6 +214,37 @@ export default function Header({ logo, title, showUserProfile = false }: HeaderP
           tabIndex={0}
           aria-label="Close navigation menu"
         ></div>
+      )}
+      {isMenuOpen && (
+        <nav className={styles.mobileMenu}>
+          <Link href="/dashboard" onClick={closeMenu}>🏠 Dashboard</Link>
+          <Link href="/swap" onClick={closeMenu}>🔄 Swap</Link>
+          <Link href="/challenges" onClick={closeMenu}>🏆 Challenges</Link>
+          <Link href="/community" onClick={closeMenu}>🌍 Community</Link>
+          <Link href="/profile" onClick={closeMenu}>👤 Profile</Link>
+          <Link href="/settings" onClick={closeMenu}>⚙️ Settings</Link>
+          <Link href="/help" onClick={closeMenu}>❓ Help</Link>
+          <Link href="/community-hub" onClick={closeMenu}>🌍 Community Hub</Link>
+          {user ? (
+            <button 
+              onClick={() => {
+                handleLogout()
+                closeMenu()
+              }} 
+              className={styles.logoutButton} 
+              aria-label="Log out of your account"
+              type="button"
+            >
+              <i className="fas fa-sign-out-alt" aria-hidden="true"></i>
+              <span>Logout</span>
+            </button>
+          ) : (
+            <Link href="/login" onClick={closeMenu}>🔑 Login</Link>
+          )}
+          <Link href="/community-dashboard" onClick={closeMenu}>🌍 Community Dashboard</Link>
+          <Link href="/waste-tracker" onClick={closeMenu}>♻️ Waste Tracker</Link>
+          <Link href="/volunteer" onClick={closeMenu}>🤝 Volunteer</Link>
+        </nav>
       )}
     </header>
   )
