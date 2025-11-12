@@ -1,5 +1,3 @@
-'use client';
-
 import { useState, useRef } from 'react';
 import { User } from 'firebase/auth';
 import { collection, addDoc, serverTimestamp } from 'firebase/firestore';

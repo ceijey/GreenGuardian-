@@ -1,0 +1,87 @@
+.section {
+  margin-top: 40px;
+  padding-bottom: 40px;
+}
+
+.title {
+  font-size: 1.5rem;
+  font-weight: 600;
+  margin-bottom: 8px;
+  color: rgba(0, 121, 0, 0.745);
+}
+
+.subtitle {
+  font-size: 0.875rem;
+  margin-bottom: 24px;
+  color: rgb(103, 102, 102);
+}
+
+.grid {
+  display: grid;
+  gap: var(--spacing-md);
+  grid-template-columns: 1fr;
+}
+
+@media (min-width: 768px) {
+  .grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: var(--spacing-lg);
+  }
+}
+
+@media (min-width: 1024px) {
+  .grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+.card {
+  display: block;
+  text-decoration: none;
+  color: inherit;
+  cursor: pointer;
+}
+
+.cardContent {
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+}
+
+.iconWrapper {
+  background: var(--light-green);
+  color: var(--foreground);
+  border-radius: 9999px;
+  padding: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  min-width: 44px;
+  height: 44px;
+}
+
+.iconWrapper.videos {
+  background: #e8f3fb;
+}
+
+.iconWrapper.quizzes {
+  background: #fff7e6fe;
+}
+
+.icon {
+  font-size: 1.25rem;
+}
+
+.cardText h3 {
+  font-weight: 500;
+  font-size: 1rem;
+  margin-bottom: 4px;
+  color: #191919;
+}
+
+.cardText p {
+  font-size: 0.875rem;
+  color: rgb(103, 102, 102);
+  line-height: 1.5;
+}

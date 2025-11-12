@@ -1,9 +1,8 @@
 .header {
-  background: linear-gradient(135deg, #2d5a2d 0%, #1e3d1e 100%);
+  background: linear-gradient(135deg, #1d411d 5%, #0db10d 100%);
   color: white;
-  padding: 12px 0;
+  padding: 10px 0;
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
-  position: fixed;
   top: 0;
   left: 0;
   right: 0;

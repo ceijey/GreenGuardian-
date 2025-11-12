@@ -1,0 +1,141 @@
+.container {
+  padding-top: var(--spacing-lg);
+}
+
+.header {
+  margin-bottom: var(--spacing-xl);
+}
+
+.header h1 {
+  font-size: var(--font-size-3xl);
+  font-weight: 600;
+  margin-bottom: var(--spacing-md);
+  color: rgb(21, 104, 0);
+}
+
+.header p {
+  font-size: var(--font-size-base);
+  color: rgb(52, 52, 52);
+}
+
+.grid {
+  display: grid;
+  gap: var(--spacing-md);
+  grid-template-columns: 1fr;
+}
+
+@media (min-width: 768px) {
+  .grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: var(--spacing-lg);
+  }
+}
+
+@media (min-width: 1024px) {
+  .grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+.videoCard {
+  border: none;
+  background: white;
+  padding: 0;
+  overflow: hidden;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.videoCard:hover {
+  box-shadow: 0 4px 16px var(--shadow-medium);
+  transform: translateY(-2px);
+}
+
+.videoCardContent {
+  background: rgba(76, 175, 80, 0.1);
+  padding: var(--spacing-lg);
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+.videoIcon {
+  font-size: 2rem;
+  color: var(--primary-green);
+  margin-bottom: var(--spacing-md);
+}
+
+.videoTitle {
+  font-size: 1.125rem;
+  font-weight: 600;
+  margin-bottom: var(--spacing-md);
+  color: rgb(52, 52, 52);
+}
+
+.videoDescription {
+  font-size: var(--font-size-sm);
+  color: rgb(52, 52, 52);
+  margin-bottom: auto;
+  line-height: 1.5;
+}
+
+.videoButton {
+  margin-top: auto;
+  padding-top: var(--spacing-md);
+  font-size: var(--font-size-sm);
+  padding: 6px 12px;
+}
+
+.detailView {
+  padding-top: 0;
+}
+
+.detailHeader {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-md);
+  margin-bottom: var(--spacing-lg);
+}
+
+.detailIcon {
+  font-size: 2rem;
+  color: var(--primary-green);
+}
+
+.detailTitle {
+  font-size: var(--font-size-3xl);
+  font-weight: 600;
+  color: rgb(52, 52, 52);
+}
+
+.detailDescription {
+  margin-bottom: var(--spacing-lg);
+  font-size: var(--font-size-base);
+   color: rgb(52, 52, 52);
+}
+
+.iframeContainer {
+  position: relative;
+  padding-top: 56.25%;
+  border-radius: var(--border-radius);
+  overflow: hidden;
+  background: rgba(0, 0, 0, 0.03);
+  margin-bottom: var(--spacing-lg);
+}
+
+.iframeContainer iframe {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  border: 0;
+}
+
+.backButton {
+  margin-bottom: var(--spacing-lg);
+}
+
+.footer {
+  margin-top: var(--spacing-xl);
+}

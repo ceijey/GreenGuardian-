@@ -3,7 +3,6 @@
 /* CSS Reset and Global Styles */
 * {
   margin: 0;
-  padding: 0;
   box-sizing: border-box;
 }
 
@@ -15,7 +14,7 @@
   --accent-green: #2e7d32;
   --light-green: #e8f5e8;
   --text-dark: #2d5a2d;
-  --text-light: #666666;
+  --text-light: #030303;
   --border-color: #e0e0e0;
   --shadow-light: rgba(0, 0, 0, 0.1);
   --shadow-medium: rgba(0, 0, 0, 0.15);
