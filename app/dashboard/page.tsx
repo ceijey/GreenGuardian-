@@ -52,6 +52,9 @@ export default function DashboardPage() {
   const [isScannerOpen, setIsScannerOpen] = useState(false);
   const [isActionLoggerOpen, setIsActionLoggerOpen] = useState(false);
   const [showEnvironmentalData, setShowEnvironmentalData] = useState(false);
+
+  // Check if user is government official
+  const isGovOfficial = user?.email?.endsWith('@gordoncollege.edu.ph') || user?.email?.includes('admin');
   
   // Location tracking state
   const [userLocation, setUserLocation] = useState<UserLocation | null>(null);
@@ -161,6 +164,49 @@ export default function DashboardPage() {
 
   const airQuality = getAirQualityLabel(envData.airQualityIndex);
   const waterQuality = getWaterQualityLabel(envData.waterQualityIndex);
+
+  // Block government officials from accessing citizen dashboard
+  if (isGovOfficial) {
+    return (
+      <>
+        <Header logo="fas fa-leaf" title="GREENGUARDIAN" />
+        <main className="main-content">
+          <div style={{
+            maxWidth: '600px',
+            margin: '100px auto',
+            padding: '40px',
+            textAlign: 'center',
+            background: 'white',
+            borderRadius: '16px',
+            boxShadow: '0 4px 20px rgba(0,0,0,0.1)'
+          }}>
+            <i className="fas fa-shield-alt" style={{ fontSize: '64px', color: '#1e3c72', marginBottom: '20px' }}></i>
+            <h2 style={{ color: '#2c3e50', marginBottom: '16px' }}>Government Official Account</h2>
+            <p style={{ color: '#7f8c8d', marginBottom: '30px', lineHeight: '1.6' }}>
+              This account is designated for government use only. Please access the Government Portal to monitor environmental data and manage citizen reports.
+            </p>
+            <a
+              href="/gov-portal"
+              style={{
+                display: 'inline-block',
+                padding: '12px 30px',
+                background: 'linear-gradient(135deg, #1e3c72 0%, #2a5298 100%)',
+                color: 'white',
+                textDecoration: 'none',
+                borderRadius: '25px',
+                fontWeight: '600',
+                boxShadow: '0 4px 15px rgba(30, 60, 114, 0.3)',
+                transition: 'all 0.3s ease'
+              }}
+            >
+              <i className="fas fa-arrow-right" style={{ marginRight: '8px' }}></i>
+              Go to Government Portal
+            </a>
+          </div>
+        </main>
+      </>
+    );
+  }
 
   return (
     <>

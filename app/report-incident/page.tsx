@@ -85,8 +85,8 @@ export default function ReportIncidentPage() {
     return unsubscribe;
   }, [user]);
 
-  // Get current GPS location
-  const getCurrentLocation = () => {
+  // Get current GPS location and convert to address
+  const getCurrentLocation = async () => {
     if (!navigator.geolocation) {
       alert('Geolocation is not supported by your browser');
       return;
@@ -94,13 +94,31 @@ export default function ReportIncidentPage() {
 
     setGettingLocation(true);
     navigator.geolocation.getCurrentPosition(
-      (position) => {
+      async (position) => {
+        const lat = position.coords.latitude;
+        const lng = position.coords.longitude;
+        
         setGpsCoordinates({
-          latitude: position.coords.latitude,
-          longitude: position.coords.longitude
+          latitude: lat,
+          longitude: lng
         });
+
+        // Reverse geocode to get address
+        try {
+          const response = await fetch(
+            `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}`
+          );
+          const data = await response.json();
+          
+          if (data.display_name) {
+            setAddress(data.display_name);
+          }
+        } catch (error) {
+          console.error('Error getting address:', error);
+        }
+        
         setGettingLocation(false);
-        alert('📍 Location captured successfully!');
+        alert('📍 Location captured and address updated!');
       },
       (error) => {
         console.error('Error getting location:', error);
@@ -337,16 +355,15 @@ export default function ReportIncidentPage() {
 
               {/* GPS Coordinates */}
               <div className={styles.formGroup}>
-                <label>GPS Coordinates (Recommended)</label>
+                <label>GPS Location (Recommended)</label>
                 <div className={styles.gpsSection}>
                   {gpsCoordinates ? (
                     <div className={styles.gpsData}>
                       <i className="fas fa-map-marker-alt" style={{ color: '#4CAF50' }}></i>
                       <div>
                         <strong>Location Captured</strong>
-                        <p>
-                          Lat: {gpsCoordinates.latitude.toFixed(6)}, 
-                          Lng: {gpsCoordinates.longitude.toFixed(6)}
+                        <p style={{ fontSize: '13px', color: '#666' }}>
+                          {address || `${gpsCoordinates.latitude.toFixed(6)}, ${gpsCoordinates.longitude.toFixed(6)}`}
                         </p>
                       </div>
                       <button
@@ -365,7 +382,7 @@ export default function ReportIncidentPage() {
                       className={styles.gpsBtn}
                     >
                       <i className={`fas fa-${gettingLocation ? 'spinner fa-spin' : 'crosshairs'}`}></i>
-                      {gettingLocation ? 'Getting Location...' : 'Capture Current Location'}
+                      {gettingLocation ? 'Getting Location...' : 'Auto-fill Address from GPS'}
                     </button>
                   )}
                 </div>
