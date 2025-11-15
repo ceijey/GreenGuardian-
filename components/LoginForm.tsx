@@ -47,12 +47,20 @@ export default function LoginForm() {
       setIsLoading(true);
       console.log('Attempting login...');
       await login(email, password);
-      console.log('Login successful, redirecting to dashboard...');
+      console.log('Login successful, redirecting...');
+      
+      // Check if user is government official
+      const isGovOfficial = email.endsWith('@gordoncollege.edu.ph') || email.includes('admin');
       
       // Add a small delay to ensure auth state is updated
       setTimeout(() => {
-        console.log('Executing redirect to dashboard...');
-        router.push('/dashboard');
+        if (isGovOfficial) {
+          console.log('Government official detected, redirecting to gov-portal...');
+          router.push('/gov-portal');
+        } else {
+          console.log('Regular user, redirecting to dashboard...');
+          router.push('/dashboard');
+        }
       }, 500);
     } catch (err: Error | unknown) {
       console.error('Login error:', err);

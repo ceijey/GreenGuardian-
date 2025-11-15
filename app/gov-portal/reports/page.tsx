@@ -3,19 +3,25 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '@/lib/AuthContext';
 import GovHeader from '@/components/GovHeader';
+import dynamic from 'next/dynamic';
 import { 
   collection, 
   query, 
   onSnapshot, 
   doc, 
-  updateDoc, 
-  getDoc,
-  where,
+  updateDoc,
   orderBy,
   serverTimestamp
 } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
-import styles from './gov-portal.module.css';
+import styles from '../gov-portal.module.css';
+import 'leaflet/dist/leaflet.css';
+
+// Dynamic import for Leaflet components
+const MapContainer = dynamic(() => import('react-leaflet').then(mod => mod.MapContainer), { ssr: false });
+const TileLayer = dynamic(() => import('react-leaflet').then(mod => mod.TileLayer), { ssr: false });
+const Marker = dynamic(() => import('react-leaflet').then(mod => mod.Marker), { ssr: false });
+const Popup = dynamic(() => import('react-leaflet').then(mod => mod.Popup), { ssr: false });
 
 interface IncidentReport {
   id: string;
@@ -43,50 +49,35 @@ interface IncidentReport {
   upvotes?: number;
 }
 
-interface EnvironmentalData {
-  airQualityIndex: number;
-  waterQualityIndex: number;
-  wasteGenerated: number;
-  recyclingRate: number;
-  timestamp: any;
-}
-
-interface CommunityStats {
-  totalReports: number;
-  pendingReports: number;
-  resolvedReports: number;
-  averageResponseTime: number; // hours
-  activeCitizens: number;
-}
-
-export default function GovPortalPage() {
+export default function GovReportsPage() {
   const { user } = useAuth();
   const [reports, setReports] = useState<IncidentReport[]>([]);
-  const [envData, setEnvData] = useState<EnvironmentalData>({
-    airQualityIndex: 0,
-    waterQualityIndex: 0,
-    wasteGenerated: 0,
-    recyclingRate: 0,
-    timestamp: null
-  });
-  const [stats, setStats] = useState<CommunityStats>({
-    totalReports: 0,
-    pendingReports: 0,
-    resolvedReports: 0,
-    averageResponseTime: 0,
-    activeCitizens: 0
-  });
   const [loading, setLoading] = useState(true);
   const [filterStatus, setFilterStatus] = useState<'all' | 'pending' | 'investigating' | 'resolved' | 'rejected'>('all');
   const [filterPriority, setFilterPriority] = useState<'all' | 'low' | 'medium' | 'high' | 'urgent'>('all');
   const [selectedReport, setSelectedReport] = useState<IncidentReport | null>(null);
   const [showResponseModal, setShowResponseModal] = useState(false);
+  const [showMapModal, setShowMapModal] = useState(false);
+  const [mapLocation, setMapLocation] = useState<{ lat: number; lng: number; address: string } | null>(null);
   const [response, setResponse] = useState('');
   const [newStatus, setNewStatus] = useState<'pending' | 'investigating' | 'resolved' | 'rejected'>('investigating');
   const [newPriority, setNewPriority] = useState<'low' | 'medium' | 'high' | 'urgent'>('medium');
 
-  // Check if user is government official (simple check - in production, use proper role-based access)
   const isGovOfficial = user?.email?.endsWith('@gordoncollege.edu.ph') || user?.email?.includes('admin');
+
+  // Fix Leaflet icon issue
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      import('leaflet').then((L) => {
+        delete (L.Icon.Default.prototype as any)._getIconUrl;
+        L.Icon.Default.mergeOptions({
+          iconRetinaUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon-2x.png',
+          iconUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon.png',
+          shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png',
+        });
+      });
+    }
+  }, []);
 
   useEffect(() => {
     const reportsQuery = query(
@@ -101,30 +92,7 @@ export default function GovPortalPage() {
       });
       
       setReports(reportsList);
-      
-      const pending = reportsList.filter(r => r.status === 'pending').length;
-      const resolved = reportsList.filter(r => r.status === 'resolved').length;
-      
-      setStats({
-        totalReports: reportsList.length,
-        pendingReports: pending,
-        resolvedReports: resolved,
-        averageResponseTime: 24, // Mock data
-        activeCitizens: new Set(reportsList.map(r => r.reporterId)).size
-      });
-      
       setLoading(false);
-    });
-
-    return unsubscribe;
-  }, []);
-
-  useEffect(() => {
-    const envRef = doc(db, 'communityStats', 'environmentalData');
-    const unsubscribe = onSnapshot(envRef, (snapshot) => {
-      if (snapshot.exists()) {
-        setEnvData(snapshot.data() as EnvironmentalData);
-      }
     });
 
     return unsubscribe;
@@ -144,7 +112,6 @@ export default function GovPortalPage() {
     return filtered;
   };
 
-  // Update report status
   const handleUpdateReport = async () => {
     if (!selectedReport || !isGovOfficial) return;
 
@@ -168,10 +135,10 @@ export default function GovPortalPage() {
       setShowResponseModal(false);
       setSelectedReport(null);
       setResponse('');
-      alert('Report updated successfully!');
+      alert('✅ Report updated successfully!');
     } catch (error) {
       console.error('Error updating report:', error);
-      alert('Failed to update report');
+      alert('❌ Failed to update report');
     }
   };
 
@@ -195,10 +162,26 @@ export default function GovPortalPage() {
     }
   };
 
+  const handleViewMap = (lat: number, lng: number, address: string) => {
+    setMapLocation({ lat, lng, address });
+    setShowMapModal(true);
+  };
+
+  const getStats = () => {
+    return {
+      total: reports.length,
+      pending: reports.filter(r => r.status === 'pending').length,
+      investigating: reports.filter(r => r.status === 'investigating').length,
+      resolved: reports.filter(r => r.status === 'resolved').length,
+      rejected: reports.filter(r => r.status === 'rejected').length,
+      urgent: reports.filter(r => r.priority === 'urgent').length
+    };
+  };
+
   if (!user) {
     return (
       <>
-        <GovHeader title="LOCAL GOVERNMENT PORTAL" />
+        <GovHeader title="INCIDENT REPORTS" />
         <div className={styles.container}>
           <div className={styles.loginPrompt}>
             <i className="fas fa-lock"></i>
@@ -213,7 +196,7 @@ export default function GovPortalPage() {
   if (!isGovOfficial) {
     return (
       <>
-        <GovHeader title="LOCAL GOVERNMENT PORTAL" />
+        <GovHeader title="INCIDENT REPORTS" />
         <div className={styles.container}>
           <div className={styles.accessDenied}>
             <i className="fas fa-ban"></i>
@@ -227,35 +210,23 @@ export default function GovPortalPage() {
   }
 
   const filteredReports = getFilteredReports();
+  const stats = getStats();
 
   return (
     <>
-      <GovHeader title="LOCAL GOVERNMENT PORTAL" />
+      <GovHeader title="INCIDENT REPORTS MANAGEMENT" />
       
       <div className={styles.container}>
-        {/* Hero Section */}
-        <section className={styles.hero}>
-          <h1>🏛️ Local Government Environmental Portal</h1>
-          <p className={styles.subtitle}>
-            Monitor environmental data and manage citizen incident reports
-          </p>
-          <div className={styles.officialBadge}>
-            <i className="fas fa-shield-alt"></i>
-            <span>Official Government Account</span>
-            <small>{user.email}</small>
-          </div>
-        </section>
-
-        {/* Stats Dashboard */}
+        {/* Stats Overview */}
         <section className={styles.statsSection}>
-          <h2>📊 Overview Dashboard</h2>
+          <h2>📊 Reports Overview</h2>
           <div className={styles.statsGrid}>
             <div className={styles.statCard}>
               <div className={styles.statIcon} style={{ background: '#2196F3' }}>
                 <i className="fas fa-file-alt"></i>
               </div>
               <div className={styles.statContent}>
-                <div className={styles.statValue}>{stats.totalReports}</div>
+                <div className={styles.statValue}>{stats.total}</div>
                 <div className={styles.statLabel}>Total Reports</div>
               </div>
             </div>
@@ -265,8 +236,18 @@ export default function GovPortalPage() {
                 <i className="fas fa-clock"></i>
               </div>
               <div className={styles.statContent}>
-                <div className={styles.statValue}>{stats.pendingReports}</div>
+                <div className={styles.statValue}>{stats.pending}</div>
                 <div className={styles.statLabel}>Pending Review</div>
+              </div>
+            </div>
+
+            <div className={styles.statCard}>
+              <div className={styles.statIcon} style={{ background: '#2196F3' }}>
+                <i className="fas fa-search"></i>
+              </div>
+              <div className={styles.statContent}>
+                <div className={styles.statValue}>{stats.investigating}</div>
+                <div className={styles.statLabel}>Investigating</div>
               </div>
             </div>
 
@@ -275,61 +256,34 @@ export default function GovPortalPage() {
                 <i className="fas fa-check-circle"></i>
               </div>
               <div className={styles.statContent}>
-                <div className={styles.statValue}>{stats.resolvedReports}</div>
+                <div className={styles.statValue}>{stats.resolved}</div>
                 <div className={styles.statLabel}>Resolved</div>
               </div>
             </div>
 
             <div className={styles.statCard}>
-              <div className={styles.statIcon} style={{ background: '#9C27B0' }}>
-                <i className="fas fa-users"></i>
+              <div className={styles.statIcon} style={{ background: '#F44336' }}>
+                <i className="fas fa-times-circle"></i>
               </div>
               <div className={styles.statContent}>
-                <div className={styles.statValue}>{stats.activeCitizens}</div>
-                <div className={styles.statLabel}>Active Citizens</div>
+                <div className={styles.statValue}>{stats.rejected}</div>
+                <div className={styles.statLabel}>Rejected</div>
+              </div>
+            </div>
+
+            <div className={styles.statCard}>
+              <div className={styles.statIcon} style={{ background: '#B71C1C' }}>
+                <i className="fas fa-exclamation-triangle"></i>
+              </div>
+              <div className={styles.statContent}>
+                <div className={styles.statValue}>{stats.urgent}</div>
+                <div className={styles.statLabel}>Urgent Priority</div>
               </div>
             </div>
           </div>
         </section>
 
-        {/* Environmental Monitoring */}
-        <section className={styles.envSection}>
-          <h2>🌍 Environmental Monitoring</h2>
-          <div className={styles.envGrid}>
-            <div className={styles.envCard}>
-              <i className="fas fa-wind"></i>
-              <h3>Air Quality Index</h3>
-              <div className={styles.envValue}>{envData.airQualityIndex}</div>
-              <div className={styles.envBar}>
-                <div 
-                  className={styles.envFill}
-                  style={{ width: `${Math.min(envData.airQualityIndex / 5, 100)}%` }}
-                ></div>
-              </div>
-            </div>
-
-            <div className={styles.envCard}>
-              <i className="fas fa-water"></i>
-              <h3>Water Quality Index</h3>
-              <div className={styles.envValue}>{envData.waterQualityIndex}</div>
-              <div className={styles.envBar}>
-                <div 
-                  className={styles.envFill}
-                  style={{ width: `${envData.waterQualityIndex}%` }}
-                ></div>
-              </div>
-            </div>
-
-            <div className={styles.envCard}>
-              <i className="fas fa-trash"></i>
-              <h3>Community Waste</h3>
-              <div className={styles.envValue}>{envData.wasteGenerated.toLocaleString()} kg</div>
-              <small>Recycling Rate: {envData.recyclingRate}%</small>
-            </div>
-          </div>
-        </section>
-
-        {/* Incident Reports Management */}
+        {/* Filters and Reports List */}
         <section className={styles.reportsSection}>
           <div className={styles.reportsHeader}>
             <h2>📋 Citizen Incident Reports</h2>
@@ -388,6 +342,10 @@ export default function GovPortalPage() {
                             {report.reporterName}
                           </span>
                           <span>
+                            <i className="fas fa-envelope"></i>
+                            {report.reporterEmail}
+                          </span>
+                          <span>
                             <i className="fas fa-calendar"></i>
                             {reportDate.toLocaleString()}
                           </span>
@@ -426,14 +384,26 @@ export default function GovPortalPage() {
                             GPS: {report.location.coordinates.latitude.toFixed(4)}, 
                             {report.location.coordinates.longitude.toFixed(4)}
                           </span>
-                          <a
-                            href={`https://www.google.com/maps?q=${report.location.coordinates.latitude},${report.location.coordinates.longitude}`}
-                            target="_blank"
-                            rel="noopener noreferrer"
+                          <button
+                            onClick={() => {
+                              if (report.location.coordinates) {
+                                handleViewMap(
+                                  report.location.coordinates.latitude,
+                                  report.location.coordinates.longitude,
+                                  report.location.address
+                                );
+                              }
+                            }}
                             className={styles.mapLink}
                           >
-                            View on Map
-                          </a>
+                            <i className="fas fa-map-marked-alt"></i> View on Map
+                          </button>
+                        </div>
+                      )}
+                      {report.assignedTo && (
+                        <div className={styles.detail}>
+                          <i className="fas fa-user-shield"></i>
+                          <span>Assigned to: {report.assignedTo}</span>
                         </div>
                       )}
                     </div>
@@ -453,8 +423,11 @@ export default function GovPortalPage() {
 
                     {report.governmentResponse && (
                       <div className={styles.existingResponse}>
-                        <strong>Government Response:</strong>
+                        <strong>Your Response:</strong>
                         <p>{report.governmentResponse}</p>
+                        {report.resolvedAt && (
+                          <small>Resolved on {report.resolvedAt.toDate?.()?.toLocaleString() || 'N/A'}</small>
+                        )}
                       </div>
                     )}
 
@@ -470,7 +443,7 @@ export default function GovPortalPage() {
                         className={styles.actionBtn}
                       >
                         <i className="fas fa-edit"></i>
-                        Manage Report
+                        {report.governmentResponse ? 'Update Response' : 'Respond to Report'}
                       </button>
                     </div>
                   </div>
@@ -495,6 +468,18 @@ export default function GovPortalPage() {
               </div>
 
               <div className={styles.modalBody}>
+                <div className={styles.reporterInfo} style={{
+                  padding: '15px',
+                  background: '#f5f5f5',
+                  borderRadius: '8px',
+                  marginBottom: '20px'
+                }}>
+                  <strong>Reporter Information:</strong>
+                  <p style={{ margin: '5px 0' }}>Name: {selectedReport.reporterName}</p>
+                  <p style={{ margin: '5px 0' }}>Email: {selectedReport.reporterEmail}</p>
+                  <p style={{ margin: '5px 0' }}>Location: {selectedReport.location.address}</p>
+                </div>
+
                 <div className={styles.formGroup}>
                   <label>Status *</label>
                   <select
@@ -502,10 +487,10 @@ export default function GovPortalPage() {
                     onChange={(e) => setNewStatus(e.target.value as any)}
                     className={styles.select}
                   >
-                    <option value="pending">Pending</option>
-                    <option value="investigating">Investigating</option>
-                    <option value="resolved">Resolved</option>
-                    <option value="rejected">Rejected</option>
+                    <option value="pending">Pending - Awaiting review</option>
+                    <option value="investigating">Investigating - Currently looking into it</option>
+                    <option value="resolved">Resolved - Issue has been addressed</option>
+                    <option value="rejected">Rejected - Invalid or duplicate report</option>
                   </select>
                 </div>
 
@@ -516,22 +501,26 @@ export default function GovPortalPage() {
                     onChange={(e) => setNewPriority(e.target.value as any)}
                     className={styles.select}
                   >
-                    <option value="low">Low</option>
-                    <option value="medium">Medium</option>
-                    <option value="high">High</option>
-                    <option value="urgent">Urgent</option>
+                    <option value="low">Low - Minor issue</option>
+                    <option value="medium">Medium - Moderate concern</option>
+                    <option value="high">High - Serious issue</option>
+                    <option value="urgent">Urgent - Immediate action required</option>
                   </select>
                 </div>
 
                 <div className={styles.formGroup}>
-                  <label>Official Response</label>
+                  <label>Official Government Response</label>
                   <textarea
                     value={response}
                     onChange={(e) => setResponse(e.target.value)}
-                    placeholder="Add your response to the citizen..."
+                    placeholder="Write your response to the citizen. This will be visible to the reporter..."
                     rows={5}
                     className={styles.textarea}
                   />
+                  <small style={{ color: '#666', display: 'block', marginTop: '8px' }}>
+                    <i className="fas fa-info-circle"></i> 
+                    This response will be sent to {selectedReport.reporterEmail}
+                  </small>
                 </div>
 
                 <div className={styles.modalActions}>
@@ -546,9 +535,68 @@ export default function GovPortalPage() {
                     className={styles.saveBtn}
                   >
                     <i className="fas fa-save"></i>
-                    Update Report
+                    Update Report & Notify Citizen
                   </button>
                 </div>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Map Modal */}
+        {showMapModal && mapLocation && (
+          <div className={styles.modal} onClick={() => setShowMapModal(false)}>
+            <div 
+              className={styles.modalContent} 
+              style={{ width: '90%', maxWidth: '1200px', height: '85vh', padding: '0' }}
+              onClick={(e) => e.stopPropagation()}
+            >
+              <div className={styles.modalHeader} style={{ borderRadius: '12px 12px 0 0' }}>
+                <h2>
+                  <i className="fas fa-map-marked-alt"></i> Incident Location
+                </h2>
+                <button
+                  onClick={() => setShowMapModal(false)}
+                  className={styles.closeBtn}
+                >
+                  ✕
+                </button>
+              </div>
+              <div style={{ 
+                padding: '15px 20px', 
+                background: 'linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%)',
+                borderBottom: '2px solid #ddd'
+              }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                  <i className="fas fa-map-marker-alt" style={{ color: '#F44336', fontSize: '20px' }}></i>
+                  <div>
+                    <strong style={{ fontSize: '16px', color: '#333' }}>{mapLocation.address}</strong>
+                    <p style={{ margin: '4px 0 0 0', fontSize: '13px', color: '#666' }}>
+                      Coordinates: {mapLocation.lat.toFixed(6)}, {mapLocation.lng.toFixed(6)}
+                    </p>
+                  </div>
+                </div>
+              </div>
+              <div style={{ height: 'calc(100% - 130px)', width: '100%' }}>
+                <MapContainer 
+                  center={[mapLocation.lat, mapLocation.lng]} 
+                  zoom={16} 
+                  style={{ height: '100%', width: '100%' }}
+                  scrollWheelZoom={true}
+                >
+                  <TileLayer
+                    attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+                    url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+                  />
+                  <Marker position={[mapLocation.lat, mapLocation.lng]}>
+                    <Popup>
+                      <div style={{ textAlign: 'center' }}>
+                        <strong>📍 Incident Location</strong>
+                        <p style={{ margin: '5px 0', fontSize: '12px' }}>{mapLocation.address}</p>
+                      </div>
+                    </Popup>
+                  </Marker>
+                </MapContainer>
               </div>
             </div>
           </div>

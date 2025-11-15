@@ -12,12 +12,10 @@ const firebaseConfig = {
   appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID || ''
 };
 
-// Validate that we have the required environment variables
 if (!firebaseConfig.apiKey || !firebaseConfig.projectId) {
   console.warn('Firebase configuration is incomplete. Some features may not work.');
 }
 
-// Initialize Firebase
 const app = getApps().length ? getApp() : initializeApp(firebaseConfig);
 const auth = getAuth(app); 
 const db = getFirestore(app);
