@@ -1,14 +1,17 @@
 .container {
-  margin: 30px 0;
+  margin: 10px 0;
 }
 
 .setupCard {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+ background: linear-gradient(135deg, #47cd6d 0%, #017526 100%);
   color: white;
   padding: 40px;
   border-radius: 20px;
   text-align: center;
-  box-shadow: 0 10px 40px rgba(102, 126, 234, 0.3);
+  box-shadow: 0 10px 40px rgba(7, 158, 9, 0.3);
+  width: 60%;
+  align-items: center;
+  margin: 0 auto 30px auto;
 }
 
 .icon {
@@ -165,7 +168,7 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, #ffffff 0%, #764ba2 100%);
   color: white;
   padding: 20px 25px;
   border-radius: 16px;

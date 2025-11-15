@@ -38,7 +38,7 @@
 }
 
 .statCard {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, #0ad628 0%, #2e7d32 100%);
   color: white;
   padding: 25px;
   border-radius: 12px;
@@ -159,7 +159,7 @@
 }
 
 .submitButton {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, #0ad628 0%, #2e7d32 100%);
   color: white;
   padding: 12px 24px;
   border: none;
@@ -181,54 +181,116 @@
 .schedulesList {
   display: flex;
   flex-direction: column;
-  gap: 15px;
+  gap: 16px;
 }
 
 .scheduleCard {
-  border-left: 4px solid #667eea;
-  padding: 15px;
-  background: #f8f9fa;
-  border-radius: 8px;
+  border-left: 5px solid #0ad628;
+  padding: 18px;
+  background: linear-gradient(135deg, #f8fff9 0%, #f0fef5 100%);
+  border-radius: 10px;
+  box-shadow: 0 4px 12px rgba(10, 214, 40, 0.08);
+  transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.scheduleCard::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 100px;
+  height: 100px;
+  background: radial-gradient(circle, rgba(10, 214, 40, 0.05) 0%, transparent 70%);
+  border-radius: 50%;
+}
+
+.scheduleCard:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 6px 20px rgba(10, 214, 40, 0.12);
+}
+
+.scheduleCard.upcoming {
+  border-left-color: #ff9800;
+  background: linear-gradient(135deg, #fff8f5 0%, #fffaf8 100%);
+}
+
+.scheduleCard.upcoming::before {
+  background: radial-gradient(circle, rgba(255, 152, 0, 0.05) 0%, transparent 70%);
 }
 
 .scheduleHeader {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 10px;
+  margin-bottom: 12px;
+  position: relative;
+  z-index: 1;
 }
 
 .scheduleHeader h3 {
   margin: 0;
   color: #2c3e50;
+  font-size: 18px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
 }
 
 .frequency {
-  background: #667eea;
+  background: linear-gradient(135deg, #0ad628 0%, #2e7d32 100%);
   color: white;
-  padding: 4px 12px;
+  padding: 6px 14px;
   border-radius: 20px;
   font-size: 12px;
-  font-weight: 600;
+  font-weight: 700;
+  text-transform: uppercase;
+  box-shadow: 0 4px 10px rgba(10, 214, 40, 0.3);
+}
+
+.scheduleCard.upcoming .frequency {
+  background: linear-gradient(135deg, #ff9800 0%, #f57c00 100%);
+}
+
+.upcomingBadge {
+  background: #ffd54f;
+  color: #ff6f00;
+  padding: 4px 10px;
+  border-radius: 15px;
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
 }
 
 .scheduleDetails {
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 10px;
   font-size: 14px;
   color: #555;
+  position: relative;
+  z-index: 1;
 }
 
 .scheduleDetails div {
   display: flex;
-  gap: 10px;
+  gap: 12px;
   align-items: center;
+  padding: 6px 0;
 }
 
 .scheduleDetails i {
-  color: #667eea;
-  width: 16px;
+  color: #0ad628;
+  width: 18px;
+  font-size: 16px;
+}
+
+.scheduleCard.upcoming .scheduleDetails i {
+  color: #ff9800;
 }
 
 .breakdownSection,
@@ -389,5 +451,35 @@
   
   .statsGrid {
     grid-template-columns: 1fr;
+  }
+  
+  .scheduleCard {
+    padding: 14px;
+  }
+  
+  .scheduleHeader {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+  }
+  
+  .scheduleDetails div {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 4px;
+  }
+  
+  .typeBreakdown {
+    flex-direction: column;
+    gap: 8px;
+  }
+  
+  .typeInfo {
+    min-width: auto;
+  }
+  
+  .typeWeight {
+    min-width: auto;
+    text-align: left;
   }
 }

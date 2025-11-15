@@ -9,6 +9,7 @@ import ProgressChart from '@/components/ProgressChart';
 import { collection, query, where, orderBy, onSnapshot, doc, getDoc } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
 import styles from './profile.module.css';
+import EcoRewards from '@/components/EcoRewards';
 
 interface UserAction {
   id: string;
@@ -330,6 +331,15 @@ export default function ProfilePage() {
                 icon="fas fa-tasks"
                 color="#FF9800"
                 trend="+12%"
+              />
+            </section>
+
+            {/* Eco Rewards */}
+            <section>
+              <EcoRewards
+                points={userStats.totalScore}
+                userId={user.uid}
+                onRedeem={(newPoints) => setUserStats((s) => ({ ...s, totalScore: newPoints }))}
               />
             </section>
 

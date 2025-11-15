@@ -153,7 +153,7 @@ export default function CommunityHubPage() {
   ];
 
   const eventTypes = [
-    { id: 'cleanup', label: 'Cleanup Drive', icon: 'fas fa-broom', color: '#FF9800' },
+    { id: 'cleanup', label: 'Cleanup Drive', icon: 'fas fa-broom', color: '#4CAF50' },
     { id: 'tree-planting', label: 'Tree Planting', icon: 'fas fa-tree', color: '#4CAF50' },
     { id: 'workshop', label: 'Workshop', icon: 'fas fa-chalkboard', color: '#2196F3' },
     { id: 'community-service', label: 'Community Service', icon: 'fas fa-handshake', color: '#9C27B0' }

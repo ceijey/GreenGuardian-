@@ -10,35 +10,35 @@ const VIDEOS = [
     id: 1,
     title: 'Climate Change Explained',
     description: 'A comprehensive overview of climate change, its causes, and solutions.',
-    youtubeId: 'dQw4w9WgXcQ', // Replace with actual video ID
+    youtubeId: 'ifrHogDujXw1kUE0BZtTRc', // Replace with actual video ID
     icon: 'fas fa-globe',
   },
   {
     id: 2,
     title: 'Renewable Energy Sources',
     description: 'Learn about solar, wind, and hydroelectric power and their benefits.',
-    youtubeId: 'dQw4w9WgXcQ', // Replace with actual video ID
+    youtubeId: '1kUE0BZtTRc', // Replace with actual video ID
     icon: 'fas fa-bolt',
   },
   {
     id: 3,
     title: 'Ocean Plastic Crisis',
     description: 'Understand the impact of plastic pollution on marine life and ecosystems.',
-    youtubeId: 'dQw4w9WgXcQ', // Replace with actual video ID
+    youtubeId: 'HQTUWK7CM-Y', // Replace with actual video ID
     icon: 'fas fa-water',
   },
   {
     id: 4,
     title: 'Sustainable Living Guide',
     description: 'Practical tips for reducing your environmental footprint at home.',
-    youtubeId: 'dQw4w9WgXcQ', // Replace with actual video ID
+    youtubeId: 'di5NiVZ3QJkM', // Replace with actual video ID
     icon: 'fas fa-leaf',
   },
   {
     id: 5,
     title: 'Forest Conservation',
     description: 'Why forests matter and how we can protect them for future generations.',
-    youtubeId: 'dQw4w9WgXcQ', // Replace with actual video ID
+    youtubeId: 'Dzvi2tgaEs4', // Replace with actual video ID
     icon: 'fas fa-tree',
   },
 ];

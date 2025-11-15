@@ -4,6 +4,7 @@
   padding: 20px;
   background: #f5f7fa;
   min-height: 100vh;
+  color: #000;
 }
 
 .loginPrompt {
@@ -27,7 +28,7 @@
 }
 
 .loginPrompt p {
-  color: #7f8c8d;
+  color: #000;
   font-size: 16px;
 }
 
@@ -36,15 +37,11 @@
   margin-bottom: 50px;
 }
 
-.hero h1 {
-  font-size: 42px;
-  color: #2c3e50;
-  margin-bottom: 15px;
-}
+
 
 .subtitle {
   font-size: 18px;
-  color: #7f8c8d;
+  color: #000;
   margin-bottom: 40px;
 }
 
@@ -56,7 +53,7 @@
 }
 
 .statCard {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, #47cd6d 0%, #017526 100%);
   color: white;
   padding: 25px;
   border-radius: 16px;
@@ -92,7 +89,7 @@
 }
 
 .badgesSection {
-  background: white;
+  background: rgb(255, 6, 6);
   padding: 30px;
   border-radius: 16px;
   margin-bottom: 40px;
@@ -133,7 +130,7 @@
   gap: 12px;
   font-size: 18px;
   font-weight: 600;
-  color: #555;
+  color: #000;
 }
 
 .mainTab i {
@@ -142,7 +139,7 @@
 
 .mainTab .badge {
   background: #e0e0e0;
-  color: #666;
+  color: #000;
   padding: 4px 10px;
   border-radius: 12px;
   font-size: 14px;
@@ -154,7 +151,7 @@
 }
 
 .mainTab.active {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+ background: linear-gradient(135deg, #47cd6d 0%, #017526 100%);
   color: white;
   border-color: transparent;
 }
@@ -184,7 +181,7 @@
   cursor: pointer;
   transition: all 0.3s ease;
   font-weight: 600;
-  color: #555;
+  color: #000;
 }
 
 .subTabs button:hover {
@@ -193,7 +190,7 @@
 }
 
 .subTabs button.active {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+ background: linear-gradient(135deg, #47cd6d 0%, #017526 100%);
   color: white;
   border-color: transparent;
 }
@@ -253,13 +250,13 @@
 }
 
 .eventFilters button.active {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, #47cd6d 0%, #017526 100%);
   color: white;
   border-color: transparent;
 }
 
 .createBtn {
-  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+ background: linear-gradient(135deg, #47cd6d 0%, #017526 100%);
   color: white;
   padding: 12px 24px;
   border: none;
@@ -329,7 +326,7 @@
 }
 
 .description {
-  color: #7f8c8d;
+  color: #000;
   font-size: 14px;
   line-height: 1.6;
   margin-bottom: 20px;
@@ -347,7 +344,7 @@
   display: flex;
   align-items: center;
   gap: 8px;
-  color: #555;
+  color: #000;
 }
 
 .metaItem i {
@@ -365,7 +362,7 @@
   flex-wrap: wrap;
   gap: 10px;
   padding: 12px;
-  background: #f0f8ff;
+  background: #2f373f;
   border-radius: 8px;
   margin-bottom: 15px;
   font-size: 13px;
@@ -387,14 +384,14 @@
 
 .volunteers span {
   font-size: 13px;
-  color: #7f8c8d;
+  color: #000;
   font-weight: 600;
 }
 
 .progressBar {
   width: 100%;
   height: 8px;
-  background: #ecf0f1;
+  background: #bbbdbe6d;
   border-radius: 4px;
   overflow: hidden;
   margin-top: 8px;
@@ -402,7 +399,7 @@
 
 .progress {
   height: 100%;
-  background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+ background: linear-gradient(135deg, #47cd6d 0%, #017526 100%);
   transition: width 0.3s ease;
 }
 
@@ -418,7 +415,7 @@
 }
 
 .joinBtn {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+ background: linear-gradient(135deg, #47cd6d 0%, #017526 100%);
   color: white;
 }
 
@@ -450,7 +447,7 @@
   width: 50px;
   height: 50px;
   border: 4px solid #f3f3f3;
-  border-top: 4px solid #667eea;
+  border-top: 4px solid#667eea;
   border-radius: 50%;
   animation: spin 1s linear infinite;
   margin: 0 auto 20px;
@@ -473,7 +470,7 @@
 }
 
 .emptyState p {
-  color: #7f8c8d;
+  color: #000;
 }
 
 /* Modal Styles */
@@ -601,7 +598,7 @@
 }
 
 .submitBtn {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+ background: linear-gradient(135deg, #05c92f 0%, #017526 100%);
   color: white;
 }
 
@@ -733,121 +730,134 @@
   color: white;
 }
 
-/* NEW: Activity Feed Styling (Option 3) */
-.activityHeader {
+/* NEW: Activity Feed Styling (Option 3) - improved visuals and spacing */
+.section > .activityHeader {
   text-align: center;
-  margin-bottom: 30px;
+  margin-bottom: 28px;
 }
 
-.activityHeader h2 {
+.section > .activityHeader h2 {
   color: #2c3e50;
-  margin-bottom: 10px;
-  display: flex;
+  margin-bottom: 8px;
+  display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: 12px;
+  gap: 10px;
+  font-size: 20px;
 }
 
-.activityHeader p {
+.section > .activityHeader p {
   color: #7f8c8d;
-  font-size: 16px;
+  font-size: 15px;
+  margin: 0;
 }
 
 .activityFeed {
   display: flex;
   flex-direction: column;
-  gap: 20px;
-  max-width: 900px;
+  gap: 18px;
+  max-width: 1000px;
   margin: 0 auto;
+  padding: 6px;
 }
 
 .activityCard {
   background: white;
-  border-radius: 12px;
-  padding: 20px;
+  border-radius: 14px;
+  padding: 18px;
   display: flex;
-  gap: 20px;
-  box-shadow: 0 2px 15px rgba(0,0,0,0.08);
-  transition: all 0.3s ease;
+  gap: 18px;
+  align-items: flex-start;
+  box-shadow: 0 6px 20px rgba(30,40,50,0.06);
+  transition: transform 0.28s ease, box-shadow 0.28s ease;
 }
 
 .activityCard:hover {
-  box-shadow: 0 4px 25px rgba(0,0,0,0.12);
-  transform: translateX(5px);
+  box-shadow: 0 10px 30px rgba(20,30,45,0.08);
+  transform: translateY(-6px);
 }
 
 .activityIcon {
-  min-width: 50px;
-  height: 50px;
-  border-radius: 12px;
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
   color: white;
-  font-size: 24px;
+  font-size: 20px;
+  box-shadow: 0 6px 18px rgba(20,30,45,0.06);
+  flex-shrink: 0;
 }
 
 .activityContent {
   flex: 1;
+  min-width: 0;
 }
 
 .activityContent .activityHeader {
   display: flex;
   justify-content: space-between;
   align-items: flex-start;
-  margin-bottom: 10px;
+  margin-bottom: 8px;
   text-align: left;
+  gap: 12px;
 }
 
 .activityContent h3 {
-  margin: 0 0 5px 0;
+  margin: 0 0 4px 0;
   color: #2c3e50;
   font-size: 18px;
+  line-height: 1.1;
 }
 
 .activityType {
   display: inline-block;
   font-size: 12px;
-  color: #7f8c8d;
-  font-weight: 600;
+  color: #2e7d32;
+  font-weight: 700;
+  background: #e8f5e9;
+  padding: 6px 8px;
+  border-radius: 10px;
 }
 
 .activityMeta {
   display: flex;
   flex-direction: column;
   align-items: flex-end;
-  gap: 5px;
+  gap: 6px;
+  min-width: 110px;
 }
 
 .activityDate {
   font-size: 13px;
-  color: #95a5a6;
+  color: #7f8c8d;
 }
 
 .activityPoints {
-  background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+  background: linear-gradient(135deg, #7af28c 0%, #2e7d32 100%);
   color: white;
-  padding: 4px 10px;
-  border-radius: 12px;
+  padding: 6px 12px;
+  border-radius: 14px;
   font-size: 12px;
-  font-weight: 700;
+  font-weight: 800;
 }
 
 .activityDesc {
-  color: #555;
+  color: #384047;
   font-size: 14px;
-  margin: 10px 0;
+  margin: 8px 0;
   line-height: 1.5;
 }
 
 .activityStatus {
-  margin: 10px 0;
+  margin: 8px 0 0 0;
 }
 
 .statusBadge {
   display: inline-block;
-  padding: 5px 12px;
-  border-radius: 15px;
+  padding: 6px 12px;
+  border-radius: 16px;
   font-size: 11px;
   font-weight: 700;
   text-transform: uppercase;
@@ -859,24 +869,24 @@
 }
 
 .statusBadge.upcoming {
-  background: #fff3e0;
+  background: #fff8e6;
   color: #ef6c00;
 }
 
 .statusBadge.completed {
-  background: #e3f2fd;
+  background: #e8f0fb;
   color: #1565c0;
 }
 
 .statusBadge.past {
-  background: #f5f5f5;
-  color: #9e9e9e;
+  background: #f5f5f6;
+  color: #8a8a8a;
 }
 
 .activityRelated {
   margin-top: 12px;
   padding-top: 12px;
-  border-top: 1px solid #eee;
+  border-top: 1px solid #f0f2f5;
 }
 
 .activityRelated small {

@@ -19,7 +19,7 @@
 .iconWrapper {
   width: 70px;
   height: 70px;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, #47cd6d 0%, #017526 100%);
   border-radius: 16px;
   display: flex;
   align-items: center;
@@ -65,13 +65,13 @@
 }
 
 .uploadLabel:hover {
-  border-color: #667eea;
+  border-color: #109d49;
   background: #f5f7ff;
 }
 
 .uploadLabel i {
   font-size: 64px;
-  color: #667eea;
+  color: #079e09;
 }
 
 .uploadLabel span {
@@ -112,7 +112,8 @@
 
 .cameraButton {
   padding: 15px 40px;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+   background: linear-gradient(135deg, #47cd6d 0%, #017526 100%);
+  border-radius: 16px;
   color: white;
   border: none;
   border-radius: 30px;
@@ -154,7 +155,7 @@
 
 .infoCard i {
   font-size: 24px;
-  color: #667eea;
+  color: #0ca305;
   margin-top: 4px;
 }
 

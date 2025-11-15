@@ -16,7 +16,7 @@
 
 .loginPrompt i {
   font-size: 64px;
-  color: #F44336;
+  color: #08a31f;
   margin-bottom: 20px;
 }
 
@@ -64,7 +64,7 @@
 .statValue {
   font-size: 36px;
   font-weight: bold;
-  color: #F44336;
+  color: #06b042;
 }
 
 .statLabel {
@@ -78,7 +78,7 @@
 }
 
 .toggleBtn {
-  background: linear-gradient(135deg, #F44336 0%, #E91E63 100%);
+   background: linear-gradient(135deg, #0ad628 0%, #2e7d32 100%);
   color: white;
   padding: 14px 32px;
   border: none;
@@ -142,7 +142,7 @@
 .formGroup input:focus,
 .formGroup textarea:focus {
   outline: none;
-  border-color: #F44336;
+  border-color: #07c761;
   box-shadow: 0 0 0 3px rgba(244, 67, 54, 0.1);
 }
 
@@ -324,7 +324,7 @@
 
 .submitBtn {
   padding: 16px 32px;
-  background: linear-gradient(135deg, #F44336 0%, #E91E63 100%);
+  background: linear-gradient(135deg, #0ad628 0%, #2e7d32 100%);
   color: white;
   border: none;
   border-radius: 12px;

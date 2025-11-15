@@ -103,8 +103,25 @@ export default function ReportIncidentPage() {
         alert('📍 Location captured successfully!');
       },
       (error) => {
-        console.error('Error getting location:', error);
-        alert('Failed to get location. Please enable GPS and try again.');
+        // Gracefully handle geolocation errors
+        let errorMessage = 'Failed to get location. ';
+        
+        switch(error.code) {
+          case error.PERMISSION_DENIED:
+            errorMessage += 'Please enable location permissions in your browser settings.';
+            break;
+          case error.POSITION_UNAVAILABLE:
+            errorMessage += 'Location information is unavailable.';
+            break;
+          case error.TIMEOUT:
+            errorMessage += 'The location request timed out. Please try again.';
+            break;
+          default:
+            errorMessage += 'Please enable GPS and try again.';
+        }
+        
+        console.warn('Geolocation error:', error.code, error.message);
+        alert(errorMessage);
         setGettingLocation(false);
       }
     );

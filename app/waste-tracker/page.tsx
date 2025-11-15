@@ -6,6 +6,7 @@ import Header from '../../components/Header';
 import { collection, addDoc, query, where, onSnapshot, doc, updateDoc, serverTimestamp } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
 import styles from './waste-tracker.module.css';
+import { initializeCollectionSchedules, getDaysUntilCollection, getScheduleForWasteType } from '@/lib/initializeSchedules';
 
 interface WasteEntry {
   id: string;
@@ -15,14 +16,17 @@ interface WasteEntry {
   date: any;
   collected: boolean;
   notes?: string;
+  readyForCollection?: boolean;
 }
 
 interface CollectionSchedule {
-  id: string;
-  type: string;
-  nextCollection: any;
+  id?: string;
+  wasteType: string;
+  dayOfWeek: number;
+  dayName: string;
   frequency: string;
   location: string;
+  time?: string;
 }
 
 export default function WasteTrackerPage() {
@@ -73,18 +77,37 @@ export default function WasteTrackerPage() {
     return unsubscribe;
   }, [user]);
 
-  // Load collection schedules
+  // Initialize and load collection schedules
   useEffect(() => {
-    const schedulesQuery = query(collection(db, 'collectionSchedules'));
-    const unsubscribe = onSnapshot(schedulesQuery, (snapshot) => {
-      const schedulesList: CollectionSchedule[] = [];
-      snapshot.forEach((doc) => {
-        schedulesList.push({ id: doc.id, ...doc.data() } as CollectionSchedule);
-      });
-      setSchedules(schedulesList);
-    });
+    const loadSchedules = async () => {
+      try {
+        await initializeCollectionSchedules();
+        
+        const schedulesQuery = query(collection(db, 'collectionSchedules'));
+        const unsubscribe = onSnapshot(schedulesQuery, (snapshot) => {
+          const schedulesList: CollectionSchedule[] = [];
+          snapshot.forEach((doc) => {
+            const data = doc.data();
+            schedulesList.push({
+              id: doc.id,
+              wasteType: data.wasteType,
+              dayOfWeek: data.dayOfWeek,
+              dayName: data.dayName,
+              frequency: data.frequency,
+              location: data.location,
+              time: data.time
+            } as CollectionSchedule);
+          });
+          setSchedules(schedulesList);
+        });
 
-    return unsubscribe;
+        return unsubscribe;
+      } catch (error) {
+        console.error('Error loading schedules:', error);
+      }
+    };
+
+    loadSchedules();
   }, []);
 
   // Add waste entry
@@ -94,6 +117,10 @@ export default function WasteTrackerPage() {
 
     setSubmitting(true);
     try {
+      // Check if collection schedule exists for this waste type
+      const schedule = getScheduleForWasteType(wasteType, schedules);
+      const daysUntilCollection = schedule ? getDaysUntilCollection(schedule.dayOfWeek) : null;
+
       await addDoc(collection(db, 'wasteEntries'), {
         userId: user.uid,
         userEmail: user.email,
@@ -102,6 +129,8 @@ export default function WasteTrackerPage() {
         date: serverTimestamp(),
         collected: false,
         notes: notes || '',
+        readyForCollection: daysUntilCollection ? daysUntilCollection <= 7 : false,
+        nextCollectionDays: daysUntilCollection,
         timestamp: serverTimestamp()
       });
 
@@ -111,11 +140,22 @@ export default function WasteTrackerPage() {
         wasteSegregated: (wasteEntries.reduce((sum, e) => sum + e.weight, 0) + parseFloat(weight))
       });
 
+      // Show appropriate message
+      if (schedule) {
+        const message = daysUntilCollection === 0 
+          ? `✓ Great! ${schedule.dayName} collection is today!`
+          : daysUntilCollection === 1
+          ? `✓ Recorded! ${schedule.dayName} collection is tomorrow!`
+          : `✓ Recorded! Next collection: ${schedule.dayName} (${daysUntilCollection} days)`;
+        alert(message);
+      } else {
+        alert('⚠️ Warning: No collection schedule found for this waste type. Please check back later.');
+      }
+
       // Reset form
       setWeight('');
       setNotes('');
       setWasteType('plastic');
-      alert('Waste entry recorded successfully!');
     } catch (error) {
       console.error('Error adding waste entry:', error);
       alert('Failed to record waste entry');
@@ -255,29 +295,49 @@ export default function WasteTrackerPage() {
           <section className={styles.schedulesSection}>
             <h2>🚛 Collection Schedules</h2>
             <div className={styles.schedulesList}>
-              {schedules.map(schedule => {
-                const nextDate = schedule.nextCollection?.toDate?.() || new Date(schedule.nextCollection);
-                const daysUntil = Math.ceil(((nextDate as Date).getTime() - Date.now()) / (1000 * 60 * 60 * 24));
-                
-                return (
-                  <div key={schedule.id} className={styles.scheduleCard}>
-                    <div className={styles.scheduleHeader}>
-                      <h3>{schedule.type}</h3>
-                      <span className={styles.frequency}>{schedule.frequency}</span>
-                    </div>
-                    <div className={styles.scheduleDetails}>
-                      <div>
-                        <i className="fas fa-calendar"></i>
-                        <span>Next: {nextDate.toLocaleDateString()} {daysUntil <= 1 ? '⚠️ Tomorrow' : `(in ${daysUntil} days)`}</span>
+              {schedules.length === 0 ? (
+                <div className={styles.emptyState}>
+                  <i className="fas fa-calendar-times"></i>
+                  <p>No collection schedules available yet.</p>
+                </div>
+              ) : (
+                schedules.map(schedule => {
+                  const daysUntil = getDaysUntilCollection(schedule.dayOfWeek);
+                  const isUpcoming = daysUntil <= 2;
+                  
+                  return (
+                    <div key={schedule.id} className={`${styles.scheduleCard} ${isUpcoming ? styles.upcoming : ''}`}>
+                      <div className={styles.scheduleHeader}>
+                        <h3>
+                          <i className="fas fa-trash-alt"></i>
+                          {schedule.wasteType}
+                        </h3>
+                        <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+                          {isUpcoming && <span className={styles.upcomingBadge}>⚠️ Soon</span>}
+                          <span className={styles.frequency}>{schedule.frequency}</span>
+                        </div>
                       </div>
-                      <div>
-                        <i className="fas fa-map-marker-alt"></i>
-                        <span>{schedule.location}</span>
+                      <div className={styles.scheduleDetails}>
+                        <div>
+                          <i className="fas fa-calendar-alt"></i>
+                          <span>
+                            <strong>Day:</strong> {schedule.dayName} 
+                            {daysUntil === 0 ? ' (Today!)' : daysUntil === 1 ? ' (Tomorrow)' : ` (in ${daysUntil} days)`}
+                          </span>
+                        </div>
+                        <div>
+                          <i className="fas fa-clock"></i>
+                          <span><strong>Time:</strong> {schedule.time || 'Not specified'}</span>
+                        </div>
+                        <div>
+                          <i className="fas fa-map-marker-alt"></i>
+                          <span><strong>Location:</strong> {schedule.location}</span>
+                        </div>
                       </div>
                     </div>
-                  </div>
-                );
-              })}
+                  );
+                })
+              )}
             </div>
           </section>
         </div>
