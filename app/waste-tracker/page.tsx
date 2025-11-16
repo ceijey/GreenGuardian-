@@ -10,6 +10,7 @@ import styles from './waste-tracker.module.css';
 import { initializeCollectionSchedules, getDaysUntilCollection, getScheduleForWasteType } from '@/lib/initializeSchedules';
 import AIWasteClassifierDialog from './AIWasteClassifierDialog';
 import CollectionCalendar from './CollectionCalendar';
+import RequestPickupModal from './RequestPickupModal';
 
 interface WasteEntry {
   id: string;
@@ -38,6 +39,14 @@ export default function WasteTrackerPage() {
   const [schedules, setSchedules] = useState<CollectionSchedule[]>([]);
   const [loading, setLoading] = useState(true);
   const [isClassifierOpen, setIsClassifierOpen] = useState(false);
+  
+  // Request Pickup Modal states
+  const [isRequestModalOpen, setIsRequestModalOpen] = useState(false);
+  const [selectedService, setSelectedService] = useState<{
+    id: string;
+    name: string;
+    wasteTypes: string[];
+  } | null>(null);
   
   // Form states
   const [wasteType, setWasteType] = useState<'plastic' | 'paper' | 'glass' | 'metal' | 'organic' | 'electronics'>('plastic');
@@ -318,7 +327,13 @@ export default function WasteTrackerPage() {
           {/* Collection Schedules */}
           <section className={styles.schedulesSection}>
             <h2>🚛 Collection Schedules</h2>
-            <CollectionCalendar schedules={schedules} />
+            <CollectionCalendar 
+              schedules={schedules}
+              onRequestPickup={(serviceId, serviceName, wasteTypes) => {
+                setSelectedService({ id: serviceId, name: serviceName, wasteTypes });
+                setIsRequestModalOpen(true);
+              }}
+            />
           </section>
         </div>
 
@@ -404,6 +419,20 @@ export default function WasteTrackerPage() {
         onClose={() => setIsClassifierOpen(false)}
         onClassified={handleClassified}
       />
+
+      {/* Request Pickup Modal */}
+      {selectedService && (
+        <RequestPickupModal
+          isOpen={isRequestModalOpen}
+          onClose={() => {
+            setIsRequestModalOpen(false);
+            setSelectedService(null);
+          }}
+          serviceId={selectedService.id}
+          serviceName={selectedService.name}
+          wasteTypes={selectedService.wasteTypes}
+        />
+      )}
     </>
   );
 }

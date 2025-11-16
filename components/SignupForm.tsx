@@ -9,8 +9,11 @@ import styles from './SignupForm.module.css';
 
 export default function SignupForm() {
   const [email, setEmail] = useState('');
+  const [displayName, setDisplayName] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
+  const [role, setRole] = useState('citizen');
+  const [showRoleSelection, setShowRoleSelection] = useState(true);
   const [error, setError] = useState('');
   const [message, setMessage] = useState('');
   const [isLoading, setIsLoading] = useState(false);
@@ -20,16 +23,30 @@ export default function SignupForm() {
   const router = useRouter();
   
   // Refs for accessibility
+  const displayNameInputRef = useRef<HTMLInputElement>(null);
   const emailInputRef = useRef<HTMLInputElement>(null);
   const passwordInputRef = useRef<HTMLInputElement>(null);
   const confirmPasswordInputRef = useRef<HTMLInputElement>(null);
   const submitButtonRef = useRef<HTMLButtonElement>(null);
   const messageRef = useRef<HTMLDivElement>(null);
 
-  // Auto-focus email field on mount
+  // Auto-focus display name field on mount
   useEffect(() => {
-    emailInputRef.current?.focus();
+    displayNameInputRef.current?.focus();
   }, []);
+
+  // Check email domain and adjust role selection visibility
+  useEffect(() => {
+    if (email.endsWith('@gordoncollege.edu.ph')) {
+      setRole('government');
+      setShowRoleSelection(false);
+    } else if (email.includes('@')) {
+      setShowRoleSelection(true);
+      if (role === 'government') {
+        setRole('citizen');
+      }
+    }
+  }, [email]);
 
   // Announce messages to screen readers
   useEffect(() => {
@@ -51,7 +68,22 @@ export default function SignupForm() {
       setError('');
       setMessage('');
       setIsLoading(true);
-      await signup(email, password);
+      
+      // Validate display name
+      if (!displayName || displayName.trim().length < 2) {
+        setError('Please enter your full name (at least 2 characters)');
+        setIsLoading(false);
+        return;
+      }
+      
+      // Validate government email domain
+      if (role === 'government' && !email.endsWith('@gordoncollege.edu.ph')) {
+        setError('Government officials must use @gordoncollege.edu.ph email address');
+        setIsLoading(false);
+        return;
+      }
+      
+      await signup(email, password, role, displayName.trim());
       
       // This won't execute because signup throws an error after sending verification
       setMessage('Account created successfully!');
@@ -109,7 +141,7 @@ export default function SignupForm() {
         <div className={styles.header}>
           <div className={styles.logoContainer}>
             <Image 
-              src="/window.svg" 
+              src="/greenguardian logo.png" 
               alt="Green Guardian Logo - Environmental sustainability platform" 
               width={60} 
               height={60}
@@ -154,6 +186,31 @@ export default function SignupForm() {
           )}
 
           <div className={styles.formFields}>
+            {/* Full Name Field */}
+            <div className={styles.field}>
+              <label htmlFor="display-name" className={styles.label}>
+                Full Name
+                <span aria-label="required" className={styles.required}>*</span>
+              </label>
+              <input
+                ref={displayNameInputRef}
+                id="display-name"
+                name="displayName"
+                type="text"
+                autoComplete="name"
+                required
+                aria-required="true"
+                aria-invalid={error ? 'true' : 'false'}
+                className={styles.input}
+                placeholder="Enter your full name"
+                value={displayName}
+                onChange={(e) => setDisplayName(e.target.value)}
+                onKeyDown={(e) => handleKeyDown(e, emailInputRef)}
+                disabled={isLoading}
+              />
+            </div>
+
+            {/* Email Field */}
             <div className={styles.field}>
               <label htmlFor="email-address" className={styles.label}>
                 Email address
@@ -175,7 +232,103 @@ export default function SignupForm() {
                 onKeyDown={(e) => handleKeyDown(e, passwordInputRef)}
                 disabled={isLoading}
               />
+              {email.endsWith('@gordoncollege.edu.ph') && (
+                <p className={styles.roleNote}>
+                  <i className="fas fa-info-circle"></i>
+                  Detected as Government Official account
+                </p>
+              )}
             </div>
+
+            {showRoleSelection && email.includes('@') && !email.endsWith('@gordoncollege.edu.ph') && (
+              <div className={styles.roleSelectionSection}>
+                <label className={styles.label}>
+                  Select Your Role
+                  <span aria-label="required" className={styles.required}>*</span>
+                </label>
+                <div className={styles.roleGrid}>
+                  {/* Citizen Card */}
+                  <button
+                    type="button"
+                    className={`${styles.roleCard} ${role === 'citizen' ? styles.roleCardActive : ''}`}
+                    onClick={() => setRole('citizen')}
+                    disabled={isLoading}
+                    aria-pressed={role === 'citizen'}
+                  >
+                    <div className={styles.roleIcon}>
+                      <i className="fas fa-user"></i>
+                    </div>
+                    <h3 className={styles.roleTitle}>Citizen</h3>
+                    <p className={styles.roleDesc}>Track waste, join challenges, and earn rewards</p>
+                    {role === 'citizen' && (
+                      <div className={styles.checkmark}>
+                        <i className="fas fa-check-circle"></i>
+                      </div>
+                    )}
+                  </button>
+
+                  {/* NGO Card */}
+                  <button
+                    type="button"
+                    className={`${styles.roleCard} ${role === 'ngo' ? styles.roleCardActive : ''}`}
+                    onClick={() => setRole('ngo')}
+                    disabled={isLoading}
+                    aria-pressed={role === 'ngo'}
+                  >
+                    <div className={styles.roleIcon}>
+                      <i className="fas fa-hands-helping"></i>
+                    </div>
+                    <h3 className={styles.roleTitle}>NGO</h3>
+                    <p className={styles.roleDesc}>Manage campaigns and coordinate volunteers</p>
+                    {role === 'ngo' && (
+                      <div className={styles.checkmark}>
+                        <i className="fas fa-check-circle"></i>
+                      </div>
+                    )}
+                  </button>
+
+                  {/* School Card */}
+                  <button
+                    type="button"
+                    className={`${styles.roleCard} ${role === 'school' ? styles.roleCardActive : ''}`}
+                    onClick={() => setRole('school')}
+                    disabled={isLoading}
+                    aria-pressed={role === 'school'}
+                  >
+                    <div className={styles.roleIcon}>
+                      <i className="fas fa-graduation-cap"></i>
+                    </div>
+                    <h3 className={styles.roleTitle}>School</h3>
+                    <p className={styles.roleDesc}>Create classroom challenges and track progress</p>
+                    {role === 'school' && (
+                      <div className={styles.checkmark}>
+                        <i className="fas fa-check-circle"></i>
+                      </div>
+                    )}
+                  </button>
+
+                  {/* Private Partner Card */}
+                  <button
+                    type="button"
+                    className={`${styles.roleCard} ${role === 'private-partner' ? styles.roleCardActive : ''}`}
+                    onClick={() => setRole('private-partner')}
+                    disabled={isLoading}
+                    aria-pressed={role === 'private-partner'}
+                  >
+                    <div className={styles.roleIcon}>
+                      <i className="fas fa-handshake"></i>
+                    </div>
+                    <h3 className={styles.roleTitle}>Partner</h3>
+                    <p className={styles.roleDesc}>Sponsor challenges and promote eco-products</p>
+                    {role === 'private-partner' && (
+                      <div className={styles.checkmark}>
+                        <i className="fas fa-check-circle"></i>
+                      </div>
+                    )}
+                  </button>
+                </div>
+              </div>
+            )}
 
             <div className={styles.field}>
               <label htmlFor="password" className={styles.label}>

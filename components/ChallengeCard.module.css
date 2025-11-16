@@ -285,3 +285,53 @@
     font-size: 1.25rem;
   }
 }
+/* Sponsored Challenge Styles */
+.sponsored {
+  border: 3px solid #FFD700;
+  background: linear-gradient(to bottom, #fffbf0 0%, white 100%);
+}
+
+.sponsorBadge {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: linear-gradient(135deg, #FFD700 0%, #FFA500 100%);
+  color: #fff;
+  padding: 10px 16px;
+  border-radius: 8px;
+  font-weight: 600;
+  font-size: 0.9rem;
+  margin-bottom: 16px;
+  box-shadow: 0 2px 8px rgba(255, 215, 0, 0.3);
+}
+
+.sponsorBadge i {
+  font-size: 1rem;
+}
+
+.fundingTag {
+  margin-left: auto;
+  background: rgba(255, 255, 255, 0.3);
+  padding: 4px 10px;
+  border-radius: 12px;
+  font-size: 0.85rem;
+  border: 1px solid rgba(255, 255, 255, 0.5);
+}
+
+.rewardsInfo {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: #fff3e0;
+  padding: 10px 14px;
+  border-radius: 8px;
+  margin-bottom: 16px;
+  color: #e65100;
+  font-weight: 500;
+  font-size: 0.9rem;
+  border-left: 3px solid #ff9800;
+}
+
+.rewardsInfo i {
+  font-size: 1.1rem;
+}

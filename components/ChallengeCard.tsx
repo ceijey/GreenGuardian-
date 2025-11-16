@@ -26,6 +26,10 @@ interface Challenge {
   };
   isActive: boolean;
   createdBy: string;
+  sponsored?: boolean;
+  sponsorName?: string;
+  fundingAmount?: number;
+  rewards?: string;
 }
 
 interface UserBadge {
@@ -113,7 +117,18 @@ export default function ChallengeCard({ challenge, currentUser, onJoinChallenge,
   };
 
   return (
-    <div className={`${styles.challengeCard} ${styles[status]}`}>
+    <div className={`${styles.challengeCard} ${styles[status]} ${challenge.sponsored ? styles.sponsored : ''}`}>
+      {/* Sponsored Badge */}
+      {challenge.sponsored && challenge.sponsorName && (
+        <div className={styles.sponsorBadge}>
+          <i className="fas fa-handshake"></i>
+          <span>Sponsored by {challenge.sponsorName}</span>
+          {challenge.fundingAmount && (
+            <span className={styles.fundingTag}>₱{challenge.fundingAmount.toLocaleString()}</span>
+          )}
+        </div>
+      )}
+
       {/* Challenge Header */}
       <div className={styles.header}>
         <div className={styles.categoryBadge}>
@@ -134,6 +149,14 @@ export default function ChallengeCard({ challenge, currentUser, onJoinChallenge,
       <div className={styles.content}>
         <h3 className={styles.title}>{challenge.title}</h3>
         <p className={styles.description}>{challenge.description}</p>
+        
+        {/* Rewards Info */}
+        {challenge.rewards && (
+          <div className={styles.rewardsInfo}>
+            <i className="fas fa-gift"></i>
+            <span>{challenge.rewards}</span>
+          </div>
+        )}
         
         <div className={styles.details}>
           <div className={styles.dateInfo}>

@@ -11,6 +11,7 @@ import {
   doc, 
   updateDoc, 
   getDoc,
+  getDocs,
   where,
   orderBy,
   serverTimestamp
@@ -120,6 +121,64 @@ export default function GovPortalPage() {
     });
 
     return unsubscribe;
+  }, []);
+
+  // Track active citizens using presence system
+  useEffect(() => {
+    const loadActiveCitizens = async () => {
+      try {
+        // First, load all citizen users
+        const usersQuery = query(
+          collection(db, 'users'),
+          where('role', '==', 'citizen')
+        );
+        const usersSnapshot = await getDocs(usersQuery);
+        const citizenIds = new Set<string>();
+        
+        usersSnapshot.forEach((doc) => {
+          citizenIds.add(doc.id);
+        });
+
+        // Then listen to presence changes
+        const presenceQuery = query(collection(db, 'userPresence'));
+        const unsubscribe = onSnapshot(presenceQuery, (snapshot) => {
+          const now = Date.now();
+          const fiveMinutesAgo = now - (5 * 60 * 1000); // 5 minutes threshold
+          
+          let activeCitizenCount = 0;
+          
+          snapshot.forEach((presenceDoc) => {
+            const presenceData = presenceDoc.data();
+            const userId = presenceData.userId;
+            
+            // Check if user is a citizen and was active in last 5 minutes
+            if (citizenIds.has(userId)) {
+              const lastSeen = presenceData.lastSeen?.toMillis?.() || 0;
+              if (lastSeen > fiveMinutesAgo || presenceData.status === 'online') {
+                activeCitizenCount++;
+              }
+            }
+          });
+          
+          setStats(prev => ({
+            ...prev,
+            activeCitizens: activeCitizenCount
+          }));
+        });
+
+        return unsubscribe;
+      } catch (error) {
+        console.error('Error loading active citizens:', error);
+      }
+    };
+
+    const unsubscribePromise = loadActiveCitizens();
+    
+    return () => {
+      unsubscribePromise.then((unsubscribe) => {
+        if (unsubscribe) unsubscribe();
+      });
+    };
   }, []);
 
   // Load environmental data

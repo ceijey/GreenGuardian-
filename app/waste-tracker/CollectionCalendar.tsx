@@ -1,6 +1,8 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { collection, query, where, onSnapshot } from 'firebase/firestore';
+import { db } from '@/lib/firebase';
 import styles from './CollectionCalendar.module.css';
 
 interface CollectionSchedule {
@@ -13,16 +15,49 @@ interface CollectionSchedule {
   time?: string;
 }
 
+interface WasteCollectionService {
+  id: string;
+  providerId: string;
+  providerName: string;
+  wasteTypes: string[];
+  serviceArea: string;
+  contactNumber: string;
+  pickupSchedule: string;
+  pricing: string;
+  isActive: boolean;
+  description?: string;
+}
+
 interface CollectionCalendarProps {
   schedules: CollectionSchedule[];
+  onRequestPickup?: (serviceId: string, serviceName: string, wasteTypes: string[]) => void;
 }
 
 const DAYS_OF_WEEK = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
 const MONTHS = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
 
-export default function CollectionCalendar({ schedules }: CollectionCalendarProps) {
+export default function CollectionCalendar({ schedules, onRequestPickup }: CollectionCalendarProps) {
   const [currentDate, setCurrentDate] = useState(new Date());
   const [selectedDay, setSelectedDay] = useState<number | null>(null);
+  const [wasteServices, setWasteServices] = useState<WasteCollectionService[]>([]);
+
+  // Load waste collection services from private partners
+  useEffect(() => {
+    const q = query(
+      collection(db, 'wasteCollectionServices'),
+      where('isActive', '==', true)
+    );
+
+    const unsubscribe = onSnapshot(q, (snapshot) => {
+      const services: WasteCollectionService[] = [];
+      snapshot.forEach((doc) => {
+        services.push({ id: doc.id, ...doc.data() } as WasteCollectionService);
+      });
+      setWasteServices(services);
+    });
+
+    return unsubscribe;
+  }, []);
 
   // Get calendar data
   const year = currentDate.getFullYear();
@@ -254,6 +289,91 @@ export default function CollectionCalendar({ schedules }: CollectionCalendarProp
         <div className={styles.emptyState}>
           <i className="fas fa-calendar-times"></i>
           <p>No collection schedules available yet.</p>
+        </div>
+      )}
+
+      {/* Private Partner Waste Collection Services */}
+      {wasteServices.length > 0 && (
+        <div className={styles.servicesSection}>
+          <h4>
+            <i className="fas fa-truck"></i>
+            Available Waste Collection Services
+          </h4>
+          <p className={styles.servicesIntro}>
+            Private partners offering waste collection and pickup services in your area:
+          </p>
+          <div className={styles.servicesList}>
+            {wasteServices.map((service) => (
+              <div key={service.id} className={styles.serviceCard}>
+                <div className={styles.serviceHeader}>
+                  <div>
+                    <h5>{service.providerName}</h5>
+                    <p className={styles.serviceArea}>
+                      <i className="fas fa-map-marker-alt"></i>
+                      {service.serviceArea}
+                    </p>
+                  </div>
+                  <span className={styles.activeBadge}>
+                    <i className="fas fa-check-circle"></i>
+                    Active
+                  </span>
+                </div>
+                
+                {service.description && (
+                  <p className={styles.serviceDescription}>{service.description}</p>
+                )}
+                
+                <div className={styles.serviceDetails}>
+                  <div className={styles.serviceInfo}>
+                    <strong>Waste Types:</strong>
+                    <div className={styles.wasteTypeTags}>
+                      {service.wasteTypes.map((type, idx) => (
+                        <span key={idx} className={styles.wasteTypeTag}>
+                          <i className={`fas ${getWasteIcon(type)}`} style={{ color: getWasteColor(type) }}></i>
+                          {type}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                  
+                  <div className={styles.serviceInfo}>
+                    <strong>Pickup Schedule:</strong>
+                    <span>{service.pickupSchedule}</span>
+                  </div>
+                  
+                  <div className={styles.serviceInfo}>
+                    <strong>Pricing:</strong>
+                    <span>{service.pricing}</span>
+                  </div>
+                  
+                  <div className={styles.serviceInfo}>
+                    <strong>Contact:</strong>
+                    <span>
+                      <i className="fas fa-phone"></i>
+                      {service.contactNumber}
+                    </span>
+                  </div>
+                </div>
+                
+                <div className={styles.serviceActions}>
+                  <a 
+                    href={`tel:${service.contactNumber}`}
+                    className={styles.contactButton}
+                  >
+                    <i className="fas fa-phone"></i>
+                    Call Now
+                  </a>
+                  <button 
+                    className={styles.requestButton}
+                    onClick={() => onRequestPickup?.(service.id, service.providerName, service.wasteTypes)}
+                  >
+                    <i className="fas fa-calendar-plus"></i>
+                    Request Pickup
+                  </button>
+                </div>
+              </div>
+            ))}
+          </div>
         </div>
       )}
     </div>

@@ -109,43 +109,15 @@ export default function CommunityHubPage() {
   const [activities, setActivities] = useState<CombinedActivity[]>([]); // NEW: Activity feed
   
   // Challenge filters
-  const [challengeTab, setChallengeTab] = useState<'active' | 'upcoming' | 'completed'>('active');
+  const [challengeTab, setChallengeTab] = useState<'active' | 'upcoming' | 'completed' | 'archived'>('active');
   const [selectedCategory, setSelectedCategory] = useState('all');
   
   // Event filters
   const [eventTypeFilter, setEventTypeFilter] = useState<'all' | 'cleanup' | 'tree-planting' | 'workshop' | 'community-service'>('all');
   
   // Modals
-  const [showCreateEventModal, setShowCreateEventModal] = useState(false);
   const [selectedChallenge, setSelectedChallenge] = useState<Challenge | null>(null); // NEW: For showing related events
   const [selectedEvent, setSelectedEvent] = useState<VolunteerEvent | null>(null); // NEW: For showing related challenges
-  
-  // Form state
-  const [newEvent, setNewEvent] = useState<{
-    title: string;
-    description: string;
-    type: 'cleanup' | 'tree-planting' | 'workshop' | 'community-service';
-    date: string;
-    time: string;
-    location: string;
-    address: string;
-    duration: number;
-    difficulty: 'easy' | 'moderate' | 'challenging';
-    maxVolunteers: number;
-    requirements: string;
-  }>({
-    title: '',
-    description: '',
-    type: 'cleanup',
-    date: '',
-    time: '',
-    location: '',
-    address: '',
-    duration: 2,
-    difficulty: 'easy',
-    maxVolunteers: 20,
-    requirements: ''
-  });
 
   const categories = [
     'all', 'plastic-reduction', 'food-waste', 'energy-saving',
@@ -244,7 +216,7 @@ export default function CommunityHubPage() {
 
       try {
         // Get user's challenges
-        const userChallenges = challenges.filter(c => c.participants.includes(user.uid));
+        const userChallenges = challenges.filter(c => c.participants?.includes(user.uid));
         userChallenges.forEach(c => {
           const startDate = c.startDate ? new Date(c.startDate.seconds * 1000) : new Date();
           const endDate = c.endDate ? new Date(c.endDate.seconds * 1000) : new Date();
@@ -274,7 +246,7 @@ export default function CommunityHubPage() {
         });
 
         // Get user's volunteer events
-        const userEvents = events.filter(e => e.volunteers.includes(user.uid));
+        const userEvents = events.filter(e => e.volunteers?.includes(user.uid));
         userEvents.forEach(e => {
           const eventDate = e.date?.toDate?.() || new Date(e.date);
           const now = new Date();
@@ -339,6 +311,7 @@ export default function CommunityHubPage() {
   // Filter challenges
   const getFilteredChallenges = () => {
     const now = new Date();
+    const thirtyDaysAgo = new Date(now.getTime() - (30 * 24 * 60 * 60 * 1000));
     let filtered = challenges;
 
     if (selectedCategory !== 'all') {
@@ -358,9 +331,18 @@ export default function CommunityHubPage() {
         return new Date(c.startDate.seconds * 1000) > now;
       });
     } else if (challengeTab === 'completed') {
+      // Show recently completed (within last 30 days)
       filtered = filtered.filter(c => {
         if (!c.endDate) return false;
-        return new Date(c.endDate.seconds * 1000) < now;
+        const endDate = new Date(c.endDate.seconds * 1000);
+        return endDate < now && endDate >= thirtyDaysAgo;
+      });
+    } else if (challengeTab === 'archived') {
+      // Show older completed challenges (more than 30 days ago)
+      filtered = filtered.filter(c => {
+        if (!c.endDate) return false;
+        const endDate = new Date(c.endDate.seconds * 1000);
+        return endDate < thirtyDaysAgo;
       });
     }
 
@@ -453,7 +435,7 @@ export default function CommunityHubPage() {
       const relatedCategories = eventToChallengeMap[event.type] || [];
       const relatedChallenges = challenges.filter(c => 
         relatedCategories.includes(c.category) && 
-        c.participants.includes(user.uid) &&
+        c.participants?.includes(user.uid) &&
         c.isActive
       );
       
@@ -505,42 +487,6 @@ export default function CommunityHubPage() {
     } catch (error) {
       console.error('Error:', error);
       alert('Failed to leave event');
-    }
-  };
-
-  // Create event
-  const handleCreateEvent = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!user) return;
-
-    try {
-      await addDoc(collection(db, 'volunteerEvents'), {
-        ...newEvent,
-        date: new Date(newEvent.date + ' ' + newEvent.time),
-        volunteers: [],
-        organizer: {
-          name: user.displayName || 'Anonymous',
-          email: user.email || ''
-        },
-        requirements: newEvent.requirements.split(',').map(r => r.trim()).filter(r => r),
-        impact: {
-          expectedCo2Reduction: 0,
-          expectedWasteCollected: 0,
-          expectedTreesPlanted: newEvent.type === 'tree-planting' ? newEvent.maxVolunteers : 0
-        },
-        createdAt: serverTimestamp()
-      });
-
-      setNewEvent({
-        title: '', description: '', type: 'cleanup', date: '', time: '',
-        location: '', address: '', duration: 2, difficulty: 'easy',
-        maxVolunteers: 20, requirements: ''
-      });
-      setShowCreateEventModal(false);
-      alert('Event created successfully!');
-    } catch (error) {
-      console.error('Error:', error);
-      alert('Failed to create event');
     }
   };
 
@@ -692,7 +638,13 @@ export default function CommunityHubPage() {
                 className={challengeTab === 'completed' ? styles.active : ''}
                 onClick={() => setChallengeTab('completed')}
               >
-                Completed
+                Recently Completed
+              </button>
+              <button
+                className={challengeTab === 'archived' ? styles.active : ''}
+                onClick={() => setChallengeTab('archived')}
+              >
+                <i className="fas fa-archive"></i> Archive
               </button>
             </div>
 
@@ -743,7 +695,7 @@ export default function CommunityHubPage() {
                       />
                       
                       {/* NEW: Show related events (Option 4) */}
-                      {relatedEvents.length > 0 && challenge.participants.includes(user.uid) && (
+                      {relatedEvents.length > 0 && challenge.participants?.includes(user.uid) && (
                         <div className={styles.relatedSection}>
                           <h4>
                             <i className="fas fa-link"></i> 
@@ -806,12 +758,6 @@ export default function CommunityHubPage() {
                   </button>
                 ))}
               </div>
-              <button 
-                onClick={() => setShowCreateEventModal(true)}
-                className={styles.createBtn}
-              >
-                <i className="fas fa-plus"></i> Create Event
-              </button>
             </div>
 
             {/* Events Grid */}
@@ -826,8 +772,8 @@ export default function CommunityHubPage() {
                 {filteredEvents.map(event => {
                   const typeInfo = eventTypes.find(t => t.id === event.type);
                   const eventDate = event.date?.toDate?.() || new Date(event.date);
-                  const isJoined = event.volunteers.includes(user.uid);
-                  const isFull = event.volunteers.length >= event.maxVolunteers;
+                  const isJoined = event.volunteers?.includes(user.uid);
+                  const isFull = (event.volunteers?.length || 0) >= event.maxVolunteers;
                   const hoursUntil = Math.ceil((eventDate.getTime() - Date.now()) / (1000 * 60 * 60));
                   
                   // NEW: Get related challenges (Option 4)
@@ -922,7 +868,7 @@ export default function CommunityHubPage() {
                           </h4>
                           <div className={styles.relatedItems}>
                             {relatedChallenges.slice(0, 3).map(challenge => {
-                              const isParticipating = challenge.participants.includes(user.uid);
+                              const isParticipating = challenge.participants?.includes(user.uid);
                               return (
                                 <div key={challenge.id} className={styles.relatedItem}>
                                   <div className={styles.relatedIcon} style={{ color: challenge.badge.color }}>
@@ -1023,153 +969,6 @@ export default function CommunityHubPage() {
                 ))}
               </div>
             )}
-          </div>
-        )}
-
-        {/* Create Event Modal */}
-        {showCreateEventModal && (
-          <div className={styles.modal} onClick={() => setShowCreateEventModal(false)}>
-            <div className={styles.modalContent} onClick={(e) => e.stopPropagation()}>
-              <div className={styles.modalHeader}>
-                <h2>Create Volunteer Event</h2>
-                <button onClick={() => setShowCreateEventModal(false)} className={styles.closeBtn}>✕</button>
-              </div>
-
-              <form onSubmit={handleCreateEvent} className={styles.form}>
-                <div className={styles.formGroup}>
-                  <label>Event Title *</label>
-                  <input
-                    type="text"
-                    value={newEvent.title}
-                    onChange={(e) => setNewEvent({...newEvent, title: e.target.value})}
-                    required
-                    placeholder="e.g., Beach Cleanup Drive"
-                  />
-                </div>
-
-                <div className={styles.formGroup}>
-                  <label>Description *</label>
-                  <textarea
-                    value={newEvent.description}
-                    onChange={(e) => setNewEvent({...newEvent, description: e.target.value})}
-                    required
-                    placeholder="Describe the event..."
-                    rows={3}
-                  />
-                </div>
-
-                <div className={styles.formRow}>
-                  <div className={styles.formGroup}>
-                    <label>Type *</label>
-                    <select
-                      value={newEvent.type}
-                      onChange={(e) => setNewEvent({...newEvent, type: e.target.value as any})}
-                    >
-                      {eventTypes.map(t => (
-                        <option key={t.id} value={t.id}>{t.label}</option>
-                      ))}
-                    </select>
-                  </div>
-
-                  <div className={styles.formGroup}>
-                    <label>Difficulty *</label>
-                    <select
-                      value={newEvent.difficulty}
-                      onChange={(e) => setNewEvent({...newEvent, difficulty: e.target.value as any})}
-                    >
-                      <option value="easy">Easy</option>
-                      <option value="moderate">Moderate</option>
-                      <option value="challenging">Challenging</option>
-                    </select>
-                  </div>
-                </div>
-
-                <div className={styles.formRow}>
-                  <div className={styles.formGroup}>
-                    <label>Date *</label>
-                    <input
-                      type="date"
-                      value={newEvent.date}
-                      onChange={(e) => setNewEvent({...newEvent, date: e.target.value})}
-                      required
-                    />
-                  </div>
-
-                  <div className={styles.formGroup}>
-                    <label>Time *</label>
-                    <input
-                      type="time"
-                      value={newEvent.time}
-                      onChange={(e) => setNewEvent({...newEvent, time: e.target.value})}
-                      required
-                    />
-                  </div>
-
-                  <div className={styles.formGroup}>
-                    <label>Duration (hours) *</label>
-                    <input
-                      type="number"
-                      min="1"
-                      value={newEvent.duration}
-                      onChange={(e) => setNewEvent({...newEvent, duration: parseInt(e.target.value)})}
-                      required
-                    />
-                  </div>
-                </div>
-
-                <div className={styles.formGroup}>
-                  <label>Location *</label>
-                  <input
-                    type="text"
-                    value={newEvent.location}
-                    onChange={(e) => setNewEvent({...newEvent, location: e.target.value})}
-                    required
-                    placeholder="e.g., Marina Bay Park"
-                  />
-                </div>
-
-                <div className={styles.formGroup}>
-                  <label>Full Address *</label>
-                  <input
-                    type="text"
-                    value={newEvent.address}
-                    onChange={(e) => setNewEvent({...newEvent, address: e.target.value})}
-                    required
-                    placeholder="Complete street address"
-                  />
-                </div>
-
-                <div className={styles.formGroup}>
-                  <label>Max Volunteers *</label>
-                  <input
-                    type="number"
-                    min="1"
-                    value={newEvent.maxVolunteers}
-                    onChange={(e) => setNewEvent({...newEvent, maxVolunteers: parseInt(e.target.value)})}
-                    required
-                  />
-                </div>
-
-                <div className={styles.formGroup}>
-                  <label>Requirements (comma-separated)</label>
-                  <input
-                    type="text"
-                    value={newEvent.requirements}
-                    onChange={(e) => setNewEvent({...newEvent, requirements: e.target.value})}
-                    placeholder="e.g., Gloves required, Closed shoes, Water bottle"
-                  />
-                </div>
-
-                <div className={styles.formActions}>
-                  <button type="button" onClick={() => setShowCreateEventModal(false)} className={styles.cancelBtn}>
-                    Cancel
-                  </button>
-                  <button type="submit" className={styles.submitBtn}>
-                    Create Event
-                  </button>
-                </div>
-              </form>
-            </div>
           </div>
         )}
       </div>

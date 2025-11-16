@@ -15,7 +15,7 @@ import { auth, db } from './firebase';
 interface AuthContextType {
   user: User | null;
   loading: boolean;
-  signup: (email: string, password: string) => Promise<void>;
+  signup: (email: string, password: string, role: string, displayName?: string) => Promise<void>;
   login: (email: string, password: string) => Promise<{ user: User }>;
   logout: () => Promise<void>;
   resendVerification: () => Promise<void>;
@@ -47,9 +47,24 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   // ✅ Signup with email verification
-  const signup = async (email: string, password: string) => {
+  const signup = async (email: string, password: string, role: string, displayName?: string) => {
     const userCredential = await createUserWithEmailAndPassword(auth, email, password);
     const user = userCredential.user;
+
+    // Create user document with role and display name
+    try {
+      const userRef = doc(db, 'users', user.uid);
+      await setDoc(userRef, {
+        email: user.email,
+        displayName: displayName || email.split('@')[0], // Use email prefix if no name provided
+        role: role,
+        createdAt: serverTimestamp(),
+        emailVerified: false,
+        profileComplete: !!displayName
+      });
+    } catch (error) {
+      console.error('Error creating user document:', error);
+    }
 
     // Update global user count
     try {
