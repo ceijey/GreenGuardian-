@@ -5,6 +5,7 @@ import { useAuth } from '@/lib/AuthContext';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import Image from 'next/image';
+import { getLoginRedirectPath } from '@/lib/roleUtils';
 import styles from './LoginForm.module.css';
 
 export default function LoginForm() {
@@ -46,13 +47,15 @@ export default function LoginForm() {
       setShowResendButton(false);
       setIsLoading(true);
       console.log('Attempting login...');
-      await login(email, password);
-      console.log('Login successful, redirecting to dashboard...');
+      const userCredential = await login(email, password);
+      console.log('Login successful, determining redirect...');
       
       // Add a small delay to ensure auth state is updated
       setTimeout(() => {
-        console.log('Executing redirect to dashboard...');
-        router.push('/dashboard');
+        // Get the appropriate redirect based on user role
+        const redirectPath = getLoginRedirectPath(userCredential?.user || null);
+        console.log('Executing redirect to:', redirectPath);
+        router.push(redirectPath);
       }, 500);
     } catch (err: Error | unknown) {
       console.error('Login error:', err);

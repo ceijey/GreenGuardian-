@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useAuth } from '@/lib/AuthContext';
+import CitizenOnly from '@/components/CitizenOnly';
 import Header from '../../components/Header';
 import ImpactChart from '@/components/ImpactChart';
 import ImpactCard from '@/components/ImpactCard';
@@ -180,6 +181,7 @@ export default function CommunityImpactPage() {
 
   return (
     <>
+      <CitizenOnly />
       <Header logo="fas fa-chart-line" title="GREENGUARDIAN" />
       
       <div className={styles.container}>

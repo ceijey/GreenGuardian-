@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useAuth } from '@/lib/AuthContext';
+import CitizenOnly from '@/components/CitizenOnly';
 import Header from '../../components/Header';
 import ScoreCard from '@/components/ScoreCard';
 import ActivityLog from '@/components/ActivityLog';
@@ -210,6 +211,7 @@ export default function ProfilePage() {
   if (!user) {
     return (
       <>
+        <CitizenOnly />
         <Header logo="fas fa-user" title="GREENGUARDIAN" />
         <div className={styles.container}>
           <div className={styles.loginPrompt}>
@@ -222,6 +224,7 @@ export default function ProfilePage() {
 
   return (
     <>
+      <CitizenOnly />
       <Header logo="fas fa-user" title="GREENGUARDIAN" />
       
       <div className={styles.container}>

@@ -2,7 +2,8 @@
 
 import { useState, useEffect } from 'react';
 import { useAuth } from '@/lib/AuthContext';
-import Header from '@/components/Header';
+import GovHeader from '@/components/GovHeader';
+import ProfileReminder from '@/components/ProfileReminder';
 import { 
   collection, 
   query, 
@@ -86,7 +87,7 @@ export default function GovPortalPage() {
   const [newPriority, setNewPriority] = useState<'low' | 'medium' | 'high' | 'urgent'>('medium');
 
   // Check if user is government official (simple check - in production, use proper role-based access)
-  const isGovOfficial = user?.email?.endsWith('@gov.ph') || user?.email?.includes('admin');
+  const isGovOfficial = user?.email?.endsWith('@gordoncollege.edu.ph') || user?.email?.includes('admin');
 
   // Load all incident reports
   useEffect(() => {
@@ -202,7 +203,7 @@ export default function GovPortalPage() {
   if (!user) {
     return (
       <>
-        <Header logo="fas fa-shield-alt" title="GREENGUARDIAN" />
+        <GovHeader />
         <div className={styles.container}>
           <div className={styles.loginPrompt}>
             <i className="fas fa-lock"></i>
@@ -217,7 +218,7 @@ export default function GovPortalPage() {
   if (!isGovOfficial) {
     return (
       <>
-        <Header logo="fas fa-shield-alt" title="GREENGUARDIAN" />
+        <GovHeader />
         <div className={styles.container}>
           <div className={styles.accessDenied}>
             <i className="fas fa-ban"></i>
@@ -234,7 +235,8 @@ export default function GovPortalPage() {
 
   return (
     <>
-      <Header logo="fas fa-shield-alt" title="GREENGUARDIAN GOV PORTAL" />
+      <GovHeader />
+      <ProfileReminder />
       
       <div className={styles.container}>
         {/* Hero Section */}
@@ -328,7 +330,7 @@ export default function GovPortalPage() {
               <i className="fas fa-trash"></i>
               <h3>Community Waste</h3>
               <div className={styles.envValue}>{envData.wasteGenerated.toLocaleString()} kg</div>
-              <small>Recycling Rate: {envData.recyclingRate}%</small>
+              <small style={{ color: '#7f8c8d', fontSize: '14px' }}>Recycling Rate: {envData.recyclingRate}%</small>
             </div>
           </div>
         </section>

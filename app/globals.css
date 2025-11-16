@@ -64,18 +64,13 @@ body {
 
 /* Add padding for pages with fixed header */
 .main-content {
-  padding-top: 0; /* Default no padding */
-}
-
-/* Only add padding to pages that have a header */
-.with-header .main-content {
-  padding-top: 80px; /* Space for fixed header */
+  padding-top: 52px; /* Space for fixed header (48px header + 4px buffer) */
 }
 
 /* Responsive adjustments for mobile */
 @media (max-width: 767px) {
-  .with-header .main-content {
-    padding-top: 70px; /* Less space on mobile */
+  .main-content {
+    padding-top: 52px; /* Same space on mobile */
   }
 }
 

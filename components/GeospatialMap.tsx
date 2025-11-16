@@ -67,6 +67,7 @@ export default function GeospatialMap({ userLocation, filterByLocation = false }
   const [selectedFilter, setSelectedFilter] = useState<string>('all');
   const [mapView, setMapView] = useState<'hotspots' | 'changes'>('hotspots');
   const [mapLoaded, setMapLoaded] = useState(false);
+  const [hotspotsExpanded, setHotspotsExpanded] = useState(true);
 
   // Default center (Manila, Philippines) or user location
   const mapCenter = userLocation 
@@ -462,9 +463,20 @@ export default function GeospatialMap({ userLocation, filterByLocation = false }
                 </div>
               </div>
 
-              <div className={styles.hotspotsList}>
-                <h3>Hotspot Details</h3>
-                {filteredHotspots.map((hotspot) => (
+              <div className={styles.hotspotsListContainer}>
+                <div 
+                  className={styles.hotspotsListHeader}
+                  onClick={() => setHotspotsExpanded(!hotspotsExpanded)}
+                >
+                  <h3>Hotspot Details ({filteredHotspots.length})</h3>
+                  <button className={styles.collapseBtn}>
+                    <i className={`fas fa-chevron-${hotspotsExpanded ? 'up' : 'down'}`}></i>
+                  </button>
+                </div>
+                
+                {hotspotsExpanded && (
+                  <div className={styles.hotspotsList}>
+                    {filteredHotspots.map((hotspot) => (
                   <div key={hotspot.id} className={styles.hotspotCard}>
                     <div 
                       className={styles.severityIndicator}
@@ -508,6 +520,8 @@ export default function GeospatialMap({ userLocation, filterByLocation = false }
                     </div>
                   </div>
                 ))}
+                  </div>
+                )}
               </div>
             </>
           )}

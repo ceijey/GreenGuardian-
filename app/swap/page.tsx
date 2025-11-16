@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useAuth } from '@/lib/AuthContext';
+import CitizenOnly from '@/components/CitizenOnly';
 import Header from '../../components/Header';
 import SwapItem from '../../components/SwapItem';
 import AddItemModal from '../../components/AddItemModal';
@@ -157,6 +158,7 @@ export default function SwapPage() {
 
   return (
     <>
+      <CitizenOnly />
       <Header logo="fas fa-leaf" title="GREENGUARDIAN" />
       
       <div className={styles.container}>

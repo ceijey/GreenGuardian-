@@ -249,7 +249,8 @@ export default function ReportIncidentPage() {
     <>
       <Header logo="fas fa-exclamation-triangle" title="GREENGUARDIAN" />
       
-      <div className={styles.container}>
+      <main className="main-content">
+        <div className={styles.container}>
         {/* Hero Section */}
         <section className={styles.hero}>
           <h1>🚨 Environmental Incident Reporting</h1>
@@ -557,6 +558,7 @@ export default function ReportIncidentPage() {
           </section>
         )}
       </div>
+      </main>
     </>
   );
 }

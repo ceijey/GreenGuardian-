@@ -1,17 +1,24 @@
 .header {
   background: linear-gradient(135deg, #1d411d 5%, #0db10d 100%);
   color: white;
-  padding: 10px 0;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+  padding: 4px 0;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  position: fixed;
   top: 0;
   left: 0;
   right: 0;
   z-index: 1000;
   backdrop-filter: blur(10px);
+  transition: transform 0.3s ease-in-out;
+  transform: translateY(0);
+}
+
+.headerHidden {
+  transform: translateY(-100%);
 }
 
 .container {
-  max-width: 1200px;
+  max-width: 100%;
   margin: 0 auto;
   padding: 0 16px;
 }
@@ -24,18 +31,26 @@
 }
 
 .logo {
-  font-size: 20px;
+  font-size: 18px;
   font-weight: 700;
   display: flex;
   align-items: center;
   color: white;
   z-index: 1001;
+  gap: 8px;
+}
+
+.logoImage {
+  width: 32px;
+  height: 32px;
+  object-fit: contain;
+  border-radius: 4px;
 }
 
 .logo i {
-  margin-right: 8px;
+  margin-right: 6px;
   color: #81c784;
-  font-size: 1.5em;
+  font-size: 1.3em;
 }
 
 .logoText {
@@ -110,29 +125,29 @@
 }
 
 .navList li {
-  margin-left: 24px;
+  margin-left: 8px;
 }
 
 .navList a {
   color: white;
   text-decoration: none;
   font-weight: 500;
-  font-size: 16px;
+  font-size: 14px;
   transition: all 0.3s ease;
   display: flex;
   align-items: center;
-  gap: 8px;
-  padding: 8px 16px;
-  border-radius: 12px;
-  min-height: 44px;
+  gap: 6px;
+  padding: 6px 12px;
+  border-radius: 8px;
+  min-height: 40px;
 }
 
 .navList a span {
-  display: none;
+  display: inline;
 }
 
 .navList a i {
-  font-size: 18px;
+  font-size: 16px;
 }
 
 .navList a:hover {
@@ -217,21 +232,21 @@
   background: rgba(255, 255, 255, 0.1);
   border: 1px solid rgba(255, 255, 255, 0.2);
   color: white;
-  font-size: 16px;
+  font-size: 14px;
   cursor: pointer;
   transition: all 0.3s ease;
-  padding: 8px 16px;
+  padding: 6px 12px;
   display: flex;
   align-items: center;
   justify-content: center;
-  border-radius: 12px;
-  min-height: 44px;
+  border-radius: 8px;
+  min-height: 40px;
   font-weight: 500;
-  gap: 8px;
+  gap: 6px;
 }
 
 .logoutButton span {
-  display: none;
+  display: inline;
 }
 
 .logoutButton:hover {
@@ -296,16 +311,8 @@
     display: inline;
   }
   
-  .navList a span {
-    display: inline;
-  }
-  
-  .logoutButton span {
-    display: inline;
-  }
-  
   .container {
-    padding: 0 24px;
+    padding: 0 20px;
   }
   
   .nav {
@@ -323,13 +330,13 @@
   }
   
   .navList li {
-    margin: 0 0 0 24px !important;
+    margin: 0 0 0 8px !important;
     width: auto !important;
   }
   
   .navList a {
     width: auto !important;
-    padding: 8px 16px !important;
+    padding: 6px 12px !important;
   }
 }
 

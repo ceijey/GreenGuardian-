@@ -2,15 +2,14 @@
 
 import { useState, useEffect } from 'react';
 import { useAuth } from '@/lib/AuthContext';
+import CitizenOnly from '@/components/CitizenOnly';
 import Dashboard from '@/components/Dashboard';
 import Header from '@/components/Header';
 import ActionLogger from '@/components/ActionLogger';
 import ResourceHub from '@/components/ResourceHub';
 import GlobalAnnouncements from '@/components/GlobalAnnouncements';
 import EcoScannerDialog from './EcoScannerDialog';
-import AIWasteClassifier from '@/components/AIWasteClassifier';
 import GeospatialMap from '@/components/GeospatialMap';
-import InitializeCloudData from '@/components/InitializeCloudData';
 import LocationPicker from '@/components/LocationPicker';
 import AirQualityMonitor from '@/components/AirQualityMonitor';
 import styles from './page.module.css';
@@ -52,7 +51,9 @@ export default function DashboardPage() {
   const { user } = useAuth();
   const [isScannerOpen, setIsScannerOpen] = useState(false);
   const [isActionLoggerOpen, setIsActionLoggerOpen] = useState(false);
-  const [showEnvironmentalData, setShowEnvironmentalData] = useState(false);
+  const [activeSection, setActiveSection] = useState('overview');
+  const [sidebarVisible, setSidebarVisible] = useState(true);
+  const [lastScrollY, setLastScrollY] = useState(0);
   
   // Location tracking state
   const [userLocation, setUserLocation] = useState<UserLocation | null>(null);
@@ -93,6 +94,34 @@ export default function DashboardPage() {
       setLocationFilterEnabled(true);
     }
   }, []);
+
+  // Sidebar scroll behavior
+  useEffect(() => {
+    const handleScroll = () => {
+      const currentScrollY = window.scrollY;
+      
+      // If at the top, always show sidebar
+      if (currentScrollY < 10) {
+        setSidebarVisible(true);
+      }
+      // If scrolling down and past threshold, hide sidebar
+      else if (currentScrollY > lastScrollY && currentScrollY > 80) {
+        setSidebarVisible(false);
+      }
+      // If scrolling up, show sidebar
+      else if (currentScrollY < lastScrollY) {
+        setSidebarVisible(true);
+      }
+      
+      setLastScrollY(currentScrollY);
+    };
+
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    
+    return () => {
+      window.removeEventListener('scroll', handleScroll);
+    };
+  }, [lastScrollY]);
 
   // Load local projects
   useEffect(() => {
@@ -163,44 +192,125 @@ export default function DashboardPage() {
   const airQuality = getAirQualityLabel(envData.airQualityIndex);
   const waterQuality = getWaterQualityLabel(envData.waterQualityIndex);
 
+  const scrollToSection = (sectionId: string) => {
+    const element = document.getElementById(sectionId);
+    if (element) {
+      element.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      setActiveSection(sectionId);
+    }
+  };
+
   return (
     <>
+      <CitizenOnly />
       <Header logo="fas fa-leaf" title="GREENGUARDIAN" />
+      
+      {/* Side Navigation */}
+      {user && (
+        <>
+          {/* Hover trigger area */}
+          <div 
+            className={styles.sideNavTrigger}
+            onMouseEnter={() => setSidebarVisible(true)}
+          ></div>
+          
+          <nav 
+            className={`${styles.sideNav} ${!sidebarVisible ? styles.sideNavHidden : ''}`}
+            onMouseEnter={() => setSidebarVisible(true)}
+          >
+            <div className={styles.sideNavContent}>
+            <button
+              onClick={() => scrollToSection('overview')}
+              className={`${styles.navItem} ${activeSection === 'overview' ? styles.navItemActive : ''}`}
+            >
+              <i className="fas fa-home"></i>
+              <span>Overview</span>
+            </button>
+            <button
+              onClick={() => scrollToSection('actions')}
+              className={`${styles.navItem} ${activeSection === 'actions' ? styles.navItemActive : ''}`}
+            >
+              <i className="fas fa-tasks"></i>
+              <span>Actions</span>
+            </button>
+            <button
+              onClick={() => scrollToSection('resources')}
+              className={`${styles.navItem} ${activeSection === 'resources' ? styles.navItemActive : ''}`}
+            >
+              <i className="fas fa-book"></i>
+              <span>Resources</span>
+            </button>
+            <button
+              onClick={() => scrollToSection('location')}
+              className={`${styles.navItem} ${activeSection === 'location' ? styles.navItemActive : ''}`}
+            >
+              <i className="fas fa-map-marker-alt"></i>
+              <span>Location</span>
+            </button>
+            <button
+              onClick={() => scrollToSection('environmental')}
+              className={`${styles.navItem} ${activeSection === 'environmental' ? styles.navItemActive : ''}`}
+            >
+              <i className="fas fa-chart-line"></i>
+              <span>Environment</span>
+            </button>
+            <button
+              onClick={() => scrollToSection('map')}
+              className={`${styles.navItem} ${activeSection === 'map' ? styles.navItemActive : ''}`}
+            >
+              <i className="fas fa-map"></i>
+              <span>Map</span>
+            </button>
+            <button
+              onClick={() => scrollToSection('projects')}
+              className={`${styles.navItem} ${activeSection === 'projects' ? styles.navItemActive : ''}`}
+            >
+              <i className="fas fa-leaf"></i>
+              <span>Projects</span>
+            </button>
+          </div>
+        </nav>
+        </>
+      )}
+
       <main className="main-content">
         <GlobalAnnouncements position="top" maxVisible={2} />
-        <Dashboard />
+        <div id="overview">
+          <Dashboard />
+        </div>
 
-      <div className="flex justify-center gap-4 mt-8">
-  <div className="flex flex-row gap-4 mt-8 ml-8 items-center">
-  <button
-    onClick={() => setIsActionLoggerOpen(true)}
-    className="bg-green-600 text-white px-12 py-8 rounded-full shadow-2xl hover:bg-green-700 hover:shadow-3xl transition-all duration-300 flex items-center gap-2 font-semibold text-lg group transform hover:scale-105"
-  >
-    <i className="fas fa-plus bg-white/20 p-2 rounded-full group-hover:bg-white/30 transition-colors"></i>
-    Log Eco-Action
-  </button>
-  
-  <button
-    onClick={() => setIsScannerOpen(true)}
-    className="bg-blue-600 text-white px-12 py-8 rounded-full shadow-2xl hover:bg-blue-700 hover:shadow-3xl transition-all duration-300 flex items-center gap-2 font-semibold text-lg group transform hover:scale-105"
-  >
-    <i className="fas fa-camera bg-white/20 p-2 rounded-full group-hover:bg-white/30 transition-colors"></i>
-    Open Scanner
-  </button>
-</div>
-</div>
+      <div id="actions" className="flex justify-center gap-4 mt-8">
+        <div className="flex flex-row gap-4 mt-8 ml-8 items-center">
+          <button
+            onClick={() => setIsActionLoggerOpen(true)}
+            className="bg-green-600 text-white px-12 py-8 rounded-full shadow-2xl hover:bg-green-700 hover:shadow-3xl transition-all duration-300 flex items-center gap-2 font-semibold text-lg group transform hover:scale-105"
+          >
+            <i className="fas fa-plus bg-white/20 p-2 rounded-full group-hover:bg-white/30 transition-colors"></i>
+            Log Eco-Action
+          </button>
+          
+          <button
+            onClick={() => setIsScannerOpen(true)}
+            className="bg-blue-600 text-white px-12 py-8 rounded-full shadow-2xl hover:bg-blue-700 hover:shadow-3xl transition-all duration-300 flex items-center gap-2 font-semibold text-lg group transform hover:scale-105"
+          >
+            <i className="fas fa-camera bg-white/20 p-2 rounded-full group-hover:bg-white/30 transition-colors"></i>
+            Open Scanner
+          </button>
+        </div>
+      </div>
 
-      <ResourceHub />
-
-      {/* AI Waste Classifier Section */}
-      {user && <AIWasteClassifier />}
+      <div id="resources">
+        <ResourceHub />
+      </div>
 
       {/* Location Picker */}
       {user && (
-        <LocationPicker 
-          onLocationChange={handleLocationChange}
-          initialLocation={userLocation}
-        />
+        <div id="location">
+          <LocationPicker 
+            onLocationChange={handleLocationChange}
+            initialLocation={userLocation}
+          />
+        </div>
       )}
 
       {/* Location Info Display */}
@@ -225,22 +335,9 @@ export default function DashboardPage() {
         </div>
       )}
 
-      {/* Environmental Data Toggle Section */}
-      {user && (
-        <div className={styles.envToggleWrapper}>
-          <button
-            onClick={() => setShowEnvironmentalData(!showEnvironmentalData)}
-            className={styles.toggleButton}
-          >
-            <i className={`fas fa-${showEnvironmentalData ? 'eye-slash' : 'chart-line'}`}></i>
-            {showEnvironmentalData ? 'Hide' : 'Show'} Community Environmental Data
-          </button>
-        </div>
-      )}
-
       {/* Environmental Data Section */}
-      {user && showEnvironmentalData && (
-        <div className={styles.envSection}>
+      {user && (
+        <div id="environmental" className={styles.envSection}>
           <section className={styles.sectionHeading}>
             <h2 className={styles.sectionTitle}>
               🌍 Community Environmental Dashboard
@@ -382,13 +479,15 @@ export default function DashboardPage() {
           </section>
 
           {/* Geospatial Analytics Map */}
-          <GeospatialMap 
-            userLocation={userLocation}
-            filterByLocation={locationFilterEnabled}
-          />
+          <div id="map">
+            <GeospatialMap 
+              userLocation={userLocation}
+              filterByLocation={locationFilterEnabled}
+            />
+          </div>
 
           {/* Local Projects Section */}
-          <section className={styles.projectsSection}>
+          <section id="projects" className={styles.projectsSection}>
             <h2 className={styles.projectsTitle}>
               🌱 Ongoing Local Eco-Projects
             </h2>
@@ -491,9 +590,6 @@ export default function DashboardPage() {
         isOpen={isScannerOpen}
         onClose={() => setIsScannerOpen(false)}
       />
-
-      {/* Cloud Data Initialization Prompt */}
-      <InitializeCloudData />
     </>
   );
 }

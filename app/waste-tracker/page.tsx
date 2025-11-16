@@ -2,11 +2,14 @@
 
 import { useState, useEffect } from 'react';
 import { useAuth } from '@/lib/AuthContext';
+import CitizenOnly from '@/components/CitizenOnly';
 import Header from '../../components/Header';
 import { collection, addDoc, query, where, onSnapshot, doc, updateDoc, serverTimestamp } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
 import styles from './waste-tracker.module.css';
 import { initializeCollectionSchedules, getDaysUntilCollection, getScheduleForWasteType } from '@/lib/initializeSchedules';
+import AIWasteClassifierDialog from './AIWasteClassifierDialog';
+import CollectionCalendar from './CollectionCalendar';
 
 interface WasteEntry {
   id: string;
@@ -34,6 +37,7 @@ export default function WasteTrackerPage() {
   const [wasteEntries, setWasteEntries] = useState<WasteEntry[]>([]);
   const [schedules, setSchedules] = useState<CollectionSchedule[]>([]);
   const [loading, setLoading] = useState(true);
+  const [isClassifierOpen, setIsClassifierOpen] = useState(false);
   
   // Form states
   const [wasteType, setWasteType] = useState<'plastic' | 'paper' | 'glass' | 'metal' | 'organic' | 'electronics'>('plastic');
@@ -186,9 +190,18 @@ export default function WasteTrackerPage() {
       .reduce((sum, e) => sum + e.weight, 0)
   }));
 
+  // Handle AI classification result
+  const handleClassified = (result: any) => {
+    // Auto-fill form with classified waste type
+    setWasteType(result.wasteType);
+    setNotes(`AI Classified: ${result.category} (${Math.round(result.confidence * 100)}% confidence)`);
+    alert(`Waste classified as: ${result.category}\n\nThe form has been pre-filled. Please enter the weight and submit.`);
+  };
+
   if (!user) {
     return (
       <>
+        <CitizenOnly />
         <Header logo="fas fa-leaf" title="GREENGUARDIAN" />
         <div className={styles.container}>
           <div className={styles.loginPrompt}>
@@ -201,12 +214,23 @@ export default function WasteTrackerPage() {
 
   return (
     <>
+      <CitizenOnly />
       <Header logo="fas fa-trash-alt" title="GREENGUARDIAN" />
       
-      <div className={styles.container}>
+      <main className="main-content">
+        <div className={styles.container}>
         {/* Stats Overview */}
         <section className={styles.statsSection}>
-          <h1>♻️ Recycling & Waste Management Tracker</h1>
+          <div className="flex justify-between items-center mb-6">
+            <h1>♻️ Recycling & Waste Management Tracker</h1>
+            <button
+              onClick={() => setIsClassifierOpen(true)}
+              className="bg-purple-600 text-white px-6 py-3 rounded-lg shadow-lg hover:bg-purple-700 transition-all duration-300 flex items-center gap-2 font-semibold"
+            >
+              <i className="fas fa-brain"></i>
+              AI Waste Classifier
+            </button>
+          </div>
           
           <div className={styles.statsGrid}>
             <div className={styles.statCard}>
@@ -294,51 +318,7 @@ export default function WasteTrackerPage() {
           {/* Collection Schedules */}
           <section className={styles.schedulesSection}>
             <h2>🚛 Collection Schedules</h2>
-            <div className={styles.schedulesList}>
-              {schedules.length === 0 ? (
-                <div className={styles.emptyState}>
-                  <i className="fas fa-calendar-times"></i>
-                  <p>No collection schedules available yet.</p>
-                </div>
-              ) : (
-                schedules.map(schedule => {
-                  const daysUntil = getDaysUntilCollection(schedule.dayOfWeek);
-                  const isUpcoming = daysUntil <= 2;
-                  
-                  return (
-                    <div key={schedule.id} className={`${styles.scheduleCard} ${isUpcoming ? styles.upcoming : ''}`}>
-                      <div className={styles.scheduleHeader}>
-                        <h3>
-                          <i className="fas fa-trash-alt"></i>
-                          {schedule.wasteType}
-                        </h3>
-                        <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
-                          {isUpcoming && <span className={styles.upcomingBadge}>⚠️ Soon</span>}
-                          <span className={styles.frequency}>{schedule.frequency}</span>
-                        </div>
-                      </div>
-                      <div className={styles.scheduleDetails}>
-                        <div>
-                          <i className="fas fa-calendar-alt"></i>
-                          <span>
-                            <strong>Day:</strong> {schedule.dayName} 
-                            {daysUntil === 0 ? ' (Today!)' : daysUntil === 1 ? ' (Tomorrow)' : ` (in ${daysUntil} days)`}
-                          </span>
-                        </div>
-                        <div>
-                          <i className="fas fa-clock"></i>
-                          <span><strong>Time:</strong> {schedule.time || 'Not specified'}</span>
-                        </div>
-                        <div>
-                          <i className="fas fa-map-marker-alt"></i>
-                          <span><strong>Location:</strong> {schedule.location}</span>
-                        </div>
-                      </div>
-                    </div>
-                  );
-                })
-              )}
-            </div>
+            <CollectionCalendar schedules={schedules} />
           </section>
         </div>
 
@@ -416,6 +396,14 @@ export default function WasteTrackerPage() {
           )}
         </section>
       </div>
+      </main>
+
+      {/* AI Waste Classifier Dialog */}
+      <AIWasteClassifierDialog
+        isOpen={isClassifierOpen}
+        onClose={() => setIsClassifierOpen(false)}
+        onClassified={handleClassified}
+      />
     </>
   );
 }

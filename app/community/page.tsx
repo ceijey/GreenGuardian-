@@ -18,6 +18,7 @@ import {
 import { db } from '../../lib/firebase';
 import { useAuth } from '../../lib/AuthContext';
 import { createPresenceManager } from '../../lib/presenceUtils';
+import CitizenOnly from '@/components/CitizenOnly';
 import Header from '../../components/Header';
 import GlobalAnnouncements from '../../components/GlobalAnnouncements';
 import styles from './community.module.css';
@@ -274,6 +275,7 @@ export default function CommunityPage() {
 
   return (
     <div className={styles.container}>
+      <CitizenOnly />
       <Header />
       
       {/* Global Announcements Section */}

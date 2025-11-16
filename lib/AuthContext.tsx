@@ -16,7 +16,7 @@ interface AuthContextType {
   user: User | null;
   loading: boolean;
   signup: (email: string, password: string) => Promise<void>;
-  login: (email: string, password: string) => Promise<void>;
+  login: (email: string, password: string) => Promise<{ user: User }>;
   logout: () => Promise<void>;
   resendVerification: () => Promise<void>;
 }
@@ -83,6 +83,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       await signOut(auth);
       throw new Error('Please verify your email before logging in. Check your inbox for the verification link.');
     }
+
+    return { user };
   };
 
   const logout = async () => {

@@ -1,0 +1,426 @@
+.calendarContainer {
+  background: white;
+  border-radius: 16px;
+  padding: 24px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  margin: 20px 0;
+}
+
+/* Calendar Header */
+.calendarHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+  padding-bottom: 16px;
+  border-bottom: 2px solid #f0f0f0;
+}
+
+.monthYear {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.monthYear h3 {
+  font-size: 24px;
+  font-weight: 600;
+  color: #2c3e50;
+  margin: 0;
+}
+
+.navButton {
+  background: #f8f9fa;
+  border: none;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s;
+  color: #495057;
+}
+
+.navButton:hover {
+  background: #e9ecef;
+  color: #2c3e50;
+  transform: scale(1.05);
+}
+
+.todayButton {
+  background: #4CAF50;
+  color: white;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 500;
+  transition: all 0.2s;
+  font-size: 14px;
+}
+
+.todayButton:hover {
+  background: #45a049;
+  transform: translateY(-1px);
+  box-shadow: 0 2px 6px rgba(76, 175, 80, 0.3);
+}
+
+/* Legend */
+.legend {
+  margin-bottom: 20px;
+  padding: 16px;
+  background: #f8f9fa;
+  border-radius: 12px;
+}
+
+.legendItems {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+}
+
+.legendItem {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+  color: #495057;
+}
+
+.legendColor {
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-size: 14px;
+}
+
+.todayBadge {
+  background: #ff5722;
+  color: white;
+  font-size: 11px;
+  padding: 2px 8px;
+  border-radius: 12px;
+  font-weight: 600;
+}
+
+.tomorrowBadge {
+  background: #ff9800;
+  color: white;
+  font-size: 11px;
+  padding: 2px 8px;
+  border-radius: 12px;
+  font-weight: 600;
+}
+
+/* Week Days Header */
+.weekDays {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+.weekDay {
+  text-align: center;
+  font-weight: 600;
+  font-size: 14px;
+  color: #6c757d;
+  padding: 12px 0;
+}
+
+/* Calendar Grid */
+.calendarGrid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 8px;
+  margin-bottom: 24px;
+}
+
+.emptyDay {
+  aspect-ratio: 1;
+  min-height: 80px;
+}
+
+.calendarDay {
+  aspect-ratio: 1;
+  min-height: 80px;
+  background: white;
+  border: 2px solid #e9ecef;
+  border-radius: 12px;
+  padding: 8px;
+  cursor: pointer;
+  transition: all 0.2s;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  overflow: hidden;
+}
+
+.calendarDay:hover {
+  border-color: #4CAF50;
+  box-shadow: 0 4px 12px rgba(76, 175, 80, 0.2);
+  transform: translateY(-2px);
+}
+
+.calendarDay.today {
+  background: linear-gradient(135deg, #4CAF50 0%, #45a049 100%);
+  border-color: #4CAF50;
+  color: white;
+}
+
+.calendarDay.today .dayNumber {
+  color: white;
+  font-weight: 700;
+}
+
+.calendarDay.hasCollection {
+  border-color: #2196F3;
+  background: #f8f9fa;
+}
+
+.calendarDay.selected {
+  border-color: #9C27B0;
+  border-width: 3px;
+  background: linear-gradient(135deg, #f3e5f5 0%, #e1bee7 100%);
+}
+
+.dayNumber {
+  font-size: 16px;
+  font-weight: 600;
+  color: #2c3e50;
+  margin-bottom: 4px;
+}
+
+/* Collection Indicators */
+.collectionIndicators {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  margin-top: auto;
+}
+
+.indicator {
+  width: 24px;
+  height: 24px;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-size: 10px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.moreIndicator {
+  width: 24px;
+  height: 24px;
+  border-radius: 6px;
+  background: #6c757d;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-size: 10px;
+  font-weight: 600;
+}
+
+/* Selected Day Details */
+.selectedDayDetails {
+  background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+  border-radius: 12px;
+  padding: 20px;
+  margin-top: 24px;
+}
+
+.selectedDayDetails h4 {
+  font-size: 18px;
+  color: #2c3e50;
+  margin-bottom: 16px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.collectionsList {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.collectionCard {
+  background: white;
+  border-radius: 12px;
+  padding: 16px;
+  border-left: 4px solid;
+  display: flex;
+  gap: 16px;
+  align-items: center;
+  transition: all 0.2s;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+.collectionCard:hover {
+  transform: translateX(4px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.collectionIcon {
+  width: 48px;
+  height: 48px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 20px;
+  flex-shrink: 0;
+}
+
+.collectionInfo {
+  flex: 1;
+}
+
+.collectionInfo h5 {
+  font-size: 16px;
+  font-weight: 600;
+  color: #2c3e50;
+  margin: 0 0 8px 0;
+}
+
+.collectionMeta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+  font-size: 13px;
+  color: #6c757d;
+}
+
+.collectionMeta span {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.collectionMeta i {
+  color: #9c27b0;
+}
+
+/* Empty State */
+.emptyState {
+  text-align: center;
+  padding: 60px 20px;
+  color: #6c757d;
+}
+
+.emptyState i {
+  font-size: 64px;
+  color: #dee2e6;
+  margin-bottom: 16px;
+  display: block;
+}
+
+.emptyState p {
+  font-size: 16px;
+  margin: 0;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .calendarContainer {
+    padding: 16px;
+  }
+
+  .calendarHeader {
+    flex-direction: column;
+    gap: 16px;
+  }
+
+  .monthYear {
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .monthYear h3 {
+    font-size: 20px;
+  }
+
+  .legendItems {
+    gap: 12px;
+  }
+
+  .legendItem {
+    font-size: 12px;
+  }
+
+  .legendColor {
+    width: 28px;
+    height: 28px;
+  }
+
+  .calendarGrid {
+    gap: 4px;
+  }
+
+  .calendarDay {
+    min-height: 60px;
+    padding: 4px;
+  }
+
+  .dayNumber {
+    font-size: 14px;
+  }
+
+  .indicator {
+    width: 20px;
+    height: 20px;
+    font-size: 9px;
+  }
+
+  .moreIndicator {
+    width: 20px;
+    height: 20px;
+    font-size: 9px;
+  }
+
+  .weekDay {
+    font-size: 12px;
+    padding: 8px 0;
+  }
+
+  .collectionCard {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .collectionMeta {
+    flex-direction: column;
+    gap: 8px;
+  }
+}
+
+@media (max-width: 480px) {
+  .calendarDay {
+    min-height: 50px;
+  }
+
+  .collectionIndicators {
+    gap: 2px;
+  }
+
+  .indicator {
+    width: 16px;
+    height: 16px;
+    font-size: 8px;
+  }
+
+  .moreIndicator {
+    width: 16px;
+    height: 16px;
+    font-size: 8px;
+  }
+}

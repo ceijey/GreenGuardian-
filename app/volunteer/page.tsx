@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useAuth } from '@/lib/AuthContext';
+import CitizenOnly from '@/components/CitizenOnly';
 import Header from '../../components/Header';
 import { 
   collection, 
@@ -253,6 +254,7 @@ export default function VolunteerPage() {
 
   return (
     <>
+      <CitizenOnly />
       <Header logo="fas fa-hands-helping" title="GREENGUARDIAN" />
       
       <div className={styles.container}>

@@ -255,8 +255,54 @@
   color: #7f8c8d;
 }
 
-.hotspotsList {
+.hotspotsListContainer {
   margin-top: 30px;
+  background: white;
+  border-radius: 12px;
+  overflow: hidden;
+  border: 2px solid #f0f0f0;
+}
+
+.hotspotsListHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 15px 20px;
+  background: #f8f9fa;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  user-select: none;
+}
+
+.hotspotsListHeader:hover {
+  background: #e9ecef;
+}
+
+.hotspotsListHeader h3 {
+  font-size: 20px;
+  color: #2c3e50;
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.collapseBtn {
+  background: none;
+  border: none;
+  font-size: 18px;
+  color: #666;
+  cursor: pointer;
+  transition: transform 0.3s ease;
+  padding: 5px 10px;
+}
+
+.collapseBtn i {
+  transition: transform 0.3s ease;
+}
+
+.hotspotsList {
+  padding: 20px;
 }
 
 .hotspotsList h3 {

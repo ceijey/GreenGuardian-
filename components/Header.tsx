@@ -1,7 +1,8 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import Link from 'next/link'
+import Image from 'next/image'
 import { usePathname, useRouter } from 'next/navigation'
 import { useAuth } from '@/lib/AuthContext'
 import CommunityNotifications from './CommunityNotifications'
@@ -18,6 +19,35 @@ export default function Header({ logo, title, showUserProfile = false }: HeaderP
   const router = useRouter()
   const { user, logout } = useAuth()
   const [isMenuOpen, setIsMenuOpen] = useState(false)
+  const [scrollDirection, setScrollDirection] = useState<'up' | 'down'>('up')
+  const [lastScrollY, setLastScrollY] = useState(0)
+
+  useEffect(() => {
+    const handleScroll = () => {
+      const currentScrollY = window.scrollY
+      
+      // If at the top, always show header
+      if (currentScrollY < 10) {
+        setScrollDirection('up')
+      }
+      // If scrolling down and past threshold, hide header
+      else if (currentScrollY > lastScrollY && currentScrollY > 80) {
+        setScrollDirection('down')
+      }
+      // If scrolling up, show header
+      else if (currentScrollY < lastScrollY) {
+        setScrollDirection('up')
+      }
+      
+      setLastScrollY(currentScrollY)
+    }
+
+    window.addEventListener('scroll', handleScroll, { passive: true })
+    
+    return () => {
+      window.removeEventListener('scroll', handleScroll)
+    }
+  }, [lastScrollY])
 
   const handleLogout = async () => {
     try {
@@ -37,11 +67,18 @@ export default function Header({ logo, title, showUserProfile = false }: HeaderP
   }
 
   return (
-    <header className={styles.header}>
+    <header className={`${styles.header} ${scrollDirection === 'down' ? styles.headerHidden : ''}`}>
       <div className={styles.container}>
         <div className={styles.headerContent}>
           <div className={styles.logo}>
-            <i className={logo || 'fas fa-leaf'}></i>
+            <Image 
+              src="/greenguardian logo.png" 
+              alt="GreenGuardian Logo" 
+              width={32} 
+              height={32}
+              className={styles.logoImage}
+              priority
+            />
             <span className={styles.logoText}>{title || 'GREENGUARDIAN'}</span>
           </div>
           

@@ -2,10 +2,10 @@
 
 import { useState, useEffect } from 'react';
 import { useAuth } from '@/lib/AuthContext';
+import CitizenOnly from '@/components/CitizenOnly';
 import Header from '../../components/Header';
 import ChallengeCard from '@/components/ChallengeCard';
 import BadgeDisplay from '@/components/BadgeDisplay';
-import InitializeChallenges from '@/components/InitializeChallenges';
 import { 
   collection, 
   query, 
@@ -573,10 +573,11 @@ export default function CommunityHubPage() {
 
   return (
     <>
+      <CitizenOnly />
       <Header logo="fas fa-users" title="GREENGUARDIAN" />
-      <InitializeChallenges />
       
-      <div className={styles.container}>
+      <main className="main-content">
+        <div className={styles.container}>
         {/* Hero Section */}
         <section className={styles.hero}>
           <h1>🌍 Community Hub</h1>
@@ -1172,6 +1173,7 @@ export default function CommunityHubPage() {
           </div>
         )}
       </div>
+      </main>
     </>
   );
 }
