@@ -1,0 +1,209 @@
+.modalOverlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.75);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: 20px;
+  backdrop-filter: blur(4px);
+}
+
+.modalContent {
+  background: white;
+  border-radius: 16px;
+  width: 100%;
+  max-width: 800px;
+  max-height: 90vh;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+  animation: slideUp 0.3s ease-out;
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.modalHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20px 25px;
+  border-bottom: 2px solid #e2e8f0;
+  background: linear-gradient(135deg, #38b2ac, #319795);
+  border-radius: 16px 16px 0 0;
+}
+
+.modalHeader h2 {
+  margin: 0;
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: white;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.closeButton {
+  background: rgba(255, 255, 255, 0.2);
+  border: none;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-size: 1.2rem;
+  transition: all 0.3s ease;
+}
+
+.closeButton:hover {
+  background: rgba(255, 255, 255, 0.3);
+  transform: rotate(90deg);
+}
+
+.addressInfo {
+  padding: 20px 25px;
+  background: #f7fafc;
+  border-bottom: 1px solid #e2e8f0;
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+}
+
+.addressInfo i {
+  color: #38b2ac;
+  font-size: 1.2rem;
+  margin-top: 2px;
+}
+
+.addressInfo p {
+  margin: 0;
+  color: #2d3748;
+  font-size: 1rem;
+  line-height: 1.5;
+  flex: 1;
+}
+
+.mapWrapper {
+  height: 450px;
+  padding: 20px;
+  background: #f7fafc;
+}
+
+.mapLoading {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background: white;
+  border-radius: 8px;
+  color: #718096;
+}
+
+.mapLoading i {
+  font-size: 3rem;
+  margin-bottom: 15px;
+  color: #38b2ac;
+}
+
+.mapLoading p {
+  font-size: 1.1rem;
+  margin: 0;
+}
+
+.popupContent {
+  text-align: center;
+  min-width: 200px;
+}
+
+.popupContent strong {
+  display: block;
+  margin-bottom: 8px;
+  color: #2d3748;
+  font-size: 1rem;
+}
+
+.popupContent p {
+  margin: 0;
+  color: #4a5568;
+  font-size: 0.9rem;
+  line-height: 1.4;
+}
+
+.modalActions {
+  display: flex;
+  gap: 12px;
+  padding: 20px 25px;
+  border-top: 2px solid #e2e8f0;
+}
+
+.modalActions button {
+  flex: 1;
+  padding: 14px 24px;
+  border: none;
+  border-radius: 8px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+}
+
+.directionsButton {
+  background: linear-gradient(135deg, #4299e1, #3182ce);
+  color: white;
+}
+
+.directionsButton:hover {
+  background: linear-gradient(135deg, #3182ce, #2c5282);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(66, 153, 225, 0.4);
+}
+
+.closeBtn {
+  background: #e2e8f0;
+  color: #2d3748;
+}
+
+.closeBtn:hover {
+  background: #cbd5e0;
+  transform: translateY(-2px);
+}
+
+@media (max-width: 768px) {
+  .modalContent {
+    max-width: 100%;
+    max-height: 95vh;
+  }
+
+  .modalHeader h2 {
+    font-size: 1.2rem;
+  }
+
+  .mapWrapper {
+    height: 350px;
+  }
+
+  .modalActions {
+    flex-direction: column;
+  }
+}

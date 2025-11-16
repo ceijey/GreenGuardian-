@@ -27,7 +27,7 @@ export default function EcoRewards({ points, userId, onRedeem }: Props) {
   { id: 'seed-packet', title: 'Free Seed Packet', cost: 30, description: 'A small packet of native seeds from a local partner.' },
   { id: 'garden-kit', title: 'Starter Garden Kit', cost: 120, description: 'Complete kit with seeds, soil pods, and planting guide.' },
   { id: 'eco-bag', title: 'Reusable Shopping Bag', cost: 80, description: 'Stylish and durable reusable shopping bag made from recycled materials.' },
-  { id: 'grocery-voucher', title: 'Local Grocery Voucher', cost: 100, description: '$10 voucher for local, sustainable grocery stores.' },
+  { id: 'grocery-voucher', title: 'Local Grocery Voucher', cost: 100, description: '₱500 voucher for local, sustainable grocery stores.' },
 ];
 
   const handleRedeem = async (option: RewardOption) => {

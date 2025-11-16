@@ -478,3 +478,62 @@
     padding-top: 60px;
   }
 }
+
+/* Role-Specific Header Styles */
+
+/* NGO Header - Green Theme */
+.ngoHeader {
+  background: linear-gradient(135deg, #16a34a 0%, #22c55e 100%);
+}
+
+.ngoHeader .logo i,
+.ngoHeader .active {
+  color: #dcfce7;
+}
+
+.ngoHeader .navList a:hover {
+  background: rgba(220, 252, 231, 0.1);
+}
+
+/* School Header - Amber/Yellow Theme */
+.schoolHeader {
+  background: linear-gradient(135deg, #f59e0b 0%, #fbbf24 100%);
+}
+
+.schoolHeader .logo i,
+.schoolHeader .active {
+  color: #fef3c7;
+}
+
+.schoolHeader .navList a:hover {
+  background: rgba(254, 243, 199, 0.1);
+}
+
+/* Partner Header - Blue Theme */
+.partnerHeader {
+  background: linear-gradient(135deg, #2563eb 0%, #3b82f6 100%);
+}
+
+.partnerHeader .logo i,
+.partnerHeader .active {
+  color: #dbeafe;
+}
+
+.partnerHeader .navList a:hover {
+  background: rgba(219, 234, 254, 0.1);
+}
+
+/* Mobile specific role header adjustments */
+@media (max-width: 767px) {
+  .ngoHeader .nav,
+  .schoolHeader .nav,
+  .partnerHeader .nav {
+    background: inherit;
+  }
+  
+  .ngoHeader.navOpen,
+  .schoolHeader.navOpen,
+  .partnerHeader.navOpen {
+    background: inherit;
+  }
+}

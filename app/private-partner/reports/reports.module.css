@@ -1,0 +1,337 @@
+.container {
+  min-height: 100vh;
+  background: linear-gradient(135deg, #ffecd2 0%, #fcb69f 100%);
+}
+
+.loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 60vh;
+  color: white;
+  font-size: 1.5rem;
+  gap: 1rem;
+}
+
+.main {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 100px 2rem 4rem;
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 3rem;
+  color: #1a202c;
+}
+
+.header h1 {
+  font-size: 2.5rem;
+  margin-bottom: 0.5rem;
+}
+
+.header p {
+  font-size: 1.1rem;
+  color: #4a5568;
+}
+
+.generateButton {
+  padding: 1rem 2rem;
+  background: linear-gradient(135deg, #ff6b6b 0%, #ee5a6f 100%);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 1rem;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.generateButton:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 8px rgba(0, 0, 0, 0.15);
+}
+
+.stats {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 1.5rem;
+  margin-bottom: 3rem;
+}
+
+.statCard {
+  background: white;
+  padding: 1.5rem;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.statCard i {
+  font-size: 2.5rem;
+  color: #ff6b6b;
+}
+
+.statContent {
+  display: flex;
+  flex-direction: column;
+}
+
+.statValue {
+  font-size: 1.8rem;
+  font-weight: bold;
+  color: #1a202c;
+}
+
+.statLabel {
+  font-size: 0.9rem;
+  color: #718096;
+}
+
+.filters {
+  display: flex;
+  gap: 1rem;
+  margin-bottom: 2rem;
+  flex-wrap: wrap;
+}
+
+.filters button {
+  padding: 0.75rem 1.5rem;
+  border: 2px solid white;
+  background: white;
+  color: #4a5568;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 1rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  transition: all 0.3s ease;
+}
+
+.filters button:hover {
+  background: #f7fafc;
+  transform: translateY(-2px);
+}
+
+.filters button.active {
+  background: linear-gradient(135deg, #ff6b6b 0%, #ee5a6f 100%);
+  color: white;
+  border-color: #ff6b6b;
+  font-weight: 600;
+}
+
+.reportsList {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  margin-bottom: 3rem;
+}
+
+.reportCard {
+  background: white;
+  padding: 2rem;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.reportCard:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 6px 10px rgba(0, 0, 0, 0.15);
+}
+
+.reportIcon {
+  width: 80px;
+  height: 80px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-size: 2rem;
+  flex-shrink: 0;
+}
+
+.reportInfo {
+  flex: 1;
+}
+
+.reportInfo h3 {
+  font-size: 1.3rem;
+  color: #1a202c;
+  margin-bottom: 0.75rem;
+}
+
+.reportMeta {
+  display: flex;
+  gap: 1.5rem;
+  flex-wrap: wrap;
+}
+
+.reportMeta span {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.9rem;
+  color: #718096;
+}
+
+.reportMeta i {
+  color: #a0aec0;
+}
+
+.reportActions {
+  display: flex;
+  gap: 0.75rem;
+  flex-shrink: 0;
+}
+
+.reportActions button {
+  padding: 0.75rem 1.25rem;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 0.9rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  transition: all 0.3s ease;
+}
+
+.viewButton {
+  background: #e2e8f0;
+  color: #4a5568;
+}
+
+.viewButton:hover {
+  background: #cbd5e0;
+}
+
+.downloadButton {
+  background: #48bb78;
+  color: white;
+}
+
+.downloadButton:hover {
+  background: #38a169;
+}
+
+.shareButton {
+  background: #4299e1;
+  color: white;
+}
+
+.shareButton:hover {
+  background: #3182ce;
+}
+
+.scheduledSection {
+  background: white;
+  padding: 2rem;
+  border-radius: 12px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.scheduledSection h2 {
+  font-size: 1.8rem;
+  color: #1a202c;
+  margin-bottom: 1.5rem;
+}
+
+.scheduledCard {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+  padding: 1.5rem;
+  background: #f7fafc;
+  border-radius: 8px;
+  border: 1px solid #e2e8f0;
+  margin-bottom: 1rem;
+}
+
+.scheduledCard:last-child {
+  margin-bottom: 0;
+}
+
+.scheduledCard i {
+  font-size: 2rem;
+  color: #ff6b6b;
+}
+
+.scheduledCard h4 {
+  font-size: 1.1rem;
+  color: #1a202c;
+  margin-bottom: 0.25rem;
+}
+
+.scheduledCard p {
+  font-size: 0.9rem;
+  color: #718096;
+}
+
+.nextDate {
+  margin-left: auto;
+  padding: 0.5rem 1rem;
+  background: #fef5e7;
+  color: #d68910;
+  border-radius: 6px;
+  font-size: 0.9rem;
+  font-weight: 600;
+}
+
+@media (max-width: 768px) {
+  .main {
+    padding: 80px 1rem 2rem;
+  }
+
+  .header {
+    flex-direction: column;
+    gap: 1rem;
+    text-align: center;
+  }
+
+  .header h1 {
+    font-size: 2rem;
+  }
+
+  .generateButton {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .reportCard {
+    flex-direction: column;
+    text-align: center;
+  }
+
+  .reportActions {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .reportActions button {
+    flex: 1;
+  }
+
+  .scheduledCard {
+    flex-direction: column;
+    text-align: center;
+  }
+
+  .nextDate {
+    margin-left: 0;
+  }
+}

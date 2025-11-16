@@ -13,7 +13,7 @@ import GeospatialMap from '@/components/GeospatialMap';
 import LocationPicker from '@/components/LocationPicker';
 import AirQualityMonitor from '@/components/AirQualityMonitor';
 import styles from './page.module.css';
-import { collection, query, onSnapshot, doc } from 'firebase/firestore';
+import { collection, query, onSnapshot, doc, getDoc } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
 import { 
   UserLocation, 
@@ -21,6 +21,7 @@ import {
   filterProjectsByLocation,
   getSavedUserLocation 
 } from '@/lib/locationUtils';
+import { createPresenceManager } from '@/lib/presenceUtils';
 
 interface EnvironmentalData {
   airQualityIndex: number;
@@ -47,6 +48,24 @@ interface LocalProject {
   endDate: any;
 }
 
+interface EcoProduct {
+  id: string;
+  name: string;
+  category: string;
+  description: string;
+  ecoScore: number;
+  carbonFootprint: number;
+  recyclable: boolean;
+  biodegradable: boolean;
+  sustainableMaterials: string[];
+  certifications: string[];
+  price?: number;
+  imageUrl?: string;
+  sponsorId: string;
+  sponsorName?: string;
+  createdAt: any;
+}
+
 export default function DashboardPage() {
   const { user } = useAuth();
   const [isScannerOpen, setIsScannerOpen] = useState(false);
@@ -71,6 +90,8 @@ export default function DashboardPage() {
   const [allProjects, setAllProjects] = useState<LocalProject[]>([]); // Store all projects
   const [loading, setLoading] = useState(true);
   const [selectedCategory, setSelectedCategory] = useState('all');
+  const [ecoProducts, setEcoProducts] = useState<EcoProduct[]>([]);
+  const [currentAdIndex, setCurrentAdIndex] = useState(0);
 
   // Load environmental data
   useEffect(() => {
@@ -94,6 +115,24 @@ export default function DashboardPage() {
       setLocationFilterEnabled(true);
     }
   }, []);
+
+  // User presence tracking
+  useEffect(() => {
+    if (!user) return;
+
+    const presenceManager = createPresenceManager(
+      user.uid,
+      user.displayName || 'Anonymous User',
+      user.email || ''
+    );
+
+    presenceManager.start();
+
+    // Cleanup on unmount
+    return () => {
+      presenceManager.stop();
+    };
+  }, [user]);
 
   // Sidebar scroll behavior
   useEffect(() => {
@@ -165,6 +204,54 @@ export default function DashboardPage() {
 
     return unsubscribe;
   }, [selectedCategory, user, locationFilterEnabled, userLocation]);
+
+  // Load eco products from sponsors
+  useEffect(() => {
+    if (!user) return;
+    
+    const productsQuery = query(collection(db, 'products'));
+    const unsubscribe = onSnapshot(productsQuery, async (snapshot) => {
+      const productsList: EcoProduct[] = [];
+      
+      for (const docSnapshot of snapshot.docs) {
+        const productData = docSnapshot.data();
+        
+        // Fetch sponsor name
+        let sponsorName = 'Eco Partner';
+        if (productData.sponsorId) {
+          try {
+            const sponsorDoc = await getDoc(doc(db, 'users', productData.sponsorId));
+            if (sponsorDoc.exists()) {
+              sponsorName = sponsorDoc.data()?.displayName || sponsorDoc.data()?.email || 'Eco Partner';
+            }
+          } catch (error) {
+            console.error('Error fetching sponsor name:', error);
+          }
+        }
+        
+        productsList.push({ 
+          id: docSnapshot.id, 
+          ...productData,
+          sponsorName 
+        } as EcoProduct);
+      }
+      
+      setEcoProducts(productsList);
+    });
+
+    return unsubscribe;
+  }, [user]);
+
+  // Rotate ads every 5 seconds
+  useEffect(() => {
+    if (ecoProducts.length === 0) return;
+    
+    const interval = setInterval(() => {
+      setCurrentAdIndex((prev) => (prev + 1) % ecoProducts.length);
+    }, 5000);
+
+    return () => clearInterval(interval);
+  }, [ecoProducts.length]);
 
   // Handle location change
   const handleLocationChange = (location: UserLocation | null) => {
@@ -298,6 +385,98 @@ export default function DashboardPage() {
           </button>
         </div>
       </div>
+
+      {/* Eco Products Advertisement */}
+      {ecoProducts.length > 0 && (
+        <div className={styles.ecoProductsAd}>
+          <div className={styles.adContainer}>
+            <div className={styles.adHeader}>
+              <span className={styles.sponsoredLabel}>
+                <i className="fas fa-star"></i>
+                Sponsored Eco Product
+              </span>
+            </div>
+            
+            {ecoProducts.map((product, index) => (
+              <div
+                key={product.id}
+                className={`${styles.productAdCard} ${index === currentAdIndex ? styles.productAdActive : ''}`}
+                style={{ display: index === currentAdIndex ? 'flex' : 'none' }}
+              >
+                <div className={styles.productAdImage}>
+                  {product.imageUrl ? (
+                    <img src={product.imageUrl} alt={product.name} />
+                  ) : (
+                    <div className={styles.productPlaceholder}>
+                      <i className="fas fa-leaf"></i>
+                    </div>
+                  )}
+                  <div className={styles.ecoScoreBadge}>
+                    <i className="fas fa-leaf"></i>
+                    <span>{product.ecoScore}/100</span>
+                  </div>
+                </div>
+                
+                <div className={styles.productAdContent}>
+                  <h3>{product.name}</h3>
+                  <p className={styles.productCategory}>
+                    <i className="fas fa-tag"></i>
+                    {product.category}
+                  </p>
+                  <p className={styles.productDescription}>{product.description}</p>
+                  
+                  <div className={styles.productFeatures}>
+                    {product.recyclable && (
+                      <span className={styles.featureBadge}>
+                        <i className="fas fa-recycle"></i>
+                        Recyclable
+                      </span>
+                    )}
+                    {product.biodegradable && (
+                      <span className={styles.featureBadge}>
+                        <i className="fas fa-seedling"></i>
+                        Biodegradable
+                      </span>
+                    )}
+                    {product.carbonFootprint < 5 && (
+                      <span className={styles.featureBadge}>
+                        <i className="fas fa-cloud"></i>
+                        Low Carbon
+                      </span>
+                    )}
+                  </div>
+                  
+                  <div className={styles.productFooter}>
+                    <div className={styles.sponsorInfo}>
+                      <i className="fas fa-building"></i>
+                      <span>by {product.sponsorName}</span>
+                    </div>
+                    {product.price && (
+                      <div className={styles.productPrice}>
+                        <i className="fas fa-tag"></i>
+                        ₱{product.price.toFixed(2)}
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </div>
+            ))}
+            
+            {ecoProducts.length > 1 && (
+              <div className={styles.adIndicators}>
+                {ecoProducts.map((_, index) => (
+                  <button
+                    key={index}
+                    className={`${styles.indicator} ${index === currentAdIndex ? styles.indicatorActive : ''}`}
+                    onClick={() => setCurrentAdIndex(index)}
+                    aria-label={`View product ${index + 1}`}
+                  />
+                ))}
+              </div>
+            )}
+          </div>
+        </div>
+      )}
 
       <div id="resources">
         <ResourceHub />

@@ -424,3 +424,194 @@
     font-size: 8px;
   }
 }
+
+/* Waste Collection Services */
+.servicesSection {
+  margin-top: 32px;
+  padding-top: 24px;
+  border-top: 2px solid #f0f0f0;
+}
+
+.servicesSection h4 {
+  font-size: 20px;
+  font-weight: 600;
+  color: #2c3e50;
+  margin-bottom: 8px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.servicesSection h4 i {
+  color: #48bb78;
+}
+
+.servicesIntro {
+  color: #6c757d;
+  margin-bottom: 20px;
+  font-size: 14px;
+}
+
+.servicesList {
+  display: grid;
+  gap: 16px;
+}
+
+.serviceCard {
+  background: #f8f9fa;
+  border: 1px solid #e9ecef;
+  border-radius: 12px;
+  padding: 20px;
+  transition: all 0.3s ease;
+}
+
+.serviceCard:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  border-color: #48bb78;
+}
+
+.serviceHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: start;
+  margin-bottom: 12px;
+}
+
+.serviceHeader h5 {
+  font-size: 18px;
+  font-weight: 600;
+  color: #2c3e50;
+  margin: 0 0 4px 0;
+}
+
+.serviceArea {
+  color: #6c757d;
+  font-size: 14px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin: 0;
+}
+
+.serviceArea i {
+  color: #48bb78;
+}
+
+.activeBadge {
+  background: #d4edda;
+  color: #155724;
+  padding: 6px 12px;
+  border-radius: 12px;
+  font-size: 13px;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.activeBadge i {
+  color: #28a745;
+}
+
+.serviceDescription {
+  color: #495057;
+  margin-bottom: 16px;
+  font-size: 14px;
+  line-height: 1.6;
+}
+
+.serviceDetails {
+  display: grid;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.serviceInfo {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.serviceInfo strong {
+  color: #495057;
+  font-size: 13px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.serviceInfo span {
+  color: #6c757d;
+  font-size: 14px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.wasteTypeTags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.wasteTypeTag {
+  background: white;
+  border: 1px solid #e9ecef;
+  padding: 6px 12px;
+  border-radius: 20px;
+  font-size: 13px;
+  color: #495057;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.wasteTypeTag i {
+  font-size: 14px;
+}
+
+.serviceActions {
+  display: flex;
+  gap: 10px;
+  margin-top: 16px;
+}
+
+.contactButton,
+.requestButton {
+  flex: 1;
+  padding: 10px 16px;
+  border: none;
+  border-radius: 8px;
+  font-weight: 600;
+  font-size: 14px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  text-decoration: none;
+}
+
+.contactButton {
+  background: #48bb78;
+  color: white;
+}
+
+.contactButton:hover {
+  background: #38a169;
+  transform: translateY(-1px);
+  box-shadow: 0 2px 8px rgba(72, 187, 120, 0.3);
+}
+
+.requestButton {
+  background: white;
+  color: #48bb78;
+  border: 2px solid #48bb78;
+}
+
+.requestButton:hover {
+  background: #f0fff4;
+  transform: translateY(-1px);
+}
+

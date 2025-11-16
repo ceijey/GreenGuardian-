@@ -5,7 +5,7 @@ import { useAuth } from '@/lib/AuthContext';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import Image from 'next/image';
-import { getLoginRedirectPath } from '@/lib/roleUtils';
+import * as roleUtils from '@/lib/roleUtils';
 import styles from './LoginForm.module.css';
 
 export default function LoginForm() {
@@ -50,11 +50,12 @@ export default function LoginForm() {
       const userCredential = await login(email, password);
       console.log('Login successful, determining redirect...');
       
+      // Get the appropriate redirect based on user role (now async)
+      const redirectPath = await roleUtils.getLoginRedirectPath(userCredential?.user || null);
+      console.log('Executing redirect to:', redirectPath);
+      
       // Add a small delay to ensure auth state is updated
       setTimeout(() => {
-        // Get the appropriate redirect based on user role
-        const redirectPath = getLoginRedirectPath(userCredential?.user || null);
-        console.log('Executing redirect to:', redirectPath);
         router.push(redirectPath);
       }, 500);
     } catch (err: Error | unknown) {
@@ -126,7 +127,7 @@ export default function LoginForm() {
         <div className={styles.header}>
           <div className={styles.logoContainer}>
             <Image 
-              src="/window.svg" 
+              src="/greenguardian logo.png" 
               alt="Green Guardian Logo - Environmental sustainability platform" 
               width={60} 
               height={60}
