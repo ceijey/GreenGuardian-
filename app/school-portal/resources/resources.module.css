@@ -13,7 +13,7 @@
   width: 50px;
   height: 50px;
   border: 4px solid #f3f4f6;
-  border-top-color: #f59e0b;
+  border-top-color: #21D375;
   border-radius: 50%;
   animation: spin 1s linear infinite;
 }
@@ -27,7 +27,7 @@
   margin: 0 auto;
   padding: 2rem;
   min-height: 100vh;
-  background: linear-gradient(135deg, #fffbeb 0%, #fef3c7 100%);
+  background: linear-gradient(135deg, #e9fbf0 0%, #f0fff6 100%);
 }
 
 .header {
@@ -42,7 +42,7 @@
 .title {
   font-size: 2rem;
   font-weight: 700;
-  background: linear-gradient(135deg, #f59e0b, #fbbf24);
+  background: linear-gradient(135deg, #21D375, #34d399);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
@@ -56,7 +56,7 @@
 }
 
 .createButton {
-  background: linear-gradient(135deg, #f59e0b, #fbbf24);
+  background: linear-gradient(135deg, #21D375, #34d399);
   color: white;
   padding: 0.75rem 1.5rem;
   border: none;
@@ -68,12 +68,12 @@
   align-items: center;
   gap: 0.5rem;
   transition: transform 0.2s, box-shadow 0.2s;
-  box-shadow: 0 4px 6px rgba(245, 158, 11, 0.2);
+  box-shadow: 0 4px 6px rgba(33, 211, 117, 0.18);
 }
 
 .createButton:hover {
   transform: translateY(-2px);
-  box-shadow: 0 6px 12px rgba(245, 158, 11, 0.3);
+  box-shadow: 0 6px 12px rgba(33, 211, 117, 0.28);
 }
 
 .createButton i {
@@ -107,7 +107,7 @@
 .statIcon {
   width: 60px;
   height: 60px;
-  background: linear-gradient(135deg, #f59e0b, #fbbf24);
+  background: linear-gradient(135deg, #21D375, #34d399);
   border-radius: 1rem;
   display: flex;
   align-items: center;
@@ -163,7 +163,7 @@
 
 .filterSelect:hover,
 .filterSelect:focus {
-  border-color: #f59e0b;
+  border-color: #21D375;
   outline: none;
 }
 
@@ -200,7 +200,7 @@
 .resourceIconBox {
   width: 50px;
   height: 50px;
-  background: linear-gradient(135deg, #f59e0b, #fbbf24);
+  background: linear-gradient(135deg, #21D375, #34d399);
   border-radius: 0.75rem;
   display: flex;
   align-items: center;
@@ -217,8 +217,8 @@
 
 .typeBadge {
   padding: 0.25rem 0.75rem;
-  background: #fef3c7;
-  color: #92400e;
+  background: #e9fbf0;
+  color: #0f5c38;
   border-radius: 0.5rem;
   font-size: 0.8rem;
   font-weight: 600;
@@ -280,7 +280,7 @@
 }
 
 .metaItem i {
-  color: #f59e0b;
+  color: #21D375;
 }
 
 .resourceActions {
@@ -362,7 +362,7 @@
   display: inline-flex;
   align-items: center;
   gap: 0.5rem;
-  color: #f59e0b;
+  color: #21D375;
   text-decoration: none;
   font-weight: 600;
   transition: transform 0.2s;
@@ -404,7 +404,7 @@
   align-items: center;
   padding: 1.5rem;
   border-bottom: 2px solid #f3f4f6;
-  background: linear-gradient(135deg, #f59e0b, #fbbf24);
+  background: linear-gradient(135deg, #21D375, #179b58);
   color: white;
   border-radius: 1rem 1rem 0 0;
 }
@@ -465,7 +465,7 @@
 .formGroup select:focus,
 .formGroup textarea:focus {
   outline: none;
-  border-color: #f59e0b;
+  border-color: #21D375;
 }
 
 .formGroup textarea {
@@ -512,14 +512,14 @@
 }
 
 .submitBtn {
-  background: linear-gradient(135deg, #f59e0b, #fbbf24);
+  background: linear-gradient(135deg, #21D375, #34d399);
   color: white;
-  box-shadow: 0 4px 6px rgba(245, 158, 11, 0.2);
+  box-shadow: 0 4px 6px rgba(33, 211, 117, 0.18);
 }
 
 .submitBtn:hover {
   transform: translateY(-2px);
-  box-shadow: 0 6px 12px rgba(245, 158, 11, 0.3);
+  box-shadow: 0 6px 12px rgba(33, 211, 117, 0.28);
 }
 
 /* Responsive */

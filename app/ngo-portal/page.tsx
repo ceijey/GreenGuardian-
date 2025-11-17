@@ -300,7 +300,7 @@ export default function NGOPortalPage() {
               <div className={styles.card}>
                 <h3>Post Volunteer Opportunity</h3>
                 <p>Recruit volunteers for cleanup drives and events</p>
-                <Link href="/community-hub">
+                <Link href="/ngo-portal/volunteers">
                   <button className={styles.primaryButton}>Post Opportunity</button>
                 </Link>
               </div>
@@ -551,8 +551,8 @@ export default function NGOPortalPage() {
                     <input
                       type="number"
                       min="1"
-                      value={newChallenge.targetActions}
-                      onChange={(e) => setNewChallenge({...newChallenge, targetActions: parseInt(e.target.value)})}
+                      value={newChallenge.targetActions || ''}
+                      onChange={(e) => setNewChallenge({...newChallenge, targetActions: parseInt(e.target.value) || 10})}
                       required
                     />
                   </div>
@@ -563,8 +563,8 @@ export default function NGOPortalPage() {
                       type="number"
                       min="1"
                       max="90"
-                      value={newChallenge.duration}
-                      onChange={(e) => setNewChallenge({...newChallenge, duration: parseInt(e.target.value)})}
+                      value={newChallenge.duration || ''}
+                      onChange={(e) => setNewChallenge({...newChallenge, duration: parseInt(e.target.value) || 7})}
                       required
                     />
                   </div>

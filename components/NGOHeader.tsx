@@ -116,8 +116,8 @@ export default function NGOHeader() {
               </li>
               <li>
                 <Link 
-                  href="/profile" 
-                  className={pathname === '/profile' ? styles.active : ''}
+                  href="/ngo-portal/profile" 
+                  className={pathname.startsWith('/ngo-portal/profile') ? styles.active : ''}
                   onClick={closeMenu}
                 >
                   <i className="fas fa-user-circle" aria-hidden="true"></i>

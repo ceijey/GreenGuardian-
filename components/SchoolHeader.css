@@ -1,0 +1,8 @@
+/* Optional global copy of header styles (same theme as module) */
+:root { --gg-primary: #21D375; --gg-primary-dark: #179b58; --gg-accent: #34d399; }
+header.schoolHeader { background: linear-gradient(90deg, var(--gg-primary), var(--gg-primary-dark)); color: white; }
+header.schoolHeader .logoText { color: rgba(255,255,255,0.95); font-weight:700; }
+header.schoolHeader .navList li a { color: rgba(255,255,255,0.95); }
+header.schoolHeader .navList li a:hover { background: rgba(255,255,255,0.08); }
+header.schoolHeader .logoutButton { background: rgba(255,255,255,0.08); border-radius: 8px; }
+/* Note: global CSS must be imported in a top-level file (e.g. app/layout.tsx) in Next.js */

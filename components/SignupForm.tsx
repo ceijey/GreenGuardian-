@@ -5,6 +5,8 @@ import { useAuth } from '@/lib/AuthContext';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import Image from 'next/image';
+import TermsModal from './TermsModal';
+import PrivacyModal from './PrivacyModal';
 import styles from './SignupForm.module.css';
 
 export default function SignupForm() {
@@ -19,6 +21,9 @@ export default function SignupForm() {
   const [isLoading, setIsLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [acceptedTerms, setAcceptedTerms] = useState(false);
+  const [showTermsModal, setShowTermsModal] = useState(false);
+  const [showPrivacyModal, setShowPrivacyModal] = useState(false);
   const { signup } = useAuth();
   const router = useRouter();
   
@@ -59,6 +64,12 @@ export default function SignupForm() {
     e.preventDefault();
 
     if (isLoading) return;
+
+    // Check if terms are accepted
+    if (!acceptedTerms) {
+      setError('Please accept the Terms and Conditions to continue');
+      return;
+    }
 
     if (password !== confirmPassword) {
       return setError("Passwords don't match");
@@ -415,6 +426,39 @@ export default function SignupForm() {
             </div>
           </div>
 
+          <div className={styles.termsContainer}>
+            <label className={styles.termsLabel}>
+              <input
+                type="checkbox"
+                checked={acceptedTerms}
+                onChange={(e) => setAcceptedTerms(e.target.checked)}
+                className={styles.termsCheckbox}
+                disabled={isLoading}
+                aria-required="true"
+              />
+              <span>
+                I agree to the{' '}
+                <button
+                  type="button"
+                  onClick={() => setShowTermsModal(true)}
+                  className={styles.termsLink}
+                  disabled={isLoading}
+                >
+                  Terms and Conditions
+                </button>
+                {' '}and{' '}
+                <button
+                  type="button"
+                  onClick={() => setShowPrivacyModal(true)}
+                  className={styles.termsLink}
+                  disabled={isLoading}
+                >
+                  Privacy Policy
+                </button>
+              </span>
+            </label>
+          </div>
+
           <button 
             ref={submitButtonRef}
             type="submit" 
@@ -447,6 +491,20 @@ export default function SignupForm() {
           </div>
         </form>
       </div>
+
+      <TermsModal 
+        isOpen={showTermsModal}
+        onClose={() => setShowTermsModal(false)}
+        onAccept={() => {
+          setAcceptedTerms(true);
+          setShowTermsModal(false);
+        }}
+      />
+
+      <PrivacyModal 
+        isOpen={showPrivacyModal}
+        onClose={() => setShowPrivacyModal(false)}
+      />
     </div>
   );
 }

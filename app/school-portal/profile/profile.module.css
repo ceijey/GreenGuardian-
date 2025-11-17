@@ -1,9 +1,9 @@
 /* CSS Variables */
 :root {
-  --primary-green: #22c55e;
-  --accent-green: #16a34a;
-  --dark-green: #15803d;
-  --light-green: #86efac;
+  --primary-green: #21D375;
+  --accent-green: #179b58;
+  --dark-green: #0f5c38;
+  --light-green: #e9fbf0;
   --bg-light: #f8fafc;
   --text-dark: #1e293b;
   --text-light: #64748b;
@@ -491,6 +491,13 @@
   border-radius: 8px;
   transition: all 0.2s ease;
   font-family: inherit;
+  color: #1f2937;
+  background-color: #ffffff;
+}
+
+.formGroup input::placeholder,
+.formGroup textarea::placeholder {
+  color: #9ca3af;
 }
 
 .formGroup input:focus,

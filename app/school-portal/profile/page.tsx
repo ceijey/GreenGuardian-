@@ -4,9 +4,10 @@ import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/lib/AuthContext';
 import { db, storage } from '@/lib/firebase';
-import { doc, getDoc, updateDoc, collection, query, where, getDocs, orderBy, limit } from 'firebase/firestore';
+import { doc, getDoc, updateDoc, collection, query, where, getDocs, limit } from 'firebase/firestore';
 import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 import { updateProfile } from 'firebase/auth';
+import SchoolHeader from '@/components/SchoolHeader';
 import styles from './profile.module.css';
 
 interface SchoolStats {
@@ -166,8 +167,7 @@ export default function SchoolProfilePage() {
       const resourcesQuery = query(
         collection(db, 'educationalResources'),
         where('createdBy', '==', user.uid),
-        orderBy('createdAt', 'desc'),
-        limit(5)
+        limit(50)
       );
       const resourcesSnapshot = await getDocs(resourcesQuery);
       resourcesSnapshot.forEach((doc) => {
@@ -185,8 +185,7 @@ export default function SchoolProfilePage() {
       const challengesQuery = query(
         collection(db, 'challenges'),
         where('createdBy', '==', user.uid),
-        orderBy('createdAt', 'desc'),
-        limit(5)
+        limit(50)
       );
       const challengesSnapshot = await getDocs(challengesQuery);
       challengesSnapshot.forEach((doc) => {
@@ -334,8 +333,10 @@ export default function SchoolProfilePage() {
   }
 
   return (
-    <div className={styles.container}>
-      {/* Profile Header */}
+    <>
+      <SchoolHeader />
+      <div className={styles.container}>
+        {/* Profile Header */}
       <div className={styles.profileHeader}>
         <div className={styles.headerActions}>
           <button className={styles.settingsButton} onClick={() => setShowSettingsModal(true)}>
@@ -669,6 +670,7 @@ export default function SchoolProfilePage() {
           </div>
         </div>
       )}
-    </div>
+      </div>
+    </>
   );
 }

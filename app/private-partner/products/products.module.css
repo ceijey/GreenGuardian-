@@ -1,6 +1,6 @@
 .container {
   min-height: 100vh;
-  background: linear-gradient(135deg, #38b2ac 0%, #2c7a7b 100%);
+  background: linear-gradient(135deg, #e9fbf0 0%, #f0fff6 100%);
 }
 
 .loading {
@@ -9,7 +9,7 @@
   align-items: center;
   justify-content: center;
   height: 60vh;
-  color: white;
+  color: rgb(15, 213, 97);
   font-size: 1.5rem;
   gap: 1rem;
 }
@@ -25,7 +25,7 @@
   justify-content: space-between;
   align-items: center;
   margin-bottom: 3rem;
-  color: white;
+  color: rgb(79, 77, 77);
 }
 
 .header h1 {
@@ -41,7 +41,7 @@
 .addButton {
   padding: 1rem 2rem;
   background: white;
-  color: #38b2ac;
+  color: #21D375;
   border: none;
   border-radius: 8px;
   cursor: pointer;
@@ -78,7 +78,7 @@
 
 .statCard i {
   font-size: 2.5rem;
-  color: #38b2ac;
+  color: #21D375;
 }
 
 .statContent {
@@ -108,7 +108,7 @@
 
 .emptyState i {
   font-size: 5rem;
-  color: #38b2ac;
+  color: #21D375;
   margin-bottom: 1.5rem;
   opacity: 0.5;
 }
@@ -127,7 +127,7 @@
 
 .ctaButton {
   padding: 1rem 2rem;
-  background: #38b2ac;
+  background: linear-gradient(135deg, #21D375 0%, #34d399 100%);
   color: white;
   border: none;
   border-radius: 8px;
@@ -141,7 +141,7 @@
 }
 
 .ctaButton:hover {
-  background: #319795;
+  background: linear-gradient(135deg, #179b58 0%, #10b981 100%);
   transform: translateY(-2px);
 }
 
@@ -166,7 +166,7 @@
 
 .featureCard i {
   font-size: 3rem;
-  color: #38b2ac;
+  color: #21D375;
   margin-bottom: 1rem;
 }
 
@@ -277,7 +277,7 @@
 }
 
 .detailItem i {
-  color: #38b2ac;
+  color: #21D375;
 }
 
 .badge {
@@ -331,12 +331,38 @@
 .price {
   font-size: 1.5rem;
   font-weight: bold;
-  color: #38b2ac;
+  color: #21D375;
   margin-bottom: 1rem;
 }
 
+.productActions {
+  display: flex;
+  gap: 0.5rem;
+  margin-top: 1rem;
+}
+
+.editButton {
+  flex: 1;
+  padding: 0.8rem;
+  background: #4299e1;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: 600;
+  transition: background 0.3s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+}
+
+.editButton:hover {
+  background: #3182ce;
+}
+
 .deleteButton {
-  width: 100%;
+  flex: 1;
   padding: 0.8rem;
   background: #fc8181;
   color: white;
@@ -345,6 +371,10 @@
   cursor: pointer;
   font-weight: 600;
   transition: background 0.3s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
 }
 
 .deleteButton:hover {
@@ -426,13 +456,72 @@
   border-radius: 6px;
   font-size: 1rem;
   transition: border-color 0.3s ease;
+  color: #1f2937;
+  background-color: #ffffff;
+}
+
+.formGroup input::placeholder,
+.formGroup textarea::placeholder {
+  color: #9ca3af;
 }
 
 .formGroup input:focus,
 .formGroup select:focus,
 .formGroup textarea:focus {
   outline: none;
-  border-color: #38b2ac;
+  border-color: #21D375;
+}
+
+.fileInput {
+  padding: 0.5rem !important;
+  cursor: pointer;
+}
+
+.uploadStatus {
+  margin-top: 0.5rem;
+  color: #21D375;
+  font-size: 0.9rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.imagePreview {
+  margin-top: 1rem;
+  position: relative;
+  border: 2px solid #e2e8f0;
+  border-radius: 8px;
+  padding: 1rem;
+  background: #f8fafc;
+}
+
+.imagePreview img {
+  width: 100%;
+  max-height: 300px;
+  object-fit: contain;
+  border-radius: 6px;
+  margin-bottom: 0.75rem;
+}
+
+.removeImageButton {
+  width: 100%;
+  padding: 0.5rem;
+  background: #ef4444;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 0.9rem;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  transition: background 0.3s ease;
+}
+
+.removeImageButton:hover {
+  background: #dc2626;
 }
 
 .formRow {
@@ -485,12 +574,12 @@
 }
 
 .submitButton {
-  background: #38b2ac;
+  background: linear-gradient(135deg, #21D375 0%, #34d399 100%);
   color: white;
 }
 
 .submitButton:hover:not(:disabled) {
-  background: #319795;
+  background: linear-gradient(135deg, #179b58 0%, #10b981 100%);
 }
 
 .submitButton:disabled {

@@ -1,11 +1,12 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useAuth } from '@/lib/AuthContext';
 import CitizenOnly from '@/components/CitizenOnly';
 import Header from '../../components/Header';
 import ChallengeCard from '@/components/ChallengeCard';
 import BadgeDisplay from '@/components/BadgeDisplay';
+import { useSearchParams } from 'next/navigation';
 import { 
   collection, 
   query, 
@@ -99,6 +100,8 @@ interface CombinedActivity {
 
 export default function CommunityHubPage() {
   const { user } = useAuth();
+  const searchParams = useSearchParams();
+  const challengeRefs = useRef<{ [key: string]: HTMLDivElement | null }>({});
   
   // State
   const [mainTab, setMainTab] = useState<'challenges' | 'events' | 'activity'>('challenges'); // NEW: Added 'activity' tab
@@ -107,6 +110,7 @@ export default function CommunityHubPage() {
   const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
   const [loading, setLoading] = useState(true);
   const [activities, setActivities] = useState<CombinedActivity[]>([]); // NEW: Activity feed
+  const [highlightedChallengeId, setHighlightedChallengeId] = useState<string | null>(null);
   
   // Challenge filters
   const [challengeTab, setChallengeTab] = useState<'active' | 'upcoming' | 'completed' | 'archived'>('active');
@@ -141,7 +145,10 @@ export default function CommunityHubPage() {
 
   // Load challenges
   useEffect(() => {
-    const q = query(collection(db, 'challenges'));
+    const q = query(
+      collection(db, 'challenges'),
+      where('isActive', '==', true)
+    );
     const unsubscribe = onSnapshot(q, (snapshot) => {
       const challengesData: Challenge[] = [];
       snapshot.forEach((doc) => {
@@ -206,6 +213,29 @@ export default function CommunityHubPage() {
 
     loadProfile();
   }, [user]);
+
+  // Handle challenge highlighting from query parameter
+  useEffect(() => {
+    const challengeId = searchParams.get('challengeId');
+    if (challengeId && challenges.length > 0) {
+      setHighlightedChallengeId(challengeId);
+      setMainTab('challenges');
+      setChallengeTab('active');
+      
+      // Scroll to the challenge after a short delay to ensure rendering
+      setTimeout(() => {
+        const element = challengeRefs.current[challengeId];
+        if (element) {
+          element.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+      }, 500);
+
+      // Remove highlight after 3 seconds
+      setTimeout(() => {
+        setHighlightedChallengeId(null);
+      }, 3500);
+    }
+  }, [searchParams, challenges]);
 
   // NEW: Load unified activity feed (Option 3)
   useEffect(() => {
@@ -684,9 +714,14 @@ export default function CommunityHubPage() {
                 {filteredChallenges.map(challenge => {
                   // NEW: Get related events for this challenge (Option 4)
                   const relatedEvents = getRelatedEvents(challenge);
+                  const isHighlighted = highlightedChallengeId === challenge.id;
                   
                   return (
-                    <div key={challenge.id} className={styles.challengeWrapper}>
+                    <div 
+                      key={challenge.id} 
+                      className={`${styles.challengeWrapper} ${isHighlighted ? styles.highlighted : ''}`}
+                      ref={(el) => { challengeRefs.current[challenge.id] = el; }}
+                    >
                       <ChallengeCard
                         challenge={challenge}
                         currentUser={user}

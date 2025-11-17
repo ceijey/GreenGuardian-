@@ -38,6 +38,12 @@ export default function ReportsPage() {
   const [companyName, setCompanyName] = useState('Your Company');
   const [isLoading, setIsLoading] = useState(true);
   const [selectedType, setSelectedType] = useState<'all' | 'impact' | 'financial' | 'sustainability' | 'compliance'>('all');
+  const [showShareModal, setShowShareModal] = useState(false);
+  const [selectedReport, setSelectedReport] = useState<Report | null>(null);
+  const [shareMethod, setShareMethod] = useState<'email' | 'link' | 'social' | null>(null);
+  const [shareEmail, setShareEmail] = useState('');
+  const [shareMessage, setShareMessage] = useState('');
+  const [copied, setCopied] = useState(false);
   const [analyticsData, setAnalyticsData] = useState<AnalyticsData>({
     totalImpressions: 0,
     totalInvestment: 0,
@@ -409,6 +415,79 @@ export default function ReportsPage() {
     reportWindow.document.close();
   };
 
+  const handleShare = (report: Report) => {
+    setSelectedReport(report);
+    setShowShareModal(true);
+    setShareMethod(null);
+    setShareEmail('');
+    setShareMessage('');
+    setCopied(false);
+  };
+
+  const generateShareableLink = (report: Report) => {
+    const baseUrl = window.location.origin;
+    return `${baseUrl}/reports/shared/${report.id}?company=${encodeURIComponent(companyName)}`;
+  };
+
+  const handleCopyLink = () => {
+    if (!selectedReport) return;
+    const link = generateShareableLink(selectedReport);
+    navigator.clipboard.writeText(link);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 3000);
+  };
+
+  const handleEmailShare = async () => {
+    if (!selectedReport || !shareEmail) {
+      alert('Please enter an email address');
+      return;
+    }
+
+    try {
+      const subject = encodeURIComponent(`${companyName} - ${selectedReport.title}`);
+      const body = encodeURIComponent(
+        `${shareMessage || 'I wanted to share this report with you:'}\n\n` +
+        `Report: ${selectedReport.title}\n` +
+        `Period: ${selectedReport.period}\n` +
+        `Generated: ${new Date(selectedReport.generatedDate).toLocaleDateString()}\n\n` +
+        `View report: ${generateShareableLink(selectedReport)}\n\n` +
+        `Best regards,\n${companyName}`
+      );
+      
+      window.location.href = `mailto:${shareEmail}?subject=${subject}&body=${body}`;
+      
+      setTimeout(() => {
+        alert('Email client opened! Please send the email.');
+        setShowShareModal(false);
+      }, 500);
+    } catch (error) {
+      console.error('Error sharing via email:', error);
+      alert('Failed to open email client. Please try copying the link instead.');
+    }
+  };
+
+  const handleSocialShare = (platform: 'twitter' | 'linkedin' | 'facebook') => {
+    if (!selectedReport) return;
+
+    const link = generateShareableLink(selectedReport);
+    const text = `${companyName} - ${selectedReport.title}`;
+    let shareUrl = '';
+
+    switch (platform) {
+      case 'twitter':
+        shareUrl = `https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}&url=${encodeURIComponent(link)}`;
+        break;
+      case 'linkedin':
+        shareUrl = `https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(link)}`;
+        break;
+      case 'facebook':
+        shareUrl = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(link)}`;
+        break;
+    }
+
+    window.open(shareUrl, '_blank', 'width=600,height=400');
+  };
+
   if (loading || isLoading) {
     return (
       <div className={styles.container}>
@@ -564,7 +643,10 @@ export default function ReportsPage() {
                   <i className="fas fa-download"></i>
                   Download
                 </button>
-                <button className={styles.shareButton}>
+                <button 
+                  className={styles.shareButton}
+                  onClick={() => handleShare(report)}
+                >
                   <i className="fas fa-share-alt"></i>
                   Share
                 </button>
@@ -593,6 +675,130 @@ export default function ReportsPage() {
           </div>
         </div>
       </main>
+
+      {showShareModal && selectedReport && (
+        <div className={styles.modalOverlay} onClick={() => setShowShareModal(false)}>
+          <div className={styles.modalContent} onClick={(e) => e.stopPropagation()}>
+            <div className={styles.modalHeader}>
+              <h3>Share Report</h3>
+              <button className={styles.closeButton} onClick={() => setShowShareModal(false)}>
+                <i className="fas fa-times"></i>
+              </button>
+            </div>
+            <div className={styles.modalBody}>
+              <div className={styles.reportPreview}>
+                <h4>{selectedReport.title}</h4>
+                <p><i className="fas fa-calendar"></i> {selectedReport.period}</p>
+              </div>
+
+              <div className={styles.shareOptions}>
+                <button 
+                  className={`${styles.shareOption} ${shareMethod === 'link' ? styles.active : ''}`}
+                  onClick={() => setShareMethod('link')}
+                >
+                  <i className="fas fa-link"></i>
+                  <span>Copy Link</span>
+                </button>
+                <button 
+                  className={`${styles.shareOption} ${shareMethod === 'email' ? styles.active : ''}`}
+                  onClick={() => setShareMethod('email')}
+                >
+                  <i className="fas fa-envelope"></i>
+                  <span>Share via Email</span>
+                </button>
+                <button 
+                  className={`${styles.shareOption} ${shareMethod === 'social' ? styles.active : ''}`}
+                  onClick={() => setShareMethod('social')}
+                >
+                  <i className="fas fa-share-nodes"></i>
+                  <span>Social Media</span>
+                </button>
+              </div>
+
+              {shareMethod === 'link' && (
+                <div className={styles.shareSection}>
+                  <h4>Shareable Link</h4>
+                  <div className={styles.linkBox}>
+                    <input 
+                      type="text" 
+                      value={generateShareableLink(selectedReport)}
+                      readOnly
+                    />
+                    <button onClick={handleCopyLink}>
+                      <i className={copied ? 'fas fa-check' : 'fas fa-copy'}></i>
+                      {copied ? 'Copied!' : 'Copy'}
+                    </button>
+                  </div>
+                  <p className={styles.shareNote}>
+                    <i className="fas fa-info-circle"></i>
+                    Anyone with this link can view the report
+                  </p>
+                </div>
+              )}
+
+              {shareMethod === 'email' && (
+                <div className={styles.shareSection}>
+                  <h4>Share via Email</h4>
+                  <div className={styles.formGroup}>
+                    <label>Recipient Email</label>
+                    <input 
+                      type="email" 
+                      placeholder="colleague@company.com"
+                      value={shareEmail}
+                      onChange={(e) => setShareEmail(e.target.value)}
+                    />
+                  </div>
+                  <div className={styles.formGroup}>
+                    <label>Message (Optional)</label>
+                    <textarea 
+                      placeholder="Add a personal message..."
+                      rows={3}
+                      value={shareMessage}
+                      onChange={(e) => setShareMessage(e.target.value)}
+                    />
+                  </div>
+                  <button className={styles.sendButton} onClick={handleEmailShare}>
+                    <i className="fas fa-paper-plane"></i>
+                    Send Email
+                  </button>
+                </div>
+              )}
+
+              {shareMethod === 'social' && (
+                <div className={styles.shareSection}>
+                  <h4>Share on Social Media</h4>
+                  <div className={styles.socialButtons}>
+                    <button 
+                      className={styles.socialButton}
+                      style={{ backgroundColor: '#1DA1F2' }}
+                      onClick={() => handleSocialShare('twitter')}
+                    >
+                      <i className="fab fa-twitter"></i>
+                      Share on Twitter
+                    </button>
+                    <button 
+                      className={styles.socialButton}
+                      style={{ backgroundColor: '#0A66C2' }}
+                      onClick={() => handleSocialShare('linkedin')}
+                    >
+                      <i className="fab fa-linkedin"></i>
+                      Share on LinkedIn
+                    </button>
+                    <button 
+                      className={styles.socialButton}
+                      style={{ backgroundColor: '#1877F2' }}
+                      onClick={() => handleSocialShare('facebook')}
+                    >
+                      <i className="fab fa-facebook"></i>
+                      Share on Facebook
+                    </button>
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

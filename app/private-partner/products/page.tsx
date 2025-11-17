@@ -11,6 +11,7 @@ import {
   where, 
   onSnapshot,
   addDoc,
+  updateDoc,
   deleteDoc,
   serverTimestamp 
 } from 'firebase/firestore';
@@ -43,6 +44,9 @@ export default function ProductsPage() {
   const [showAddModal, setShowAddModal] = useState(false);
   const [products, setProducts] = useState<Product[]>([]);
   const [submitting, setSubmitting] = useState(false);
+  const [editingProduct, setEditingProduct] = useState<Product | null>(null);
+  const [uploading, setUploading] = useState(false);
+  const [imageFile, setImageFile] = useState<File | null>(null);
   
   const [formData, setFormData] = useState({
     name: '',
@@ -105,13 +109,100 @@ export default function ProductsPage() {
     return unsubscribe;
   }, [user]);
 
+  const compressImage = (file: File): Promise<string> => {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.readAsDataURL(file);
+      reader.onload = (event) => {
+        const img = new Image();
+        img.src = event.target?.result as string;
+        img.onload = () => {
+          const canvas = document.createElement('canvas');
+          const MAX_WIDTH = 800;
+          const MAX_HEIGHT = 800;
+          let width = img.width;
+          let height = img.height;
+
+          if (width > height) {
+            if (width > MAX_WIDTH) {
+              height *= MAX_WIDTH / width;
+              width = MAX_WIDTH;
+            }
+          } else {
+            if (height > MAX_HEIGHT) {
+              width *= MAX_HEIGHT / height;
+              height = MAX_HEIGHT;
+            }
+          }
+
+          canvas.width = width;
+          canvas.height = height;
+          const ctx = canvas.getContext('2d');
+          ctx?.drawImage(img, 0, 0, width, height);
+
+          const compressedBase64 = canvas.toDataURL('image/jpeg', 0.7);
+          resolve(compressedBase64);
+        };
+        img.onerror = reject;
+      };
+      reader.onerror = reject;
+    });
+  };
+
+  const handleImageChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (!file.type.startsWith('image/')) {
+      alert('Please select an image file');
+      return;
+    }
+
+    if (file.size > 5 * 1024 * 1024) {
+      alert('Image size should be less than 5MB');
+      return;
+    }
+
+    setUploading(true);
+    setImageFile(file);
+
+    try {
+      const compressedImage = await compressImage(file);
+      setFormData({ ...formData, imageUrl: compressedImage });
+    } catch (error) {
+      console.error('Error compressing image:', error);
+      alert('Failed to process image');
+    } finally {
+      setUploading(false);
+    }
+  };
+
+  const handleEdit = (product: Product) => {
+    setEditingProduct(product);
+    setImageFile(null);
+    setFormData({
+      name: product.name,
+      category: product.category,
+      description: product.description,
+      ecoScore: product.ecoScore,
+      carbonFootprint: product.carbonFootprint,
+      recyclable: product.recyclable,
+      biodegradable: product.biodegradable,
+      sustainableMaterials: product.sustainableMaterials.join(', '),
+      certifications: product.certifications.join(', '),
+      price: product.price?.toString() || '',
+      imageUrl: product.imageUrl || ''
+    });
+    setShowAddModal(true);
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!user) return;
 
     setSubmitting(true);
     try {
-      await addDoc(collection(db, 'products'), {
+      const productData = {
         name: formData.name,
         category: formData.category,
         description: formData.description,
@@ -123,9 +214,21 @@ export default function ProductsPage() {
         certifications: formData.certifications.split(',').map(s => s.trim()).filter(s => s),
         price: parseFloat(formData.price) || 0,
         imageUrl: formData.imageUrl,
-        sponsorId: user.uid,
-        createdAt: serverTimestamp()
-      });
+        sponsorId: user.uid
+      };
+
+      if (editingProduct) {
+        // Update existing product
+        await updateDoc(doc(db, 'products', editingProduct.id), productData);
+        alert('✅ Product updated successfully!');
+      } else {
+        // Add new product
+        await addDoc(collection(db, 'products'), {
+          ...productData,
+          createdAt: serverTimestamp()
+        });
+        alert('✅ Product registered successfully!');
+      }
 
       // Reset form
       setFormData({
@@ -141,11 +244,12 @@ export default function ProductsPage() {
         price: '',
         imageUrl: ''
       });
+      setEditingProduct(null);
+      setImageFile(null);
       setShowAddModal(false);
-      alert('✅ Product registered successfully!');
     } catch (error) {
-      console.error('Error adding product:', error);
-      alert('Failed to register product. Please try again.');
+      console.error('Error saving product:', error);
+      alert('Failed to save product. Please try again.');
     } finally {
       setSubmitting(false);
     }
@@ -333,12 +437,20 @@ export default function ProductsPage() {
                     </div>
                   )}
 
-                  <button 
-                    className={styles.deleteButton}
-                    onClick={() => handleDelete(product.id)}
-                  >
-                    <i className="fas fa-trash"></i> Delete
-                  </button>
+                  <div className={styles.productActions}>
+                    <button 
+                      className={styles.editButton}
+                      onClick={() => handleEdit(product)}
+                    >
+                      <i className="fas fa-edit"></i> Edit
+                    </button>
+                    <button 
+                      className={styles.deleteButton}
+                      onClick={() => handleDelete(product.id)}
+                    >
+                      <i className="fas fa-trash"></i> Delete
+                    </button>
+                  </div>
                 </div>
               </div>
             ))}
@@ -346,11 +458,17 @@ export default function ProductsPage() {
         )}
 
         {showAddModal && (
-          <div className={styles.modal} onClick={() => setShowAddModal(false)}>
+          <div className={styles.modal} onClick={() => {
+            setShowAddModal(false);
+            setEditingProduct(null);
+          }}>
             <div className={styles.modalContent} onClick={(e) => e.stopPropagation()}>
               <div className={styles.modalHeader}>
-                <h2>Register New Product</h2>
-                <button onClick={() => setShowAddModal(false)}>
+                <h2>{editingProduct ? 'Edit Product' : 'Register New Product'}</h2>
+                <button onClick={() => {
+                  setShowAddModal(false);
+                  setEditingProduct(null);
+                }}>
                   <i className="fas fa-times"></i>
                 </button>
               </div>
@@ -476,19 +594,42 @@ export default function ProductsPage() {
                 </div>
 
                 <div className={styles.formGroup}>
-                  <label>Image URL</label>
+                  <label>Product Image</label>
                   <input
-                    type="url"
-                    value={formData.imageUrl}
-                    onChange={(e) => setFormData({...formData, imageUrl: e.target.value})}
-                    placeholder="https://example.com/product-image.jpg"
+                    type="file"
+                    accept="image/*"
+                    onChange={handleImageChange}
+                    className={styles.fileInput}
                   />
+                  {uploading && (
+                    <p className={styles.uploadStatus}>
+                      <i className="fas fa-spinner fa-spin"></i> Compressing image...
+                    </p>
+                  )}
+                  {formData.imageUrl && (
+                    <div className={styles.imagePreview}>
+                      <img src={formData.imageUrl} alt="Preview" />
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setFormData({...formData, imageUrl: ''});
+                          setImageFile(null);
+                        }}
+                        className={styles.removeImageButton}
+                      >
+                        <i className="fas fa-times"></i> Remove
+                      </button>
+                    </div>
+                  )}
                 </div>
 
                 <div className={styles.modalActions}>
                   <button 
                     type="button" 
-                    onClick={() => setShowAddModal(false)}
+                    onClick={() => {
+                      setShowAddModal(false);
+                      setEditingProduct(null);
+                    }}
                     className={styles.cancelButton}
                   >
                     Cancel
@@ -498,7 +639,7 @@ export default function ProductsPage() {
                     className={styles.submitButton}
                     disabled={submitting}
                   >
-                    {submitting ? 'Registering...' : 'Register Product'}
+                    {submitting ? (editingProduct ? 'Updating...' : 'Registering...') : (editingProduct ? 'Update Product' : 'Register Product')}
                   </button>
                 </div>
               </form>

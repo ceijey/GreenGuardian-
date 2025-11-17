@@ -1,6 +1,7 @@
+/* Private Partner - Sponsorships (green theme) */
 .container {
   min-height: 100vh;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+   background: linear-gradient(135deg, #e9fbf0 0%, #f0fff6 100%);
 }
 
 .loading {
@@ -9,7 +10,7 @@
   align-items: center;
   justify-content: center;
   height: 60vh;
-  color: white;
+  color: rgb(10, 217, 58);
   font-size: 1.5rem;
   gap: 1rem;
 }
@@ -23,7 +24,7 @@
 .header {
   text-align: center;
   margin-bottom: 3rem;
-  color: white;
+  color: rgb(5, 5, 5);
 }
 
 .header h1 {
@@ -55,7 +56,7 @@
 
 .statCard i {
   font-size: 2.5rem;
-  color: #667eea;
+  color: #21D375;
 }
 
 .statContent {
@@ -71,7 +72,7 @@
 
 .statLabel {
   font-size: 0.9rem;
-  color: #718096;
+  color: #111316;
 }
 
 .filters {
@@ -85,7 +86,7 @@
   padding: 0.75rem 1.5rem;
   border: none;
   background: rgba(255, 255, 255, 0.2);
-  color: white;
+  color: rgb(41, 39, 39);
   border-radius: 8px;
   cursor: pointer;
   font-size: 1rem;
@@ -100,13 +101,13 @@
 }
 
 .filters button:hover {
-  background: rgba(255, 255, 255, 0.3);
+  background: rgba(4, 128, 45, 0.593);
   transform: translateY(-2px);
 }
 
 .filters button.active {
-  background: white;
-  color: #667eea;
+  background: rgba(19, 176, 71, 0.178);
+  color: #21D375;
   font-weight: 600;
 }
 
@@ -134,7 +135,7 @@
   justify-content: space-between;
   align-items: center;
   padding: 1.5rem;
-  border-bottom: 1px solid #e2e8f0;
+  border-bottom: 1px solid #e6f6ec;
 }
 
 .cardHeader h3 {
@@ -158,8 +159,8 @@
 }
 
 .badge.completed {
-  background: #bee3f8;
-  color: #2c5282;
+  background: #c8f6dc;
+  color: #22543d;
 }
 
 .badge.pending {
@@ -187,7 +188,7 @@
 
 .metric i {
   font-size: 1.5rem;
-  color: #667eea;
+  color: #21D375;
 }
 
 .metric div {
@@ -208,14 +209,14 @@
 
 .cardFooter {
   padding: 1rem 1.5rem;
-  border-top: 1px solid #e2e8f0;
+  border-top: 1px solid #e6f6ec;
   display: flex;
   justify-content: flex-end;
 }
 
 .viewButton {
   padding: 0.75rem 1.5rem;
-  background: #667eea;
+  background: linear-gradient(135deg, #21D375 0%, #34d399 100%);
   color: white;
   border: none;
   border-radius: 8px;
@@ -228,7 +229,7 @@
 }
 
 .viewButton:hover {
-  background: #5a67d8;
+  background: linear-gradient(135deg, #179b58 0%, #10b981 100%);
   transform: translateY(-2px);
 }
 
@@ -283,7 +284,7 @@
   justify-content: space-between;
   align-items: center;
   padding: 2rem;
-  border-bottom: 2px solid #e2e8f0;
+  border-bottom: 2px solid #e6f6ec;
 }
 
 .modalHeader h2 {
@@ -348,7 +349,7 @@
 }
 
 .participantsTable thead {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, #21D375 0%, #179b58 100%);
   color: white;
 }
 
@@ -361,7 +362,7 @@
 }
 
 .participantsTable tbody tr {
-  border-bottom: 1px solid #e2e8f0;
+  border-bottom: 1px solid #e6f6ec;
   transition: background 0.2s ease;
 }
 
@@ -383,7 +384,7 @@
 }
 
 .participantName i {
-  color: #667eea;
+  color: #21D375;
   font-size: 1.2rem;
 }
 
@@ -416,7 +417,7 @@
 }
 
 .statusIssued i {
-  color: #38a169;
+  color: #179b58;
 }
 
 .statusPending {
@@ -440,15 +441,15 @@
   align-items: center;
   gap: 0.5rem;
   padding: 0.5rem 1rem;
-  background: #bee3f8;
-  color: #2c5282;
+  background: #c8f6dc;
+  color: #22543d;
   border-radius: 20px;
   font-weight: 600;
   font-size: 0.85rem;
 }
 
 .statusVerified i {
-  color: #3182ce;
+  color: #21D375;
 }
 
 .statusNotVerified {
@@ -475,7 +476,7 @@
 
 .verifyActionBtn {
   padding: 0.5rem 1rem;
-  background: #667eea;
+  background: linear-gradient(135deg, #21D375 0%, #34d399 100%);
   color: white;
   border: none;
   border-radius: 6px;
@@ -489,7 +490,7 @@
 }
 
 .verifyActionBtn:hover {
-  background: #5a67d8;
+  background: linear-gradient(135deg, #179b58 0%, #10b981 100%);
   transform: translateY(-2px);
 }
 
@@ -523,7 +524,7 @@
 }
 
 .infoText i {
-  color: #4299e1;
+  color: #21D375;
 }
 
 .verifyBtn {

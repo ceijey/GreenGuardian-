@@ -11,7 +11,7 @@
   width: 50px;
   height: 50px;
   border: 4px solid #f3f3f3;
-  border-top: 4px solid #f59e0b;
+  border-top: 4px solid #21D375;
   border-radius: 50%;
   animation: spin 1s linear infinite;
 }
@@ -23,12 +23,12 @@
 
 .container {
   min-height: 100vh;
-  background: linear-gradient(135deg, #fef3c7 0%, #fef9e7 100%);
+  background: linear-gradient(135deg, #e9fbf0 0%, #f0fff6 100%);
   padding-bottom: 3rem;
 }
 
 .hero {
-  background: linear-gradient(135deg, #f59e0b 0%, #fbbf24 100%);
+  background: linear-gradient(135deg, #21D375 0%, #179b58 100%);
   color: white;
   padding: 3rem 2rem;
   text-align: center;
@@ -39,6 +39,7 @@
   font-size: 2.5rem;
   font-weight: bold;
   margin-bottom: 1rem;
+  color: white;
 }
 
 .subtitle {
@@ -68,7 +69,7 @@
 
 .sectionTitle {
   font-size: 1.75rem;
-  color: #f59e0b;
+  color: #0f5c38;
   display: flex;
   align-items: center;
   gap: 0.75rem;
@@ -81,22 +82,22 @@
 }
 
 .card {
-  background: linear-gradient(135deg, #fffbf0 0%, #ffffff 100%);
-  border: 2px solid #e5e7eb;
+  background: linear-gradient(135deg, #21D375 0%, #aef1d1 100%);
+  border: 2px solid #c8f6dc;
   border-radius: 12px;
   padding: 1.5rem;
   transition: all 0.3s ease;
 }
 
 .card:hover {
-  border-color: #fbbf24;
+  border-color: #21D375;
   transform: translateY(-4px);
-  box-shadow: 0 8px 16px rgba(251, 191, 36, 0.15);
+  box-shadow: 0 8px 16px rgba(33, 211, 117, 0.25);
 }
 
 .cardIcon {
   font-size: 2.5rem;
-  color: #fbbf24;
+  color: #0f5c38;
   margin-bottom: 1rem;
 }
 
@@ -117,7 +118,7 @@
   flex-direction: column;
   align-items: center;
   padding: 1rem;
-  background: linear-gradient(135deg, #fef3c7 0%, #fef9e7 100%);
+  background: linear-gradient(135deg, #e9fbf0 0%, #ffffff 100%);
   border-radius: 8px;
   margin-top: 1rem;
 }
@@ -125,7 +126,7 @@
 .statValue {
   font-size: 2.5rem;
   font-weight: bold;
-  color: #f59e0b;
+  color: #21D375;
 }
 
 .statLabel {
@@ -136,7 +137,7 @@
 }
 
 .primaryButton {
-  background: linear-gradient(135deg, #f59e0b 0%, #fbbf24 100%);
+  background: linear-gradient(135deg, #21D375 0%, #34d399 100%);
   color: white;
   border: none;
   padding: 0.75rem 1.5rem;
@@ -149,15 +150,15 @@
 }
 
 .primaryButton:hover {
-  background: linear-gradient(135deg, #d97706 0%, #f59e0b 100%);
+  background: linear-gradient(135deg, #179b58 0%, #21D375 100%);
   transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(245, 158, 11, 0.3);
+  box-shadow: 0 4px 12px rgba(33, 211, 117, 0.38);
 }
 
 .secondaryButton {
   background: white;
-  color: #f59e0b;
-  border: 2px solid #f59e0b;
+  color: #21D375;
+  border: 2px solid #21D375;
   padding: 0.75rem 1.5rem;
   border-radius: 8px;
   font-size: 1rem;
@@ -168,9 +169,9 @@
 }
 
 .secondaryButton:hover {
-  background: #fef9e7;
+  background: #e9fbf0;
   transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(245, 158, 11, 0.15);
+  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.2);
 }
 
 .impactGrid {
@@ -180,8 +181,8 @@
 }
 
 .impactCard {
-  background: linear-gradient(135deg, #ffffff 0%, #fffbf0 100%);
-  border: 2px solid #fef3c7;
+  background: linear-gradient(135deg, #ffffff 0%, #e9fbf0 100%);
+  border: 2px solid #c8f6dc;
   border-radius: 12px;
   padding: 1.5rem;
   display: flex;
@@ -190,14 +191,14 @@
 }
 
 .impactCard:hover {
-  border-color: #fbbf24;
+  border-color: #21D375;
   transform: translateY(-4px);
-  box-shadow: 0 8px 16px rgba(251, 191, 36, 0.15);
+  box-shadow: 0 8px 16px rgba(16, 185, 129, 0.2);
 }
 
 .impactIcon {
   font-size: 2.5rem;
-  color: #fbbf24;
+  color: #21D375;
 }
 
 .impactContent {
@@ -215,14 +216,14 @@
 .impactValue {
   font-size: 1.75rem;
   font-weight: bold;
-  color: #f59e0b;
+  color: #10b981;
   display: block;
   margin-bottom: 0.25rem;
 }
 
 .impactTrend {
   font-size: 0.875rem;
-  color: #fbbf24;
+  color: #10b981;
   font-weight: 600;
 }
 
@@ -237,8 +238,8 @@
 }
 
 .resourceCard {
-  background: linear-gradient(135deg, #fef9e7 0%, #ffffff 100%);
-  border: 2px solid #fef3c7;
+  background: linear-gradient(135deg, #e9fbf0 0%, #ffffff 100%);
+  border: 2px solid #c8f6dc;
   border-radius: 12px;
   padding: 1.5rem;
   text-align: center;
@@ -246,14 +247,14 @@
 }
 
 .resourceCard:hover {
-  border-color: #fbbf24;
+  border-color: #21D375;
   transform: translateY(-4px);
-  box-shadow: 0 8px 16px rgba(251, 191, 36, 0.15);
+  box-shadow: 0 8px 16px rgba(16, 185, 129, 0.2);
 }
 
 .resourceIcon {
   font-size: 3rem;
-  color: #fbbf24;
+  color: #10b981;
   margin-bottom: 1rem;
 }
 
@@ -286,8 +287,8 @@
 }
 
 .actionButton {
-  background: linear-gradient(135deg, #fef9e7 0%, #ffffff 100%);
-  border: 2px solid #fef3c7;
+  background: linear-gradient(135deg, #d1fae5 0%, #ffffff 100%);
+  border: 2px solid #d1fae5;
   border-radius: 12px;
   padding: 1.25rem;
   display: flex;
@@ -298,14 +299,14 @@
   transition: all 0.3s ease;
   font-size: 1rem;
   font-weight: 600;
-  color: #f59e0b;
+  color: #10b981;
 }
 
 .actionButton:hover {
-  border-color: #fbbf24;
-  background: linear-gradient(135deg, #fef3c7 0%, #fef9e7 100%);
+  border-color: #6ee7b7;
+  background: linear-gradient(135deg, #d1fae5 0%, #ecfdf5 100%);
   transform: translateY(-4px);
-  box-shadow: 0 6px 12px rgba(251, 191, 36, 0.15);
+  box-shadow: 0 6px 12px rgba(16, 185, 129, 0.2);
 }
 
 .actionButton i {
@@ -343,7 +344,7 @@
   background: rgba(255, 255, 255, 0.1);
   border: 1px solid rgba(255, 255, 255, 0.2);
   border-radius: 8px;
-  color: white;
+  color: rgb(58, 55, 55);
   text-decoration: none;
   font-size: 0.875rem;
   font-weight: 500;
@@ -359,18 +360,18 @@
 .resourceHubWrapper {
   margin-bottom: 2rem;
   padding: 2rem;
-  background: linear-gradient(135deg, #fef3c7 0%, #fef9e7 100%);
+  background: linear-gradient(135deg, #d1fae5 0%, #ecfdf5 100%);
   border-radius: 16px;
-  border: 2px solid #fbbf24;
+  border: 2px solid #6ee7b7;
 }
 
 .resourceHubWrapper h2 {
-  color: #92400e;
+  color: #047857;
   margin-bottom: 1rem;
 }
 
 .resourceHubWrapper p {
-  color: #78350f;
+  color: #065f46;
 }
 
 @media (max-width: 768px) {
@@ -399,7 +400,7 @@
 
 .studentItem {
   background: white;
-  border: 2px solid #fef3c7;
+  border: 2px solid #d1fae5;
   border-radius: 12px;
   padding: 1.5rem;
   display: flex;
@@ -409,16 +410,16 @@
 }
 
 .studentItem:hover {
-  border-color: #fbbf24;
+  border-color: #6ee7b7;
   transform: translateX(5px);
-  box-shadow: 0 4px 12px rgba(251, 191, 36, 0.2);
+  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.2);
 }
 
 .studentRank {
   min-width: 50px;
   font-size: 1.5rem;
   font-weight: bold;
-  color: #f59e0b;
+  color: #10b981;
   text-align: center;
 }
 
@@ -433,13 +434,13 @@
 
 .studentInfo h3 {
   margin: 0 0 0.5rem 0;
-  color: #92400e;
+  color: #047857;
   font-size: 1.125rem;
 }
 
 .studentInfo p {
   margin: 0;
-  color: #78350f;
+  color: #065f46;
   display: flex;
   align-items: center;
   gap: 0.5rem;
@@ -460,13 +461,13 @@
 }
 
 .miniStat i {
-  color: #f59e0b;
+  color: #10b981;
   font-size: 1.25rem;
 }
 
 .miniStat span {
   font-weight: 600;
-  color: #92400e;
+  color: #047857;
   font-size: 0.875rem;
   white-space: nowrap;
 }
@@ -506,13 +507,13 @@
   padding: 1.5rem;
   background: white;
   border-radius: 12px;
-  border: 1px solid #e5e7eb;
+  border: 1px solid #d1fae5;
   transition: all 0.3s ease;
 }
 
 .resourceItem:hover {
-  box-shadow: 0 4px 12px rgba(245, 158, 11, 0.1);
-  border-color: #fbbf24;
+  box-shadow: 0 4px 12px rgba(33, 211, 117, 0.15);
+  border-color: #6ee7b7;
   transform: translateY(-2px);
 }
 
@@ -523,10 +524,10 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  background: linear-gradient(135deg, #fef3c7, #fde68a);
+  background: linear-gradient(135deg, #c8f6dc, #aef1d1);
   border-radius: 12px;
   font-size: 1.5rem;
-  color: #f59e0b;
+  color: #21D375;
 }
 
 .resourceInfo {
@@ -559,10 +560,10 @@
   align-items: center;
   gap: 0.4rem;
   padding: 0.25rem 0.75rem;
-  background: #fef3c7;
+  background: #d1fae5;
   border-radius: 20px;
   font-size: 0.85rem;
-  color: #f59e0b;
+  color: #10b981;
   font-weight: 500;
 }
 
@@ -575,7 +576,7 @@
   display: inline-block;
   margin-top: 1.5rem;
   padding: 0.75rem 1.5rem;
-  background: linear-gradient(135deg, #f59e0b, #fbbf24);
+  background: linear-gradient(135deg, #21D375, #34d399);
   color: white;
   text-decoration: none;
   border-radius: 8px;
@@ -586,7 +587,7 @@
 
 .viewMore:hover {
   transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(245, 158, 11, 0.3);
+  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.4);
 }
 
 /* Citizen Activity List */
@@ -604,12 +605,12 @@
   padding: 1rem 1.5rem;
   background: white;
   border-radius: 10px;
-  border-left: 4px solid #fbbf24;
+  border-left: 4px solid #10b981;
   transition: all 0.3s ease;
 }
 
 .activityItem:hover {
-  box-shadow: 0 4px 12px rgba(245, 158, 11, 0.15);
+  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.15);
   transform: translateX(5px);
 }
 
@@ -620,10 +621,10 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  background: linear-gradient(135deg, #fef3c7, #fde68a);
+  background: linear-gradient(135deg, #d1fae5, #a7f3d0);
   border-radius: 50%;
   font-size: 1.1rem;
-  color: #f59e0b;
+  color: #10b981;
 }
 
 .activityInfo {
@@ -637,7 +638,7 @@
 }
 
 .activityUser strong {
-  color: #f59e0b;
+  color: #10b981;
   font-weight: 600;
 }
 
@@ -686,27 +687,27 @@
   display: flex;
   gap: 1.5rem;
   padding: 1.5rem;
-  background: linear-gradient(135deg, #fef3c7, #fde68a);
+  background: linear-gradient(135deg, #d1fae5, #a7f3d0);
   border-radius: 12px;
   margin-bottom: 1.5rem;
-  border: 2px solid #fbbf24;
+  border: 2px solid #6ee7b7;
 }
 
 .infoCard i {
   font-size: 2.5rem;
-  color: #f59e0b;
+  color: #10b981;
   flex-shrink: 0;
 }
 
 .infoCard h3 {
   margin: 0 0 0.5rem 0;
-  color: #92400e;
+  color: #0f5c38;
   font-size: 1.25rem;
 }
 
 .infoCard p {
   margin: 0;
-  color: #78350f;
+  color: #0e5a3a;
   line-height: 1.6;
 }
 
@@ -723,19 +724,19 @@
   padding: 1.5rem;
   background: white;
   border-radius: 10px;
-  border: 2px solid #fef3c7;
+  border: 2px solid #d1fae5;
   transition: all 0.3s ease;
 }
 
 .statBox:hover {
-  border-color: #fbbf24;
+  border-color: #6ee7b7;
   transform: translateY(-3px);
-  box-shadow: 0 4px 12px rgba(245, 158, 11, 0.2);
+  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.2);
 }
 
 .statBox i {
   font-size: 2rem;
-  color: #f59e0b;
+  color: #21D375;
   flex-shrink: 0;
 }
 
@@ -743,7 +744,7 @@
   display: block;
   font-size: 1.75rem;
   font-weight: bold;
-  color: #92400e;
+  color: #047857;
   line-height: 1;
   margin-bottom: 0.25rem;
 }
@@ -751,7 +752,7 @@
 .statText {
   display: block;
   font-size: 0.875rem;
-  color: #78350f;
+  color: #065f46;
 }
 
 /* Quick Access Cards */
@@ -770,21 +771,21 @@
   gap: 1.5rem;
   text-decoration: none;
   color: inherit;
-  border: 2px solid #fef3c7;
+  border: 2px solid #d1fae5;
   transition: all 0.3s ease;
   cursor: pointer;
 }
 
 .quickAccessCard:hover {
-  border-color: #fbbf24;
+  border-color: #6ee7b7;
   transform: translateY(-4px);
-  box-shadow: 0 8px 20px rgba(245, 158, 11, 0.2);
+  box-shadow: 0 8px 20px rgba(16, 185, 129, 0.25);
 }
 
 .quickAccessIcon {
   width: 70px;
   height: 70px;
-  background: linear-gradient(135deg, #f59e0b, #fbbf24);
+  background: linear-gradient(135deg, #10b981, #34d399);
   border-radius: 1rem;
   display: flex;
   align-items: center;
@@ -806,13 +807,13 @@
 .quickAccessContent h3 {
   font-size: 1.5rem;
   font-weight: 700;
-  color: #92400e;
+  color: #047857;
   margin: 0 0 0.5rem 0;
 }
 
 .quickAccessContent p {
   font-size: 1rem;
-  color: #78716c;
+  color: #065f46;
   margin: 0 0 1rem 0;
   line-height: 1.5;
 }
@@ -833,12 +834,12 @@
 }
 
 .quickAccessStats i {
-  color: #f59e0b;
+  color: #21D375;
 }
 
 .quickAccessArrow {
   font-size: 1.5rem;
-  color: #f59e0b;
+  color: #10b981;
   transition: transform 0.3s ease;
 }
 

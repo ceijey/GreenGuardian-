@@ -6,6 +6,9 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import Image from 'next/image';
 import * as roleUtils from '@/lib/roleUtils';
+import TermsModal from './TermsModal';
+import PrivacyModal from './PrivacyModal';
+import LoginInstructions from './LoginInstructions';
 import styles from './LoginForm.module.css';
 
 export default function LoginForm() {
@@ -15,6 +18,9 @@ export default function LoginForm() {
   const [showResendButton, setShowResendButton] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
+  const [acceptedTerms, setAcceptedTerms] = useState(false);
+  const [showTermsModal, setShowTermsModal] = useState(false);
+  const [showPrivacyModal, setShowPrivacyModal] = useState(false);
   const { login } = useAuth();
   const router = useRouter();
   
@@ -41,6 +47,12 @@ export default function LoginForm() {
 
     // Prevent multiple submissions
     if (isLoading) return;
+
+    // Check if terms are accepted
+    if (!acceptedTerms) {
+      setError('Please accept the Terms and Conditions to continue');
+      return;
+    }
 
     try {
       setError('');
@@ -137,6 +149,8 @@ export default function LoginForm() {
           <h1 className={styles.title} id="login-heading">Welcome Back</h1>
           <p className={styles.subtitle}>Sign in to continue to Green Guardian</p>
         </div>
+
+        <LoginInstructions />
 
         <form 
           className={styles.form} 
@@ -238,6 +252,39 @@ export default function LoginForm() {
             </div>
           </div>
 
+          <div className={styles.termsContainer}>
+            <label className={styles.termsLabel}>
+              <input
+                type="checkbox"
+                checked={acceptedTerms}
+                onChange={(e) => setAcceptedTerms(e.target.checked)}
+                className={styles.termsCheckbox}
+                disabled={isLoading}
+                aria-required="true"
+              />
+              <span>
+                I agree to the{' '}
+                <button
+                  type="button"
+                  onClick={() => setShowTermsModal(true)}
+                  className={styles.termsLink}
+                  disabled={isLoading}
+                >
+                  Terms and Conditions
+                </button>
+                {' '}and{' '}
+                <button
+                  type="button"
+                  onClick={() => setShowPrivacyModal(true)}
+                  className={styles.termsLink}
+                  disabled={isLoading}
+                >
+                  Privacy Policy
+                </button>
+              </span>
+            </label>
+          </div>
+
           <button 
             ref={submitButtonRef}
             type="submit" 
@@ -256,6 +303,17 @@ export default function LoginForm() {
             )}
           </button>
 
+          <div className={styles.forgotPassword}>
+            <Link 
+              href="/forgot-password" 
+              className={styles.forgotLink}
+              aria-label="Reset your password"
+            >
+              <i className="fas fa-key" aria-hidden="true"></i>
+              Forgot your password?
+            </Link>
+          </div>
+
           <div className={styles.footer}>
             <p className={styles.footerText}>
               Don&apos;t have an account?{' '}
@@ -270,6 +328,20 @@ export default function LoginForm() {
           </div>
         </form>
       </div>
+
+      <TermsModal 
+        isOpen={showTermsModal}
+        onClose={() => setShowTermsModal(false)}
+        onAccept={() => {
+          setAcceptedTerms(true);
+          setShowTermsModal(false);
+        }}
+      />
+
+      <PrivacyModal 
+        isOpen={showPrivacyModal}
+        onClose={() => setShowPrivacyModal(false)}
+      />
     </div>
   );
 }

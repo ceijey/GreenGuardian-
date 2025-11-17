@@ -1,0 +1,224 @@
+.overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.7);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 10000;
+  padding: 20px;
+  animation: fadeIn 0.3s ease;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.modal {
+  background: white;
+  border-radius: 20px;
+  max-width: 800px;
+  width: 100%;
+  max-height: 90vh;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+  animation: slideUp 0.3s ease;
+}
+
+@keyframes slideUp {
+  from {
+    transform: translateY(50px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+.header {
+  padding: 30px;
+  border-bottom: 2px solid #f0f0f0;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: linear-gradient(135deg, #057c32 0%, #6cf9a4 100%);
+  border-radius: 20px 20px 0 0;
+}
+
+.header h2 {
+  margin: 0;
+  font-size: 1.8rem;
+  color: white;
+  font-weight: 700;
+}
+
+.closeButton {
+  background: rgba(255, 255, 255, 0.2);
+  border: none;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-size: 1.2rem;
+  transition: all 0.3s ease;
+}
+
+.closeButton:hover {
+  background: rgba(255, 255, 255, 0.3);
+  transform: rotate(90deg);
+}
+
+.content {
+  flex: 1;
+  overflow-y: auto;
+  padding: 30px;
+}
+
+.content section {
+  margin-bottom: 30px;
+}
+
+.content h3 {
+  color: #2c3e50;
+  font-size: 1.3rem;
+  margin-bottom: 12px;
+  font-weight: 700;
+}
+
+.content p {
+  color: #555;
+  line-height: 1.7;
+  margin-bottom: 12px;
+}
+
+.content ul {
+  padding-left: 25px;
+  margin: 12px 0;
+}
+
+.content li {
+  color: #555;
+  line-height: 1.7;
+  margin-bottom: 8px;
+}
+
+.lastUpdated {
+  padding-top: 20px;
+  border-top: 2px solid #f0f0f0;
+  margin-top: 20px;
+}
+
+.lastUpdated p {
+  color: #999;
+  font-size: 0.95rem;
+  margin: 0;
+}
+
+.footer {
+  padding: 25px 30px;
+  border-top: 2px solid #f0f0f0;
+  display: flex;
+  gap: 15px;
+  justify-content: flex-end;
+  background: #f8f9fa;
+  border-radius: 0 0 20px 20px;
+}
+
+.cancelButton,
+.acceptButton {
+  padding: 12px 30px;
+  border: none;
+  border-radius: 12px;
+  font-weight: 600;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.cancelButton {
+  background: #e0e0e0;
+  color: #666;
+}
+
+.cancelButton:hover {
+  background: #d0d0d0;
+  transform: translateY(-2px);
+}
+
+.acceptButton {
+  background: linear-gradient(135deg, #4CAF50 0%, #45a049 100%);
+  color: white;
+  box-shadow: 0 4px 12px rgba(76, 175, 80, 0.3);
+}
+
+.acceptButton:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(76, 175, 80, 0.4);
+}
+
+/* Scrollbar styling */
+.content::-webkit-scrollbar {
+  width: 8px;
+}
+
+.content::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 10px;
+}
+
+.content::-webkit-scrollbar-thumb {
+  background: #4CAF50;
+  border-radius: 10px;
+}
+
+.content::-webkit-scrollbar-thumb:hover {
+  background: #45a049;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .modal {
+    max-height: 95vh;
+    margin: 10px;
+  }
+
+  .header {
+    padding: 20px;
+  }
+
+  .header h2 {
+    font-size: 1.4rem;
+  }
+
+  .content {
+    padding: 20px;
+  }
+
+  .content h3 {
+    font-size: 1.1rem;
+  }
+
+  .footer {
+    padding: 20px;
+    flex-direction: column;
+  }
+
+  .cancelButton,
+  .acceptButton {
+    width: 100%;
+  }
+}

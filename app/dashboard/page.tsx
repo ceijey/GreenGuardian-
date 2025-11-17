@@ -13,7 +13,7 @@ import GeospatialMap from '@/components/GeospatialMap';
 import LocationPicker from '@/components/LocationPicker';
 import AirQualityMonitor from '@/components/AirQualityMonitor';
 import styles from './page.module.css';
-import { collection, query, onSnapshot, doc, getDoc } from 'firebase/firestore';
+import { collection, query, onSnapshot, doc, getDoc, where } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
 import { 
   UserLocation, 
@@ -209,7 +209,10 @@ export default function DashboardPage() {
   useEffect(() => {
     if (!user) return;
     
-    const productsQuery = query(collection(db, 'products'));
+    const productsQuery = query(
+      collection(db, 'products'),
+      where('sponsorId', '!=', null)
+    );
     const unsubscribe = onSnapshot(productsQuery, async (snapshot) => {
       const productsList: EcoProduct[] = [];
       
@@ -222,7 +225,7 @@ export default function DashboardPage() {
           try {
             const sponsorDoc = await getDoc(doc(db, 'users', productData.sponsorId));
             if (sponsorDoc.exists()) {
-              sponsorName = sponsorDoc.data()?.displayName || sponsorDoc.data()?.email || 'Eco Partner';
+              sponsorName = sponsorDoc.data()?.companyName || sponsorDoc.data()?.displayName || sponsorDoc.data()?.email || 'Eco Partner';
             }
           } catch (error) {
             console.error('Error fetching sponsor name:', error);

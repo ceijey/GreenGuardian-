@@ -52,7 +52,7 @@
 
 .createButton {
   padding: 14px 28px;
-  background: linear-gradient(135deg, #667eea, #764ba2);
+   background: linear-gradient(135deg, #057c32 0%, #6cf9a4 100%);
   color: white;
   border: none;
   border-radius: 8px;

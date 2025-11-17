@@ -54,6 +54,12 @@ async function getUserRole(user: User | null): Promise<string> {
 export async function getLoginRedirectPath(user: User | null): Promise<string> {
   if (!user) return '/dashboard';
   
+  // Check email domain first for government officials
+  if (user.email && user.email.endsWith('@gordoncollege.edu.ph')) {
+    return '/gov-portal';
+  }
+  
+  // For regular users (@gmail.com or other domains), check their role
   const role = await getUserRole(user);
   
   switch (role) {

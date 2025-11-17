@@ -5,7 +5,7 @@ import Link from 'next/link'
 import Image from 'next/image'
 import { usePathname, useRouter } from 'next/navigation'
 import { useAuth } from '@/lib/AuthContext'
-import styles from './Header.module.css'
+import styles from './PartnerHeader.module.css'
 
 export default function PartnerHeader() {
   const pathname = usePathname()

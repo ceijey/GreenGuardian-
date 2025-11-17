@@ -204,12 +204,12 @@
   width: 100%;
   background: rgba(255, 255, 255, 0.8);
   backdrop-filter: blur(10px);
+  color: #1f2937;
 }
 
 .input:focus {
   outline: none;
   border-color: #10b981;
-  background: white;
   box-shadow: 
     0 0 0 4px rgba(16, 185, 129, 0.1),
     0 8px 25px rgba(16, 185, 129, 0.1);
@@ -218,6 +218,55 @@
 
 .input::placeholder {
   color: #9ca3af;
+}
+
+.termsContainer {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  margin-top: 8px;
+}
+
+.termsLabel {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  font-size: var(--font-size-sm);
+  color: #6b7280;
+  cursor: pointer;
+  user-select: none;
+}
+
+.termsCheckbox {
+  width: 20px;
+  height: 20px;
+  margin-top: 2px;
+  cursor: pointer;
+  accent-color: #10b981;
+  min-width: 20px;
+  flex-shrink: 0;
+}
+
+.termsLink {
+  background: none;
+  border: none;
+  color: #10b981;
+  text-decoration: underline;
+  cursor: pointer;
+  padding: 0;
+  font-size: inherit;
+  font-weight: 500;
+  transition: color 0.2s ease;
+}
+
+.termsLink:hover {
+  color: #059669;
+}
+
+.termsLink:focus {
+  outline: 2px solid #10b981;
+  outline-offset: 2px;
+  border-radius: 2px;
 }
 
 .submitButton {
@@ -236,7 +285,7 @@
   align-items: center;
   justify-content: center;
   gap: 8px;
-  margin-top: 24px;
+  margin-top: 8px;
   position: relative;
   overflow: hidden;
 }
@@ -268,9 +317,43 @@
   transform: translateY(0);
 }
 
+.forgotPassword {
+  text-align: center;
+  margin-top: 16px;
+}
+
+.forgotLink {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  color: #10b981;
+  text-decoration: none;
+  font-size: var(--font-size-sm);
+  font-weight: 500;
+  transition: all 0.2s ease;
+  padding: 8px 12px;
+  border-radius: 8px;
+}
+
+.forgotLink:hover {
+  color: #059669;
+  background: rgba(16, 185, 129, 0.1);
+}
+
+.forgotLink:focus {
+  outline: 2px solid #10b981;
+  outline-offset: 2px;
+}
+
+.forgotLink i {
+  font-size: 14px;
+}
+
 .footer {
   text-align: center;
-  margin-top: 32px;
+  margin-top: 24px;
+  padding-top: 24px;
+  border-top: 1px solid #e5e7eb;
 }
 
 .footerText {

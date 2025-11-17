@@ -319,7 +319,7 @@
 }
 
 .adContainer {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+ background: linear-gradient(135deg, #00971c 0%, #a24ff6 100%);
   border-radius: 16px;
   padding: 25px;
   box-shadow: 0 10px 40px rgba(102, 126, 234, 0.3);
@@ -422,7 +422,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  background: linear-gradient(135deg, #667eea, #764ba2);
+  background: linear-gradient(135deg, #13cf02, #003114);
   color: white;
   font-size: 4rem;
 }

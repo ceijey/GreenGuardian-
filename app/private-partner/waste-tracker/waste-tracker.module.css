@@ -1,6 +1,6 @@
 .container {
   min-height: 100vh;
-  background: linear-gradient(135deg, #38b2ac 0%, #2c7a7b 100%);
+  background: linear-gradient(135deg, #e9fbf0 0%, #f0fff6 100%);
 }
 
 .loading {
@@ -9,7 +9,7 @@
   align-items: center;
   justify-content: center;
   height: 60vh;
-  color: white;
+color: rgb(15, 213, 97);
   font-size: 1.5rem;
   gap: 1rem;
 }
@@ -22,7 +22,7 @@
 
 .header {
   margin-bottom: 2rem;
-  color: white;
+  color: rgb(65, 62, 62);
 }
 
 .header h1 {
@@ -54,7 +54,7 @@
 
 .statCard i {
   font-size: 2.5rem;
-  color: #38b2ac;
+  color: #21D375;
 }
 
 .statContent {
@@ -124,7 +124,7 @@
 .typeWeight {
   font-size: 1.5rem;
   font-weight: bold;
-  color: #38b2ac;
+  color: #21D375;
   margin-bottom: 0.5rem;
 }
 
@@ -227,7 +227,7 @@
 
 .scheduleMeta i {
   width: 16px;
-  color: #38b2ac;
+  color: #21D375;
 }
 
 .todayBadge {
@@ -285,7 +285,7 @@
 
 .filterGroup select:focus {
   outline: none;
-  border-color: #38b2ac;
+  border-color: #21D375;
 }
 
 .entriesSection {
@@ -375,7 +375,7 @@
 }
 
 .entryDetails i {
-  color: #38b2ac;
+  color: #21D375;
 }
 
 .entryNotes {
@@ -458,8 +458,8 @@
 }
 
 .requestCard:hover {
-  border-color: #38b2ac;
-  box-shadow: 0 4px 12px rgba(56, 178, 172, 0.15);
+  border-color: #21D375;
+  box-shadow: 0 4px 12px rgba(33, 211, 117, 0.15);
   transform: translateY(-2px);
 }
 
@@ -532,7 +532,7 @@
 
 .detailRow i {
   width: 18px;
-  color: #38b2ac;
+  color: #21D375;
 }
 
 .viewLocationButton {
@@ -540,7 +540,7 @@
   align-items: center;
   gap: 6px;
   padding: 8px 16px;
-  background: linear-gradient(135deg, #38b2ac, #319795);
+  background: linear-gradient(135deg, #21D375, #34d399);
   color: white;
   text-decoration: none;
   border: none;
@@ -553,9 +553,9 @@
 }
 
 .viewLocationButton:hover {
-  background: linear-gradient(135deg, #319795, #2c7a7b);
+  background: linear-gradient(135deg, #179b58, #10b981);
   transform: translateY(-2px);
-  box-shadow: 0 4px 10px rgba(56, 178, 172, 0.4);
+  box-shadow: 0 4px 10px rgba(33, 211, 117, 0.4);
 }
 
 .viewLocationButton i {
@@ -590,7 +590,7 @@
   margin: 5px 0 0 0;
   padding: 12px;
   background: white;
-  border-left: 3px solid #38b2ac;
+  border-left: 3px solid #21D375;
   border-radius: 6px;
   font-size: 0.95rem;
   color: #4a5568;

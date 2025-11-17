@@ -1,6 +1,6 @@
 .container {
   min-height: 100vh;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, #00971c 0%, #a24ff6 100%);
   padding-bottom: 4rem;
 }
 
@@ -270,7 +270,7 @@
 }
 
 .certificateBadge {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+   background: linear-gradient(135deg, #00971c 0%, #a24ff6 100%);
   padding: 2rem;
   text-align: center;
   color: white;

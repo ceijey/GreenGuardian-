@@ -6,6 +6,7 @@ import Image from 'next/image'
 import { usePathname, useRouter } from 'next/navigation'
 import { useAuth } from '@/lib/AuthContext'
 import styles from './Header.module.css'
+import schoolStyles from './SchoolHeader.module.css'
 
 export default function SchoolHeader() {
   const pathname = usePathname()
@@ -47,7 +48,7 @@ export default function SchoolHeader() {
   const closeMenu = () => setIsMenuOpen(false)
 
   return (
-    <header className={`${styles.header} ${styles.schoolHeader} ${scrollDirection === 'down' ? styles.headerHidden : ''}`}>
+    <header className={`${styles.header} ${styles.schoolHeader} ${schoolStyles.schoolHeader} ${scrollDirection === 'down' ? schoolStyles.headerHidden : ''}`}>
       <div className={styles.container}>
         <div className={styles.headerContent}>
           <div className={styles.logo}>
@@ -106,8 +107,8 @@ export default function SchoolHeader() {
               </li>
               <li>
                 <Link 
-                  href="/profile" 
-                  className={pathname === '/profile' ? styles.active : ''}
+                  href="/school-portal/profile" 
+                  className={pathname.startsWith('/school-portal/profile') ? styles.active : ''}
                   onClick={closeMenu}
                 >
                   <i className="fas fa-user-circle" aria-hidden="true"></i>

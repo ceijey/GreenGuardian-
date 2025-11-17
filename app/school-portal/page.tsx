@@ -264,7 +264,7 @@ export default function SchoolPortalPage() {
       <SchoolHeader />
       <main className={styles.container}>
         <div className={styles.hero}>
-          <h1 className={styles.title}>🎓 School & Education Portal</h1>
+          <h1 className={styles.title}> School & Education Portal</h1>
           <p className={styles.subtitle}>
             Create and share educational resources with the community. Track citizen engagement and impact in real-time.
           </p>

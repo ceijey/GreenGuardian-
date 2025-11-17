@@ -1,0 +1,171 @@
+/* SchoolHeader.module.css - Theme: #21D375 */
+:root {
+  --gg-primary: #21D375;
+  --gg-primary-dark: #179b58;
+  --gg-accent: #34d399;
+  --gg-light: #e9fbf0;
+  --gg-border: rgba(33, 211, 117, 0.12);
+  --gg-shadow: 0 8px 24px rgba(33, 211, 117, 0.12);
+}
+
+
+
+.schoolHeader {
+  position: fixed;
+  background: linear-gradient(90deg, var(--gg-primary), var(--gg-primary-dark));
+  color: white;
+  box-shadow: var(--gg-shadow);
+}
+
+.headerHidden {
+  transform: translateY(-110%);
+}
+
+.container {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 0.75rem 1rem;
+}
+
+.headerContent {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.logo {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.logoImage {
+  border-radius: 6px;
+}
+
+.logoText {
+  font-weight: 700;
+  letter-spacing: 0.6px;
+  font-size: 0.95rem;
+  color: rgba(255,255,255,0.95);
+}
+
+.mobileMenuButton {
+  display: none;
+  background: transparent;
+  color: white;
+  border: none;
+  font-size: 1.25rem;
+  cursor: pointer;
+}
+
+/* Navigation */
+.nav {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.navList {
+  list-style: none;
+  display: flex;
+  gap: 0.5rem;
+  margin: 0;
+  padding: 0;
+}
+
+.navList li a,
+.navList li button {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 0.5rem 0.75rem;
+  border-radius: 8px;
+  color: rgba(255,255,255,0.95);
+  text-decoration: none;
+  font-weight: 600;
+  transition: background 160ms ease, transform 160ms ease;
+}
+
+.navList li a:hover,
+.navList li button:hover {
+  background: rgba(255,255,255,0.08);
+  transform: translateY(-2px);
+}
+
+.active {
+  background: rgba(255,255,255,0.12);
+  box-shadow: 0 4px 10px var(--gg-border) inset;
+}
+
+.logoutButton {
+  background: rgba(255,255,255,0.08);
+  color: white;
+  border: 1px solid rgba(255,255,255,0.06);
+  padding: 0.45rem 0.8rem;
+  border-radius: 8px;
+}
+
+.overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.4);
+  z-index: 40;
+}
+
+/* Responsive tweaks */
+@media (max-width: 900px) {
+  .mobileMenuButton { 
+    display: inline-block;
+    z-index: 50;
+  }
+  
+  .nav { 
+    display: none; 
+  }
+  
+  .navOpen { 
+    display: block; 
+    position: absolute; 
+    right: 1rem; 
+    top: 64px; 
+    background: linear-gradient(135deg, var(--gg-primary) 0%, var(--gg-primary-dark) 100%);
+    color: white; 
+    border-radius: 12px; 
+    padding: 1rem; 
+    box-shadow: 0 12px 30px rgba(23, 155, 88, 0.3), 0 4px 8px rgba(0, 0, 0, 0.15);
+    border: 2px solid rgba(255, 255, 255, 0.15);
+    min-width: 220px;
+    z-index: 45;
+  }
+  
+  .navList { 
+    flex-direction: column; 
+    gap: 0.75rem; 
+  }
+  
+  .navList li a,
+  .navList li button { 
+    color: white;
+    background: rgba(255, 255, 255, 0.08);
+    padding: 0.75rem 1rem;
+    border-radius: 8px;
+    width: 100%;
+    justify-content: flex-start;
+    font-weight: 600;
+    transition: all 160ms ease;
+  }
+  
+  .navList li a:hover,
+  .navList li button:hover { 
+    background: rgba(255, 255, 255, 0.18);
+    transform: translateX(4px);
+  }
+  
+  .navList li a.active {
+    background: rgba(255, 255, 255, 0.2);
+    border-left: 3px solid white;
+    padding-left: calc(1rem - 3px);
+  }
+}

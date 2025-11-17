@@ -11,7 +11,7 @@
   width: 50px;
   height: 50px;
   border: 4px solid #f3f3f3;
-  border-top: 4px solid #3b82f6;
+  border-top: 4px solid #21D375;
   border-radius: 50%;
   animation: spin 1s linear infinite;
 }
@@ -23,12 +23,12 @@
 
 .container {
   min-height: 100vh;
-  background: linear-gradient(135deg, #eff6ff 0%, #f8fafc 100%);
+  background: linear-gradient(135deg, #e9fbf0 0%, #f0fff6 100%);
   padding-bottom: 3rem;
 }
 
 .hero {
-  background: linear-gradient(135deg, #2563eb 0%, #3b82f6 100%);
+  background: linear-gradient(135deg, #21D375 0%, #179b58 100%);
   color: white;
   padding: 3rem 2rem;
   text-align: center;
@@ -68,7 +68,7 @@
 
 .sectionTitle {
   font-size: 1.75rem;
-  color: #2563eb;
+  color: #0f5c38;
   display: flex;
   align-items: center;
   gap: 0.75rem;
@@ -81,22 +81,22 @@
 }
 
 .card {
-  background: linear-gradient(135deg, #f8faff 0%, #ffffff 100%);
-  border: 2px solid #e5e7eb;
+   background: linear-gradient(135deg, #21D375 0%, #aef1d1 100%);
+  border: 2px solid #c8f6dc;
   border-radius: 12px;
   padding: 1.5rem;
   transition: all 0.3s ease;
 }
 
 .card:hover {
-  border-color: #3b82f6;
+  border-color: #21D375;
   transform: translateY(-4px);
-  box-shadow: 0 8px 16px rgba(59, 130, 246, 0.15);
+  box-shadow: 0 8px 16px rgba(33, 211, 117, 0.25);
 }
 
 .cardIcon {
   font-size: 2.5rem;
-  color: #3b82f6;
+  color: #0f5c38;
   margin-bottom: 1rem;
 }
 
@@ -111,13 +111,12 @@
   margin-bottom: 1rem;
   line-height: 1.5;
 }
-
 .stat {
   display: flex;
   flex-direction: column;
   align-items: center;
   padding: 1rem;
-  background: linear-gradient(135deg, #dbeafe 0%, #eff6ff 100%);
+  background: linear-gradient(135deg, #e9fbf0 0%, #ffffff 100%);
   border-radius: 8px;
   margin-top: 1rem;
 }
@@ -125,7 +124,7 @@
 .statValue {
   font-size: 2.5rem;
   font-weight: bold;
-  color: #2563eb;
+  color: #21D375;
 }
 
 .statLabel {
@@ -136,7 +135,7 @@
 }
 
 .primaryButton {
-  background: linear-gradient(135deg, #2563eb 0%, #3b82f6 100%);
+  background: linear-gradient(135deg, #21D375 0%, #34d399 100%);
   color: white;
   border: none;
   padding: 0.75rem 1.5rem;
@@ -149,15 +148,15 @@
 }
 
 .primaryButton:hover {
-  background: linear-gradient(135deg, #1d4ed8 0%, #2563eb 100%);
+  background: linear-gradient(135deg, #179b58 0%, #21D375 100%);
   transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
+  box-shadow: 0 4px 12px rgba(33, 211, 117, 0.38);
 }
 
 .secondaryButton {
   background: white;
-  color: #2563eb;
-  border: 2px solid #2563eb;
+  color: #21D375;
+  border: 2px solid #21D375;
   padding: 0.75rem 1.5rem;
   border-radius: 8px;
   font-size: 1rem;
@@ -168,9 +167,9 @@
 }
 
 .secondaryButton:hover {
-  background: #eff6ff;
+  background: #e9fbf0;
   transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(37, 99, 235, 0.15);
+  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.2);
 }
 
 .impactGrid {
@@ -180,8 +179,8 @@
 }
 
 .impactCard {
-  background: linear-gradient(135deg, #ffffff 0%, #f8faff 100%);
-  border: 2px solid #dbeafe;
+  background: linear-gradient(135deg, #ffffff 0%, #e9fbf0 100%);
+  border: 2px solid #c8f6dc;
   border-radius: 12px;
   padding: 1.5rem;
   display: flex;
@@ -190,14 +189,14 @@
 }
 
 .impactCard:hover {
-  border-color: #3b82f6;
+  border-color: #21D375;
   transform: translateY(-4px);
-  box-shadow: 0 8px 16px rgba(59, 130, 246, 0.15);
+  box-shadow: 0 8px 16px rgba(16, 185, 129, 0.2);
 }
 
 .impactIcon {
   font-size: 2.5rem;
-  color: #3b82f6;
+  color: #21D375;
 }
 
 .impactContent {
@@ -215,14 +214,14 @@
 .impactValue {
   font-size: 1.75rem;
   font-weight: bold;
-  color: #2563eb;
+  color: #10b981;
   display: block;
   margin-bottom: 0.25rem;
 }
 
 .impactTrend {
   font-size: 0.875rem;
-  color: #3b82f6;
+  color: #10b981;
   font-weight: 600;
 }
 
@@ -246,8 +245,8 @@
 }
 
 .benefitCard {
-  background: linear-gradient(135deg, #eff6ff 0%, #ffffff 100%);
-  border: 2px solid #dbeafe;
+  background: linear-gradient(135deg, #e9fbf0 0%, #ffffff 100%);
+  border: 2px solid #c8f6dc;
   border-radius: 12px;
   padding: 1.5rem;
   text-align: center;
@@ -255,14 +254,14 @@
 }
 
 .benefitCard:hover {
-  border-color: #3b82f6;
+  border-color: #21D375;
   transform: translateY(-4px);
-  box-shadow: 0 8px 16px rgba(59, 130, 246, 0.15);
+  box-shadow: 0 8px 16px rgba(16, 185, 129, 0.15);
 }
 
 .benefitCard i {
   font-size: 2.5rem;
-  color: #3b82f6;
+  color: #21D375;
   margin-bottom: 1rem;
   display: block;
 }
@@ -295,8 +294,8 @@
 }
 
 .actionButton {
-  background: linear-gradient(135deg, #eff6ff 0%, #ffffff 100%);
-  border: 2px solid #dbeafe;
+  background: linear-gradient(135deg, #d1fae5 0%, #ffffff 100%);
+  border: 2px solid #c8f6dc;
   border-radius: 12px;
   padding: 1.25rem;
   display: flex;
@@ -307,14 +306,14 @@
   transition: all 0.3s ease;
   font-size: 1rem;
   font-weight: 600;
-  color: #2563eb;
+  color: #21D375;
 }
 
 .actionButton:hover {
-  border-color: #3b82f6;
-  background: linear-gradient(135deg, #dbeafe 0%, #eff6ff 100%);
+  border-color: #21D375;
+  background: linear-gradient(135deg, #c8f6dc 0%, #e9fbf0 100%);
   transform: translateY(-4px);
-  box-shadow: 0 6px 12px rgba(59, 130, 246, 0.15);
+  box-shadow: 0 6px 12px rgba(16, 185, 129, 0.15);
 }
 
 .actionButton i {
@@ -419,7 +418,7 @@
 
 .viewButton {
   display: inline-block;
-  background: #3b82f6;
+  background: linear-gradient(135deg, #21D375, #34d399);
   color: white;
   padding: 0.75rem 1.5rem;
   border-radius: 8px;
@@ -430,9 +429,9 @@
 }
 
 .viewButton:hover {
-  background: #2563eb;
+  background: linear-gradient(135deg, #179b58, #21D375);
   transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
 }
 
 .serviceArea {
@@ -445,8 +444,8 @@
 }
 
 .collectionsCount {
-  background: #dbeafe;
-  color: #1e40af;
+  background: #d1fae5;
+  color: #047857;
   padding: 0.5rem 1rem;
   border-radius: 20px;
   font-weight: 600;
@@ -574,14 +573,21 @@
   font-size: 1rem;
   transition: all 0.2s ease;
   font-family: inherit;
+  color: #1f2937;
+  background-color: #ffffff;
+}
+
+.formGroup input::placeholder,
+.formGroup textarea::placeholder {
+  color: #9ca3af;
 }
 
 .formGroup input:focus,
 .formGroup textarea:focus,
 .formGroup select:focus {
   outline: none;
-  border-color: #3b82f6;
-  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+  border-color: #21D375;
+  box-shadow: 0 0 0 3px rgba(33, 211, 117, 0.08);
 }
 
 .formGroup textarea {
@@ -613,8 +619,8 @@
 }
 
 .checkboxLabel:hover {
-  background: #eff6ff;
-  border-color: #3b82f6;
+  background: #e9fbf0;
+  border-color: #21D375;
 }
 
 .checkboxLabel input {
@@ -657,13 +663,13 @@
 }
 
 .submitButton {
-  background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+  background: linear-gradient(135deg, #21D375 0%, #34d399 100%);
   color: white;
 }
 
 .submitButton:hover {
   transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.4);
+  box-shadow: 0 4px 12px rgba(33, 211, 117, 0.38);
 }
 
 .submitButton:disabled {
@@ -718,12 +724,12 @@
 }
 
 .editButton {
-  color: #3b82f6;
-  background: #eff6ff;
+  color: #21D375;
+  background: #e9fbf0;
 }
 
 .editButton:hover {
-  background: #dbeafe;
+  background: #c8f6dc;
   transform: scale(1.1);
 }
 
