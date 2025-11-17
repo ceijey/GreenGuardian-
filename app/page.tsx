@@ -1,6 +1,7 @@
 'use client'
 
 import { useRouter } from 'next/navigation'
+import Link from 'next/link'
 import { useEffect, useState } from 'react'
 import { collection, getDocs, doc, getDoc } from 'firebase/firestore'
 import { db } from '../lib/firebase'
@@ -414,15 +415,15 @@ export default function HomePage() {
               </div>
               <div className={styles.footerColumn}>
                 <h4>Community</h4>
-                <a href="/community-hub">Hub</a>
-                <a href="/volunteer">Volunteer</a>
-                <a href="/swap">Item Swap</a>
+                <Link href="/community-hub">Hub</Link>
+                <Link href="/volunteer">Volunteer</Link>
+                <Link href="/swap">Item Swap</Link>
               </div>
               <div className={styles.footerColumn}>
                 <h4>Resources</h4>
-                <a href="/resources">Learn</a>
-                <a href="/report-incident">Report</a>
-                <a href="/waste-tracker">Tracker</a>
+                <Link href="/resources">Learn</Link>
+                <Link href="/report-incident">Report</Link>
+                <Link href="/waste-tracker">Tracker</Link>
               </div>
             </div>
           </div>
