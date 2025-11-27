@@ -37,6 +37,32 @@
   margin: 0;
 }
 
+.policyReminder {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 16px 20px;
+  margin: 20px 30px 0;
+  background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%);
+  border-left: 4px solid #10b981;
+  border-radius: 8px;
+  font-size: 14px;
+  color: #065f46;
+  line-height: 1.6;
+}
+
+.policyReminder i {
+  color: #10b981;
+  font-size: 18px;
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+.policyReminder strong {
+  color: #047857;
+  font-weight: 600;
+}
+
 .closeButton {
   background: none;
   border: none;

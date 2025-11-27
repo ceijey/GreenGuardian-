@@ -244,6 +244,11 @@ export default function AddItemModal({ isOpen, onClose, currentUser }: AddItemMo
           </button>
         </div>
 
+        <div className={styles.policyReminder}>
+          <i className="fas fa-info-circle"></i>
+          <span>Please ensure your item follows our <strong>Swap Policy</strong>. No prohibited items, accurate descriptions, and honest condition ratings required.</span>
+        </div>
+
         <form onSubmit={handleSubmit} className={styles.form}>
           <div className={styles.formGroup}>
             <label htmlFor="title">Item Title *</label>

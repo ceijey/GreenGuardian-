@@ -12,9 +12,15 @@ interface HeaderProps {
   logo?: string
   title?: string
   showUserProfile?: boolean
+  dashboardSections?: {
+    id: string
+    label: string
+    icon: string
+  }[]
+  onSectionClick?: (sectionId: string) => void
 }
 
-export default function Header({ logo, title, showUserProfile = false }: HeaderProps) {
+export default function Header({ logo, title, showUserProfile = false, dashboardSections, onSectionClick }: HeaderProps) {
   const pathname = usePathname()
   const router = useRouter()
   const { user, logout } = useAuth()
@@ -101,17 +107,38 @@ export default function Header({ logo, title, showUserProfile = false }: HeaderP
 
           <nav id="primary-navigation" className={`${styles.nav} ${isMenuOpen ? styles.navOpen : ''}`} role="navigation" aria-label="Primary">
             <ul className={styles.navList} role="menubar">
-              <li role="none">
+              <li className={dashboardSections ? styles.dropdown : ''} role="none">
                 <Link 
                   href="/dashboard" 
                   className={pathname === '/dashboard' ? styles.active : ''}
                   onClick={closeMenu}
                   role="menuitem"
                   aria-current={pathname === '/dashboard' ? 'page' : undefined}
+                  aria-haspopup={dashboardSections ? 'true' : undefined}
                 >
                   <i className="fas fa-home" aria-hidden="true"></i>
                   <span>Home</span>
+                  {dashboardSections && <i className="fas fa-caret-down" aria-hidden="true"></i>}
                 </Link>
+                {dashboardSections && pathname === '/dashboard' && (
+                  <div className={styles.dropdownMenu} role="menu">
+                    {dashboardSections.map((section) => (
+                      <button
+                        key={section.id}
+                        className={styles.dropdownItem}
+                        onClick={() => {
+                          onSectionClick?.(section.id);
+                          closeMenu();
+                        }}
+                        role="menuitem"
+                        type="button"
+                      >
+                        <i className={`fas fa-${section.icon}`} aria-hidden="true"></i>
+                        {section.label}
+                      </button>
+                    ))}
+                  </div>
+                )}
               </li>
               <li className={styles.dropdown} role="none">
                 <Link 
@@ -263,6 +290,34 @@ export default function Header({ logo, title, showUserProfile = false }: HeaderP
       {isMenuOpen && (
         <nav className={styles.mobileMenu}>
           <Link href="/dashboard" onClick={closeMenu}>🏠 Dashboard</Link>
+          {dashboardSections && pathname === '/dashboard' && (
+            <div style={{ paddingLeft: '20px', marginTop: '8px', marginBottom: '8px' }}>
+              {dashboardSections.map((section) => (
+                <button
+                  key={section.id}
+                  onClick={() => {
+                    onSectionClick?.(section.id);
+                    closeMenu();
+                  }}
+                  style={{
+                    display: 'block',
+                    width: '100%',
+                    textAlign: 'left',
+                    padding: '8px 16px',
+                    background: 'rgba(255, 255, 255, 0.1)',
+                    border: 'none',
+                    color: 'rgba(255, 255, 255, 0.9)',
+                    borderRadius: '8px',
+                    marginBottom: '4px',
+                    cursor: 'pointer',
+                    fontSize: '14px',
+                  }}
+                >
+                  {section.label}
+                </button>
+              ))}
+            </div>
+          )}
           <Link href="/swap" onClick={closeMenu}>🔄 Swap</Link>
           <Link href="/challenges" onClick={closeMenu}>🏆 Challenges</Link>
           <Link href="/community" onClick={closeMenu}>🌍 Community</Link>

@@ -206,6 +206,11 @@ export default function ContactSwapperModal({
           <span>Regarding: <strong>{swapRequest.itemTitle}</strong></span>
         </div>
 
+        <div className={styles.safetyReminder}>
+          <i className="fas fa-shield-alt"></i>
+          <span><strong>Safety Tip:</strong> Meet in public places, verify items before swapping, and trust your instincts.</span>
+        </div>
+
         <div className={styles.chatContainer} id="chatMessages">
           {loading ? (
             <div className={styles.loadingMessages}>

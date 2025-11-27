@@ -14,6 +14,32 @@ import {
 import { doc, setDoc, increment, serverTimestamp } from 'firebase/firestore';
 import { auth, db } from './firebase';
 
+// Helper function to convert Firebase error codes to user-friendly messages
+const getAuthErrorMessage = (error: AuthError): string => {
+  switch (error.code) {
+    case 'auth/invalid-credential':
+    case 'auth/wrong-password':
+    case 'auth/user-not-found':
+      return 'Invalid email or password. Please check your credentials and try again.';
+    case 'auth/too-many-requests':
+      return 'Too many failed login attempts. Please try again later or reset your password.';
+    case 'auth/user-disabled':
+      return 'This account has been disabled. Please contact support for assistance.';
+    case 'auth/invalid-email':
+      return 'Please enter a valid email address.';
+    case 'auth/email-already-in-use':
+      return 'An account with this email already exists. Please login instead.';
+    case 'auth/weak-password':
+      return 'Password is too weak. Please use at least 6 characters with a mix of letters and numbers.';
+    case 'auth/network-request-failed':
+      return 'Network error. Please check your internet connection and try again.';
+    case 'auth/operation-not-allowed':
+      return 'Email/password accounts are not enabled. Please contact support.';
+    default:
+      return error.message || 'An unexpected error occurred. Please try again.';
+  }
+};
+
 interface AuthContextType {
   user: User | null;
   loading: boolean;
@@ -108,6 +134,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       throw new Error('Please check your email and click the verification link before logging in.');
     } catch (error) {
       const authError = error as AuthError;
+      if (authError.code) {
+        throw new Error(getAuthErrorMessage(authError));
+      }
       throw new Error(authError.message || 'Signup failed');
     }
   };
@@ -128,6 +157,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       return { user };
     } catch (error) {
       const authError = error as AuthError;
+      if (authError.code) {
+        throw new Error(getAuthErrorMessage(authError));
+      }
       throw new Error(authError.message || 'Login failed');
     }
   };
@@ -153,6 +185,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       await sendPasswordResetEmail(auth, email);
     } catch (error) {
       const authError = error as AuthError;
+      if (authError.code) {
+        throw new Error(getAuthErrorMessage(authError));
+      }
       throw new Error(authError.message || 'Failed to send password reset email');
     }
   };

@@ -55,6 +55,28 @@
   opacity: 0.5;
   cursor: not-allowed;
 }
+.viewQRButton {
+  background: linear-gradient(90deg,#3b82f6 0%,#2563eb 100%);
+  color: white;
+  padding: 8px 12px;
+  border-radius: 8px;
+  border: none;
+  cursor: pointer;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  transition: all 0.2s;
+}
+.viewQRButton:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+}
+.viewQRButton::before {
+  content: '\f029';
+  font-family: 'Font Awesome 5 Free';
+  font-weight: 900;
+}
 .smallNote {
   font-size: 13px;
   color: #6b7280;

@@ -8,6 +8,7 @@ interface Challenge {
   id: string;
   title: string;
   description: string;
+  completionInstructions?: string;
   category: string;
   startDate: {
     seconds: number;
@@ -19,7 +20,7 @@ interface Challenge {
   } | null;
   targetActions: number;
   participants: string[];
-  badge: {
+  badge?: {
     name: string;
     icon: string;
     color: string;
@@ -150,6 +151,16 @@ export default function ChallengeCard({ challenge, currentUser, onJoinChallenge,
         <h3 className={styles.title}>{challenge.title}</h3>
         <p className={styles.description}>{challenge.description}</p>
         
+        {/* Completion Instructions */}
+        {challenge.completionInstructions && (
+          <div className={styles.instructionsSection}>
+            <h4 className={styles.instructionsTitle}>
+              <i className="fas fa-check-circle"></i> How to Complete
+            </h4>
+            <p className={styles.instructionsText}>{challenge.completionInstructions}</p>
+          </div>
+        )}
+        
         {/* Rewards Info */}
         {challenge.rewards && (
           <div className={styles.rewardsInfo}>
@@ -191,19 +202,42 @@ export default function ChallengeCard({ challenge, currentUser, onJoinChallenge,
       </div>
 
       {/* Badge Preview */}
-      <div className={styles.badge}>
-        <div className={styles.badgeIcon} style={{ color: challenge.badge.color }}>
-          <i className={challenge.badge.icon}></i>
+      {challenge.badge && (
+        <div className={styles.badge}>
+          <div className={styles.badgeIcon} style={{ color: challenge.badge?.color || '#4CAF50' }}>
+            <i className={challenge.badge?.icon || 'fas fa-award'}></i>
+          </div>
+          <div className={styles.badgeInfo}>
+            <span className={styles.badgeName}>{challenge.badge?.name || 'Challenge Badge'}</span>
+            {hasEarnedBadge && (
+              <span className={styles.earned}>
+                <i className="fas fa-check-circle"></i> Earned!
+              </span>
+            )}
+          </div>
         </div>
-        <div className={styles.badgeInfo}>
-          <span className={styles.badgeName}>{challenge.badge.name}</span>
-          {hasEarnedBadge && (
-            <span className={styles.earned}>
-              <i className="fas fa-check-circle"></i> Earned!
-            </span>
+      )}
+
+      {/* How to Join Instructions */}
+      {!isUserParticipant && currentUser && status === 'active' && (
+        <div className={styles.joinInstructions}>
+          <h4 className={styles.joinInstructionsTitle}>
+            <i className="fas fa-hand-point-right"></i> How to Join
+          </h4>
+          <ol className={styles.joinStepsList}>
+            <li>Click the "Join Challenge" button below</li>
+            <li>Complete {challenge.targetActions} eco-friendly actions</li>
+            <li>Log your progress in your dashboard</li>
+            <li>Earn your badge when you reach the goal!</li>
+          </ol>
+          {challenge.completionInstructions && (
+            <div className={styles.joinNote}>
+              <i className="fas fa-lightbulb"></i>
+              <span>Check the "How to Complete" section above for detailed requirements</span>
+            </div>
           )}
         </div>
-      </div>
+      )}
 
       {/* Action Button */}
       <div className={styles.actions}>

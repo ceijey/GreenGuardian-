@@ -6,6 +6,7 @@ import CitizenOnly from '@/components/CitizenOnly';
 import Header from '../../components/Header';
 import SwapItem from '../../components/SwapItem';
 import AddItemModal from '../../components/AddItemModal';
+import SwapPolicyModal from '../../components/SwapPolicyModal';
 import { collection, query, orderBy, onSnapshot, doc, updateDoc, arrayUnion } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
 import styles from './swap.module.css';
@@ -34,6 +35,7 @@ export default function SwapPage() {
   const [filteredItems, setFilteredItems] = useState<SwapItemData[]>([]);
   const [selectedCategory, setSelectedCategory] = useState('all');
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
+  const [isPolicyModalOpen, setIsPolicyModalOpen] = useState(false);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const [landfillSavings, setLandfillSavings] = useState(0);
@@ -171,6 +173,13 @@ export default function SwapPage() {
               Give your items a second life by swapping with others in your community. 
               Every swap keeps items out of landfills and reduces waste.
             </p>
+            <button
+              onClick={() => setIsPolicyModalOpen(true)}
+              className={styles.policyButton}
+            >
+              <i className="fas fa-info-circle"></i>
+              View Swap Policy & Guidelines
+            </button>
             
             <div className={styles.stats}>
               <div className={styles.statCard}>
@@ -279,6 +288,12 @@ export default function SwapPage() {
         isOpen={isAddModalOpen}
         onClose={() => setIsAddModalOpen(false)}
         currentUser={user}
+      />
+
+      {/* Swap Policy Modal */}
+      <SwapPolicyModal
+        isOpen={isPolicyModalOpen}
+        onClose={() => setIsPolicyModalOpen(false)}
       />
     </>
   );

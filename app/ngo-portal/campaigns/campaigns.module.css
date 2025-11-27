@@ -398,7 +398,7 @@
   align-items: center;
   padding: 25px;
   border-bottom: 2px solid #e2e8f0;
-  background: linear-gradient(135deg, #667eea, #764ba2);
+   background: linear-gradient(135deg, #024c1d 0%, #4aa66d 100%);
   border-radius: 16px 16px 0 0;
 }
 
@@ -512,7 +512,7 @@
 }
 
 .submitButton {
-  background: linear-gradient(135deg, #667eea, #764ba2);
+  background: linear-gradient(135deg, #01931c, #01de56);
   color: white;
 }
 

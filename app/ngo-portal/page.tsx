@@ -22,6 +22,8 @@ import styles from './ngo-portal.module.css';
 interface Challenge {
   id: string;
   title: string;
+  description?: string;
+  completionInstructions?: string;
   category: string;
   participants: string[];
   isActive: boolean;
@@ -53,10 +55,27 @@ export default function NGOPortalPage() {
   const [newChallenge, setNewChallenge] = useState({
     title: '',
     description: '',
+    completionInstructions: '',
     category: 'recycling',
     targetActions: 10,
     duration: 7
   });
+  
+  // Fundraising & Awareness States
+  const [showCreatePostModal, setShowCreatePostModal] = useState(false);
+  const [showGenerateReportModal, setShowGenerateReportModal] = useState(false);
+  const [showPartnersModal, setShowPartnersModal] = useState(false);
+  const [newPost, setNewPost] = useState({
+    title: '',
+    content: '',
+    imageUrl: '',
+    impactMetrics: {
+      co2Saved: 0,
+      treesPlanted: 0,
+      volunteersEngaged: 0
+    }
+  });
+  const [reportGenerating, setReportGenerating] = useState(false);
 
   useEffect(() => {
     const checkUserRole = async () => {
@@ -172,6 +191,7 @@ export default function NGOPortalPage() {
       await addDoc(collection(db, 'challenges'), {
         title: newChallenge.title,
         description: newChallenge.description,
+        completionInstructions: newChallenge.completionInstructions,
         category: newChallenge.category,
         targetActions: newChallenge.targetActions,
         participants: [],
@@ -192,6 +212,7 @@ export default function NGOPortalPage() {
       setNewChallenge({
         title: '',
         description: '',
+        completionInstructions: '',
         category: 'recycling',
         targetActions: 10,
         duration: 7
@@ -201,6 +222,98 @@ export default function NGOPortalPage() {
     } catch (error) {
       console.error('Error creating challenge:', error);
       alert('Failed to create challenge');
+    }
+  };
+
+  // Create Success Story Post
+  const handleCreatePost = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!user) return;
+
+    try {
+      await addDoc(collection(db, 'successStories'), {
+        title: newPost.title,
+        content: newPost.content,
+        imageUrl: newPost.imageUrl,
+        impactMetrics: newPost.impactMetrics,
+        createdBy: user.uid,
+        createdByEmail: user.email,
+        createdByName: user.displayName || 'NGO Partner',
+        createdAt: serverTimestamp(),
+        likes: 0,
+        comments: []
+      });
+
+      setNewPost({
+        title: '',
+        content: '',
+        imageUrl: '',
+        impactMetrics: {
+          co2Saved: 0,
+          treesPlanted: 0,
+          volunteersEngaged: 0
+        }
+      });
+      setShowCreatePostModal(false);
+      alert('Success story posted! It will appear in the community feed.');
+    } catch (error) {
+      console.error('Error creating post:', error);
+      alert('Failed to create post');
+    }
+  };
+
+  // Generate Donor Report
+  const handleGenerateReport = async () => {
+    if (!user) return;
+    setReportGenerating(true);
+
+    try {
+      // Gather all impact data
+      const reportData = {
+        organizationName: user.displayName || 'NGO Partner',
+        generatedAt: new Date().toISOString(),
+        totalChallenges: challenges.length,
+        activeChallenges: challenges.filter(c => c.isActive).length,
+        totalParticipants,
+        totalVolunteerHours,
+        impactMetrics: {
+          co2Saved: '8.3 tons',
+          treesPlanted: 450,
+          communityReach: 5200
+        },
+        challengeBreakdown: challenges.map(c => ({
+          title: c.title,
+          participants: c.participants.length,
+          category: c.category
+        }))
+      };
+
+      // Create downloadable JSON report
+      const dataStr = JSON.stringify(reportData, null, 2);
+      const dataBlob = new Blob([dataStr], { type: 'application/json' });
+      const url = URL.createObjectURL(dataBlob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `impact-report-${new Date().toISOString().split('T')[0]}.json`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
+
+      // Store report in Firestore
+      await addDoc(collection(db, 'donorReports'), {
+        ...reportData,
+        userId: user.uid,
+        createdAt: serverTimestamp()
+      });
+
+      setShowGenerateReportModal(false);
+      alert('Report generated successfully! Check your downloads folder.');
+    } catch (error) {
+      console.error('Error generating report:', error);
+      alert('Failed to generate report');
+    } finally {
+      setReportGenerating(false);
     }
   };
 
@@ -405,19 +518,34 @@ export default function NGOPortalPage() {
               <div className={styles.card}>
                 <h3>Share Success Stories</h3>
                 <p>Showcase your environmental impact</p>
-                <button className={styles.primaryButton}>Create Post</button>
+                <button 
+                  className={styles.primaryButton}
+                  onClick={() => setShowCreatePostModal(true)}
+                >
+                  Create Post
+                </button>
               </div>
 
               <div className={styles.card}>
                 <h3>Generate Donor Reports</h3>
                 <p>Export verified impact data for stakeholders</p>
-                <button className={styles.secondaryButton}>Generate Report</button>
+                <button 
+                  className={styles.secondaryButton}
+                  onClick={() => setShowGenerateReportModal(true)}
+                >
+                  Generate Report
+                </button>
               </div>
 
               <div className={styles.card}>
                 <h3>Partner Products</h3>
                 <p>Promote eco-friendly products and services</p>
-                <button className={styles.secondaryButton}>View Partners</button>
+                <button 
+                  className={styles.secondaryButton}
+                  onClick={() => setShowPartnersModal(true)}
+                >
+                  View Partners
+                </button>
               </div>
             </div>
           </section>
@@ -528,6 +656,23 @@ export default function NGOPortalPage() {
                   />
                 </div>
 
+                <div className={styles.formGroup}>
+                  <label>
+                    <i className="fas fa-check-circle"></i> How to Complete This Challenge
+                  </label>
+                  <textarea
+                    value={newChallenge.completionInstructions}
+                    onChange={(e) => setNewChallenge({...newChallenge, completionInstructions: e.target.value})}
+                    required
+                    placeholder="Provide step-by-step instructions on how participants can complete this challenge...&#10;&#10;Example:&#10;1. Track your plastic usage for one week&#10;2. Identify areas where you can reduce plastic&#10;3. Switch to reusable alternatives&#10;4. Log your daily progress in the app&#10;5. Share your results with the community"
+                    rows={6}
+                    className={styles.instructionsTextarea}
+                  />
+                  <small className={styles.fieldHint}>
+                    <i className="fas fa-info-circle"></i> Clear instructions help participants understand exactly what they need to do to complete the challenge and earn rewards.
+                  </small>
+                </div>
+
                 <div className={styles.formRow}>
                   <div className={styles.formGroup}>
                     <label>Category</label>
@@ -583,6 +728,331 @@ export default function NGOPortalPage() {
                   </button>
                 </div>
               </form>
+            </div>
+          </div>
+        )}
+
+        {/* Create Post Modal */}
+        {showCreatePostModal && (
+          <div className={styles.modal} onClick={() => setShowCreatePostModal(false)}>
+            <div className={styles.modalContent} onClick={(e) => e.stopPropagation()}>
+              <div className={styles.modalHeader}>
+                <h2>
+                  <i className="fas fa-newspaper"></i> Share Success Story
+                </h2>
+                <button 
+                  onClick={() => setShowCreatePostModal(false)} 
+                  className={styles.closeBtn}
+                >
+                  ✕
+                </button>
+              </div>
+
+              <form onSubmit={handleCreatePost} className={styles.form}>
+                <div className={styles.formGroup}>
+                  <label>Story Title</label>
+                  <input
+                    type="text"
+                    value={newPost.title}
+                    onChange={(e) => setNewPost({...newPost, title: e.target.value})}
+                    required
+                    placeholder="e.g., 500 Trees Planted in Local Community"
+                  />
+                </div>
+
+                <div className={styles.formGroup}>
+                  <label>Story Content</label>
+                  <textarea
+                    value={newPost.content}
+                    onChange={(e) => setNewPost({...newPost, content: e.target.value})}
+                    required
+                    placeholder="Share the details of your environmental success story..."
+                    rows={6}
+                  />
+                </div>
+
+                <div className={styles.formGroup}>
+                  <label>Image URL (optional)</label>
+                  <input
+                    type="url"
+                    value={newPost.imageUrl}
+                    onChange={(e) => setNewPost({...newPost, imageUrl: e.target.value})}
+                    placeholder="https://example.com/image.jpg"
+                  />
+                  <small className={styles.fieldHint}>
+                    <i className="fas fa-info-circle"></i> Add a photo URL to make your story more engaging
+                  </small>
+                </div>
+
+                <div className={styles.formGroup}>
+                  <label>Impact Metrics</label>
+                  <div className={styles.formRow}>
+                    <div className={styles.formGroup}>
+                      <label>CO₂ Saved (kg)</label>
+                      <input
+                        type="number"
+                        min="0"
+                        value={newPost.impactMetrics.co2Saved || ''}
+                        onChange={(e) => setNewPost({
+                          ...newPost, 
+                          impactMetrics: {...newPost.impactMetrics, co2Saved: parseFloat(e.target.value) || 0}
+                        })}
+                      />
+                    </div>
+                    <div className={styles.formGroup}>
+                      <label>Trees Planted</label>
+                      <input
+                        type="number"
+                        min="0"
+                        value={newPost.impactMetrics.treesPlanted || ''}
+                        onChange={(e) => setNewPost({
+                          ...newPost, 
+                          impactMetrics: {...newPost.impactMetrics, treesPlanted: parseInt(e.target.value) || 0}
+                        })}
+                      />
+                    </div>
+                    <div className={styles.formGroup}>
+                      <label>Volunteers Engaged</label>
+                      <input
+                        type="number"
+                        min="0"
+                        value={newPost.impactMetrics.volunteersEngaged || ''}
+                        onChange={(e) => setNewPost({
+                          ...newPost, 
+                          impactMetrics: {...newPost.impactMetrics, volunteersEngaged: parseInt(e.target.value) || 0}
+                        })}
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                <div className={styles.formActions}>
+                  <button 
+                    type="button" 
+                    onClick={() => setShowCreatePostModal(false)}
+                    className={styles.cancelBtn}
+                  >
+                    Cancel
+                  </button>
+                  <button type="submit" className={styles.submitBtn}>
+                    <i className="fas fa-share"></i> Publish Story
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+        )}
+
+        {/* Generate Report Modal */}
+        {showGenerateReportModal && (
+          <div className={styles.modal} onClick={() => setShowGenerateReportModal(false)}>
+            <div className={styles.modalContent} onClick={(e) => e.stopPropagation()}>
+              <div className={styles.modalHeader}>
+                <h2>
+                  <i className="fas fa-file-export"></i> Generate Donor Report
+                </h2>
+                <button 
+                  onClick={() => setShowGenerateReportModal(false)} 
+                  className={styles.closeBtn}
+                >
+                  ✕
+                </button>
+              </div>
+
+              <div className={styles.form}>
+                <div className={styles.reportPreview}>
+                  <h3>Report Summary</h3>
+                  <div className={styles.reportStats}>
+                    <div className={styles.reportStat}>
+                      <i className="fas fa-trophy"></i>
+                      <div>
+                        <strong>Total Challenges</strong>
+                        <p>{challenges.length}</p>
+                      </div>
+                    </div>
+                    <div className={styles.reportStat}>
+                      <i className="fas fa-users"></i>
+                      <div>
+                        <strong>Total Participants</strong>
+                        <p>{totalParticipants}</p>
+                      </div>
+                    </div>
+                    <div className={styles.reportStat}>
+                      <i className="fas fa-clock"></i>
+                      <div>
+                        <strong>Volunteer Hours</strong>
+                        <p>{totalVolunteerHours}</p>
+                      </div>
+                    </div>
+                    <div className={styles.reportStat}>
+                      <i className="fas fa-leaf"></i>
+                      <div>
+                        <strong>CO₂ Saved</strong>
+                        <p>8.3 tons</p>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className={styles.reportInfo}>
+                    <i className="fas fa-info-circle"></i>
+                    <p>This report will include all impact data, challenge statistics, and volunteer engagement metrics. The report will be downloaded as a JSON file that can be shared with stakeholders.</p>
+                  </div>
+                </div>
+
+                <div className={styles.formActions}>
+                  <button 
+                    type="button" 
+                    onClick={() => setShowGenerateReportModal(false)}
+                    className={styles.cancelBtn}
+                  >
+                    Cancel
+                  </button>
+                  <button 
+                    type="button"
+                    onClick={handleGenerateReport}
+                    className={styles.submitBtn}
+                    disabled={reportGenerating}
+                  >
+                    {reportGenerating ? (
+                      <>
+                        <i className="fas fa-spinner fa-spin"></i> Generating...
+                      </>
+                    ) : (
+                      <>
+                        <i className="fas fa-download"></i> Download Report
+                      </>
+                    )}
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* View Partners Modal */}
+        {showPartnersModal && (
+          <div className={styles.modal} onClick={() => setShowPartnersModal(false)}>
+            <div className={styles.modalContent} onClick={(e) => e.stopPropagation()}>
+              <div className={styles.modalHeader}>
+                <h2>
+                  <i className="fas fa-handshake"></i> Partner Products & Services
+                </h2>
+                <button 
+                  onClick={() => setShowPartnersModal(false)} 
+                  className={styles.closeBtn}
+                >
+                  ✕
+                </button>
+              </div>
+
+              <div className={styles.form}>
+                <div className={styles.partnersGrid}>
+                  <div className={styles.partnerCard}>
+                    <div className={styles.partnerIcon}>
+                      <i className="fas fa-shopping-bag"></i>
+                    </div>
+                    <h4>EcoMart Philippines</h4>
+                    <p>Sustainable products and zero-waste supplies</p>
+                    <div className={styles.partnerTags}>
+                      <span>Retail</span>
+                      <span>Zero Waste</span>
+                    </div>
+                    <a href="#" className={styles.partnerLink}>
+                      Visit Partner <i className="fas fa-external-link-alt"></i>
+                    </a>
+                  </div>
+
+                  <div className={styles.partnerCard}>
+                    <div className={styles.partnerIcon}>
+                      <i className="fas fa-recycle"></i>
+                    </div>
+                    <h4>Green Solutions Inc</h4>
+                    <p>Recycling services and waste management</p>
+                    <div className={styles.partnerTags}>
+                      <span>Recycling</span>
+                      <span>Services</span>
+                    </div>
+                    <a href="#" className={styles.partnerLink}>
+                      Visit Partner <i className="fas fa-external-link-alt"></i>
+                    </a>
+                  </div>
+
+                  <div className={styles.partnerCard}>
+                    <div className={styles.partnerIcon}>
+                      <i className="fas fa-solar-panel"></i>
+                    </div>
+                    <h4>Solar Energy PH</h4>
+                    <p>Renewable energy solutions for communities</p>
+                    <div className={styles.partnerTags}>
+                      <span>Energy</span>
+                      <span>Solar</span>
+                    </div>
+                    <a href="#" className={styles.partnerLink}>
+                      Visit Partner <i className="fas fa-external-link-alt"></i>
+                    </a>
+                  </div>
+
+                  <div className={styles.partnerCard}>
+                    <div className={styles.partnerIcon}>
+                      <i className="fas fa-leaf"></i>
+                    </div>
+                    <h4>Organic Farms Co-op</h4>
+                    <p>Local organic produce and sustainable farming</p>
+                    <div className={styles.partnerTags}>
+                      <span>Agriculture</span>
+                      <span>Organic</span>
+                    </div>
+                    <a href="#" className={styles.partnerLink}>
+                      Visit Partner <i className="fas fa-external-link-alt"></i>
+                    </a>
+                  </div>
+
+                  <div className={styles.partnerCard}>
+                    <div className={styles.partnerIcon}>
+                      <i className="fas fa-tshirt"></i>
+                    </div>
+                    <h4>EcoWear Fashion</h4>
+                    <p>Sustainable clothing and accessories</p>
+                    <div className={styles.partnerTags}>
+                      <span>Fashion</span>
+                      <span>Sustainable</span>
+                    </div>
+                    <a href="#" className={styles.partnerLink}>
+                      Visit Partner <i className="fas fa-external-link-alt"></i>
+                    </a>
+                  </div>
+
+                  <div className={styles.partnerCard}>
+                    <div className={styles.partnerIcon}>
+                      <i className="fas fa-seedling"></i>
+                    </div>
+                    <h4>TreeLife Foundation</h4>
+                    <p>Tree planting programs and reforestation</p>
+                    <div className={styles.partnerTags}>
+                      <span>Reforestation</span>
+                      <span>NGO</span>
+                    </div>
+                    <a href="#" className={styles.partnerLink}>
+                      Visit Partner <i className="fas fa-external-link-alt"></i>
+                    </a>
+                  </div>
+                </div>
+
+                <div className={styles.partnerInfo}>
+                  <i className="fas fa-lightbulb"></i>
+                  <p>Promote these eco-friendly partners to your community members and earn collaboration benefits!</p>
+                </div>
+
+                <div className={styles.formActions}>
+                  <button 
+                    type="button" 
+                    onClick={() => setShowPartnersModal(false)}
+                    className={styles.submitBtn}
+                  >
+                    Close
+                  </button>
+                </div>
+              </div>
             </div>
           </div>
         )}

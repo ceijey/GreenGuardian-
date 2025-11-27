@@ -36,7 +36,7 @@ interface Challenge {
   endDate: { seconds: number; nanoseconds: number; } | null;
   targetActions: number;
   participants: string[];
-  badge: { name: string; icon: string; color: string; };
+  badge?: { name: string; icon: string; color: string; };
   isActive: boolean;
   createdBy: string;
   relatedEventTypes?: string[]; // NEW: Link challenges to event types
@@ -269,8 +269,8 @@ export default function CommunityHubPage() {
             date: startDate,
             status,
             points: c.targetActions * 10,
-            icon: c.badge.icon,
-            color: c.badge.color,
+            icon: c.badge?.icon || 'fas fa-award',
+            color: c.badge?.color || '#4CAF50',
             relatedItems: relatedEvents
           });
         });
@@ -419,15 +419,25 @@ export default function CommunityHubPage() {
       const challenge = challenges.find(c => c.id === challengeId);
       if (challenge) {
         const relatedEvents = getRelatedEvents(challenge);
-        if (relatedEvents.length > 0) {
-          alert(`Successfully joined! ${relatedEvents.length} related volunteer events available. Check them out!`);
-        } else {
-          alert('Successfully joined! Start logging actions to earn your badge.');
+        let message = `🎉 Successfully joined "${challenge.title}"!\n\n`;
+        message += `📋 Next Steps:\n`;
+        message += `1. Complete ${challenge.targetActions} eco-friendly actions\n`;
+        message += `2. Log your progress in your dashboard\n`;
+        message += `3. Earn your badge when you reach the goal!\n`;
+        
+        if (challenge.completionInstructions) {
+          message += `\n💡 Tip: Check the challenge card for detailed completion instructions.`;
         }
+        
+        if (relatedEvents.length > 0) {
+          message += `\n\n🤝 ${relatedEvents.length} related volunteer event(s) available to boost your progress!`;
+        }
+        
+        alert(message);
       }
     } catch (error) {
       console.error('Error:', error);
-      alert('Failed to join challenge');
+      alert('Failed to join challenge. Please try again.');
     }
   };
 
@@ -906,8 +916,8 @@ export default function CommunityHubPage() {
                               const isParticipating = challenge.participants?.includes(user.uid);
                               return (
                                 <div key={challenge.id} className={styles.relatedItem}>
-                                  <div className={styles.relatedIcon} style={{ color: challenge.badge.color }}>
-                                    <i className={challenge.badge.icon}></i>
+                                  <div className={styles.relatedIcon} style={{ color: challenge.badge?.color || '#4CAF50' }}>
+                                    <i className={challenge.badge?.icon || 'fas fa-award'}></i>
                                   </div>
                                   <div className={styles.relatedContent}>
                                     <strong>{challenge.title}</strong>

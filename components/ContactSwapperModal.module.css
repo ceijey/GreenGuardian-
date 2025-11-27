@@ -116,6 +116,30 @@
   color: #0d47a1;
 }
 
+.safetyReminder {
+  background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+  padding: 12px 30px;
+  border-bottom: 1px solid #fcd34d;
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  color: #78350f;
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+.safetyReminder i {
+  font-size: 16px;
+  color: #f59e0b;
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+.safetyReminder strong {
+  color: #92400e;
+  font-weight: 600;
+}
+
 .chatContainer {
   flex: 1;
   overflow-y: auto;

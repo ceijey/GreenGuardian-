@@ -335,3 +335,101 @@
 .rewardsInfo i {
   font-size: 1.1rem;
 }
+
+/* Completion Instructions Styles */
+.instructionsSection {
+  background: linear-gradient(135deg, #e8f5e9 0%, #f1f8f4 100%);
+  border: 2px solid #c8e6c9;
+  border-radius: 12px;
+  padding: 16px;
+  margin-bottom: 16px;
+}
+
+.instructionsTitle {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: #2e7d32;
+  font-size: 1rem;
+  font-weight: 600;
+  margin: 0 0 12px 0;
+}
+
+.instructionsTitle i {
+  color: #4caf50;
+  font-size: 1.1rem;
+}
+
+.instructionsText {
+  color: #1b5e20;
+  line-height: 1.7;
+  margin: 0;
+  white-space: pre-line;
+  font-size: 0.95rem;
+}
+
+/* Join Instructions Styles */
+.joinInstructions {
+  background: linear-gradient(135deg, #e0f2fe 0%, #f0f9ff 100%);
+  border: 2px solid #bae6fd;
+  border-radius: 12px;
+  padding: 16px;
+  margin-bottom: 16px;
+}
+
+.joinInstructionsTitle {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: #0369a1;
+  font-size: 1rem;
+  font-weight: 600;
+  margin: 0 0 12px 0;
+}
+
+.joinInstructionsTitle i {
+  color: #0284c7;
+  font-size: 1.1rem;
+}
+
+.joinStepsList {
+  margin: 0 0 12px 0;
+  padding-left: 24px;
+  color: #075985;
+  line-height: 1.8;
+}
+
+.joinStepsList li {
+  margin-bottom: 6px;
+  font-size: 0.95rem;
+}
+
+.joinStepsList li::marker {
+  color: #0284c7;
+  font-weight: bold;
+}
+
+.joinNote {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  background: rgba(255, 255, 255, 0.5);
+  padding: 10px;
+  border-radius: 8px;
+  border-left: 3px solid #0284c7;
+  margin-top: 12px;
+}
+
+.joinNote i {
+  color: #f59e0b;
+  font-size: 1rem;
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+.joinNote span {
+  color: #075985;
+  font-size: 0.875rem;
+  line-height: 1.5;
+}
+

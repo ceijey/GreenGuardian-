@@ -71,8 +71,6 @@ export default function DashboardPage() {
   const [isScannerOpen, setIsScannerOpen] = useState(false);
   const [isActionLoggerOpen, setIsActionLoggerOpen] = useState(false);
   const [activeSection, setActiveSection] = useState('overview');
-  const [sidebarVisible, setSidebarVisible] = useState(true);
-  const [lastScrollY, setLastScrollY] = useState(0);
   
   // Location tracking state
   const [userLocation, setUserLocation] = useState<UserLocation | null>(null);
@@ -134,33 +132,27 @@ export default function DashboardPage() {
     };
   }, [user]);
 
-  // Sidebar scroll behavior
+  // Track active section on scroll
   useEffect(() => {
     const handleScroll = () => {
-      const currentScrollY = window.scrollY;
-      
-      // If at the top, always show sidebar
-      if (currentScrollY < 10) {
-        setSidebarVisible(true);
+      const sections = ['overview', 'actions', 'resources', 'location', 'environmental', 'map', 'projects'];
+      const scrollPosition = window.scrollY + 150;
+
+      for (const section of sections) {
+        const element = document.getElementById(section);
+        if (element) {
+          const { offsetTop, offsetHeight } = element;
+          if (scrollPosition >= offsetTop && scrollPosition < offsetTop + offsetHeight) {
+            setActiveSection(section);
+            break;
+          }
+        }
       }
-      // If scrolling down and past threshold, hide sidebar
-      else if (currentScrollY > lastScrollY && currentScrollY > 80) {
-        setSidebarVisible(false);
-      }
-      // If scrolling up, show sidebar
-      else if (currentScrollY < lastScrollY) {
-        setSidebarVisible(true);
-      }
-      
-      setLastScrollY(currentScrollY);
     };
 
     window.addEventListener('scroll', handleScroll, { passive: true });
-    
-    return () => {
-      window.removeEventListener('scroll', handleScroll);
-    };
-  }, [lastScrollY]);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
 
   // Load local projects
   useEffect(() => {
@@ -290,78 +282,25 @@ export default function DashboardPage() {
     }
   };
 
+  const dashboardSections = [
+    { id: 'overview', label: 'Overview', icon: 'home' },
+    { id: 'actions', label: 'Actions', icon: 'tasks' },
+    { id: 'resources', label: 'Resources', icon: 'book' },
+    { id: 'location', label: 'Location', icon: 'map-marker-alt' },
+    { id: 'environmental', label: 'Environment', icon: 'chart-line' },
+    { id: 'map', label: 'Map', icon: 'map' },
+    { id: 'projects', label: 'Projects', icon: 'leaf' },
+  ];
+
   return (
     <>
       <CitizenOnly />
-      <Header logo="fas fa-leaf" title="GREENGUARDIAN" />
-      
-      {/* Side Navigation */}
-      {user && (
-        <>
-          {/* Hover trigger area */}
-          <div 
-            className={styles.sideNavTrigger}
-            onMouseEnter={() => setSidebarVisible(true)}
-          ></div>
-          
-          <nav 
-            className={`${styles.sideNav} ${!sidebarVisible ? styles.sideNavHidden : ''}`}
-            onMouseEnter={() => setSidebarVisible(true)}
-          >
-            <div className={styles.sideNavContent}>
-            <button
-              onClick={() => scrollToSection('overview')}
-              className={`${styles.navItem} ${activeSection === 'overview' ? styles.navItemActive : ''}`}
-            >
-              <i className="fas fa-home"></i>
-              <span>Overview</span>
-            </button>
-            <button
-              onClick={() => scrollToSection('actions')}
-              className={`${styles.navItem} ${activeSection === 'actions' ? styles.navItemActive : ''}`}
-            >
-              <i className="fas fa-tasks"></i>
-              <span>Actions</span>
-            </button>
-            <button
-              onClick={() => scrollToSection('resources')}
-              className={`${styles.navItem} ${activeSection === 'resources' ? styles.navItemActive : ''}`}
-            >
-              <i className="fas fa-book"></i>
-              <span>Resources</span>
-            </button>
-            <button
-              onClick={() => scrollToSection('location')}
-              className={`${styles.navItem} ${activeSection === 'location' ? styles.navItemActive : ''}`}
-            >
-              <i className="fas fa-map-marker-alt"></i>
-              <span>Location</span>
-            </button>
-            <button
-              onClick={() => scrollToSection('environmental')}
-              className={`${styles.navItem} ${activeSection === 'environmental' ? styles.navItemActive : ''}`}
-            >
-              <i className="fas fa-chart-line"></i>
-              <span>Environment</span>
-            </button>
-            <button
-              onClick={() => scrollToSection('map')}
-              className={`${styles.navItem} ${activeSection === 'map' ? styles.navItemActive : ''}`}
-            >
-              <i className="fas fa-map"></i>
-              <span>Map</span>
-            </button>
-            <button
-              onClick={() => scrollToSection('projects')}
-              className={`${styles.navItem} ${activeSection === 'projects' ? styles.navItemActive : ''}`}
-            >
-              <i className="fas fa-leaf"></i>
-              <span>Projects</span>
-            </button>
-          </div>
-        </nav>
-        </>
-      )}
+      <Header 
+        logo="fas fa-leaf" 
+        title="GREENGUARDIAN" 
+        dashboardSections={dashboardSections}
+        onSectionClick={scrollToSection}
+      />
 
       <main className="main-content">
         <GlobalAnnouncements position="top" maxVisible={2} />

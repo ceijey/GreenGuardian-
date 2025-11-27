@@ -153,13 +153,40 @@
 }
 
 .errorMessage {
-  background: #fef2f2;
-  color: #dc2626;
-  padding: var(--spacing-md);
-  border-radius: 8px;
+  background: linear-gradient(135deg, #fef2f2 0%, #fee2e2 100%);
+  color: #991b1b;
+  padding: 18px 24px;
+  border-radius: 12px;
   font-size: var(--font-size-sm);
-  text-align: center;
-  border: 1px solid #fecaca;
+  text-align: left;
+  border: 2px solid #fca5a5;
+  box-shadow: 
+    0 4px 12px rgba(220, 38, 38, 0.15),
+    0 0 0 1px rgba(220, 38, 38, 0.1);
+  animation: errorSlideIn 0.3s ease-out;
+  position: relative;
+  overflow: hidden;
+}
+
+.errorMessage::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 4px;
+  background: linear-gradient(180deg, #dc2626 0%, #991b1b 100%);
+}
+
+@keyframes errorSlideIn {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 .resendButton {
@@ -585,14 +612,22 @@
 /* Error message with icon */
 .errorMessage {
   display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 8px;
+  flex-direction: row;
+  align-items: flex-start;
+  gap: 12px;
+  padding-left: 28px;
 }
 
 .errorMessage i {
-  font-size: 20px;
-  margin-bottom: 4px;
+  font-size: 18px;
+  flex-shrink: 0;
+  margin-top: 1px;
+}
+
+.errorMessage span {
+  flex: 1;
+  line-height: 1.6;
+  font-weight: 500;
 }
 
 /* Loading state (WCAG 1.4.11 - Non-text Contrast) */

@@ -1,3 +1,8 @@
+/* Smooth scrolling */
+html {
+  scroll-behavior: smooth;
+}
+
 .header {
   background: linear-gradient(135deg, #1d411d 5%, #0db10d 100%);
   color: white;
@@ -214,6 +219,11 @@
   font-size: 16px !important;
   gap: 16px;
   font-weight: 500;
+  background: none !important;
+  border: none;
+  width: 100%;
+  text-align: left;
+  cursor: pointer;
 }
 
 .dropdownItem:hover {
@@ -495,18 +505,18 @@
   background: rgba(220, 252, 231, 0.1);
 }
 
-/* School Header - Amber/Yellow Theme */
+/* School Header - Green Theme */
 .schoolHeader {
-  background: linear-gradient(135deg, #f59e0b 0%, #fbbf24 100%);
+  background: linear-gradient(135deg, #16a34a 0%, #22c55e 100%);
 }
 
 .schoolHeader .logo i,
 .schoolHeader .active {
-  color: #fef3c7;
+  color: #dcfce7;
 }
 
 .schoolHeader .navList a:hover {
-  background: rgba(254, 243, 199, 0.1);
+  background: rgba(220, 252, 231, 0.1);
 }
 
 /* Partner Header - Blue Theme */
