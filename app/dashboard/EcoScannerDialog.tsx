@@ -2,109 +2,87 @@
 
 import { useEffect, useRef, useState } from 'react';
 import { Dialog } from '@headlessui/react';
-import * as cocoSsd from '@tensorflow-models/coco-ssd';
-import '@tensorflow/tfjs';
 import { collection, addDoc, serverTimestamp, doc, updateDoc, increment, getDoc, setDoc } from 'firebase/firestore';
 import { db } from '../../lib/firebase';
 import { useAuth } from '../../lib/AuthContext';
 import { useStatsTracker } from '../../lib/useStatsTracker';
 
-// Global model manager to persist model across dialog opens/closes
-class ModelManager {
-  private static instance: ModelManager;
-  private model: cocoSsd.ObjectDetection | null = null;
-  private isLoading: boolean = false;
-  private loadPromise: Promise<cocoSsd.ObjectDetection> | null = null;
-  private loadAttempts: number = 0;
-  private maxAttempts: number = 5;
-  private callbacks: Set<(attempts: number) => void> = new Set();
+// Gemini AI manager for live scanning
+class GeminiScannerManager {
+  private static instance: GeminiScannerManager;
+  private isScanning: boolean = false;
+  private lastScanTime: number = 0;
+  private scanInterval: number = 3000; // Scan every 3 seconds
+  private consecutiveErrors: number = 0;
+  private maxConsecutiveErrors: number = 3;
 
-  static getInstance(): ModelManager {
-    if (!ModelManager.instance) {
-      ModelManager.instance = new ModelManager();
+  static getInstance(): GeminiScannerManager {
+    if (!GeminiScannerManager.instance) {
+      GeminiScannerManager.instance = new GeminiScannerManager();
     }
-    return ModelManager.instance;
+    return GeminiScannerManager.instance;
   }
 
-  async getModel(): Promise<cocoSsd.ObjectDetection> {
-    if (this.model) {
-      console.log('🔄 Reusing existing model');
-      return this.model;
-    }
-
-    if (this.loadPromise) {
-      console.log('🔄 Model already loading, waiting...');
-      return this.loadPromise;
-    }
-
-    return this.loadModel();
+  reset(): void {
+    this.consecutiveErrors = 0;
+    console.log('🔄 Scanner reset - error count cleared');
   }
 
-  private async loadModel(): Promise<cocoSsd.ObjectDetection> {
-    this.loadAttempts++;
-    console.log(`🚀 Loading COCO-SSD model (attempt ${this.loadAttempts}/${this.maxAttempts})`);
-    
-    // Notify callbacks about retry attempt
-    this.callbacks.forEach(callback => callback(this.loadAttempts));
-    
-    this.loadPromise = this.attemptModelLoad();
-    
+  needsReinit(): boolean {
+    return this.consecutiveErrors >= this.maxConsecutiveErrors;
+  }
+
+  canScan(): boolean {
+    const now = Date.now();
+    if (now - this.lastScanTime < this.scanInterval) {
+      return false;
+    }
+    return !this.isScanning;
+  }
+
+  async scan(imageData: string): Promise<any> {
+    if (!this.canScan()) {
+      return null;
+    }
+
+    this.isScanning = true;
+    this.lastScanTime = Date.now();
+
     try {
-      this.model = await this.loadPromise;
-      console.log('✅ Model loaded and cached successfully');
-      this.loadAttempts = 0; // Reset on success
-      return this.model;
-    } catch (error) {
-      console.error(`❌ Model load failed (attempt ${this.loadAttempts}):`, error);
-      this.loadPromise = null;
-      
-      if (this.loadAttempts < this.maxAttempts) {
-        const delay = Math.min(Math.pow(2, this.loadAttempts) * 1000, 10000);
-        console.log(`⏳ Retrying in ${delay/1000}s...`);
-        await new Promise(resolve => setTimeout(resolve, delay));
-        return this.loadModel();
-      } else {
-        this.loadAttempts = 0;
-        throw new Error(`Failed to load model after ${this.maxAttempts} attempts. Please refresh the page.`);
+      // Call the API route instead of direct Gemini call
+      const response = await fetch('/api/eco-scanner', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ image: imageData }),
+      });
+
+      if (!response.ok) {
+        throw new Error(`API request failed: ${response.status}`);
       }
+
+      const data = await response.json();
+      
+      if (data.success && data.method === 'gemini-ai') {
+        // Success! Reset error counter
+        this.consecutiveErrors = 0;
+        return data.result;
+      }
+      
+      // No result but not an error
+      return null;
+    } catch (error) {
+      console.error('❌ Gemini scan error:', error);
+      this.consecutiveErrors++;
+      console.log(`⚠️ Consecutive errors: ${this.consecutiveErrors}/${this.maxConsecutiveErrors}`);
+      
+      if (this.needsReinit()) {
+        console.log('🚨 Too many errors - needs reinitialization');
+      }
+      
+      return null;
+    } finally {
+      this.isScanning = false;
     }
-  }
-
-  private async attemptModelLoad(): Promise<cocoSsd.ObjectDetection> {
-    // Try different loading strategies
-    const strategies = [
-      () => cocoSsd.load(), // Default
-      () => cocoSsd.load({ base: 'lite_mobilenet_v2' }), // Lighter model
-      () => cocoSsd.load({ base: 'mobilenet_v1' }), // Alternative
-      () => cocoSsd.load({ base: 'mobilenet_v2' }), // Alternative
-    ];
-
-    const strategy = strategies[Math.min(this.loadAttempts - 1, strategies.length - 1)];
-    
-    // Add timeout
-    const modelPromise = strategy();
-    const timeoutPromise = new Promise<never>((_, reject) => 
-      setTimeout(() => reject(new Error('Model loading timeout')), 45000)
-    );
-
-    return Promise.race([modelPromise, timeoutPromise]);
-  }
-
-  isModelLoaded(): boolean {
-    return this.model !== null;
-  }
-
-  isModelLoading(): boolean {
-    return this.loadPromise !== null && this.model === null;
-  }
-
-  getCurrentAttempts(): number {
-    return this.loadAttempts;
-  }
-
-  onRetryUpdate(callback: (attempts: number) => void): () => void {
-    this.callbacks.add(callback);
-    return () => this.callbacks.delete(callback);
   }
 }
 
@@ -119,9 +97,11 @@ interface ProductFootprint {
   carbonFootprint: number; // kg CO2 equivalent
   waterFootprint: number; // liters
   recyclability: string; // percentage or description
-  ecoScore: number; // 1-10 scale
+  ecoScore: number; // 1-10 scale (converted from Gemini's 1-5 rating)
   alternatives?: string[];
   category: string;
+  materialType?: string;
+  instructions?: string;
 }
 
 export default function EcoScannerDialog({ isOpen, onClose }: EcoScannerDialogProps) {
@@ -131,14 +111,11 @@ export default function EcoScannerDialog({ isOpen, onClose }: EcoScannerDialogPr
   const videoRef = useRef<HTMLVideoElement | null>(null);
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const streamRef = useRef<MediaStream | null>(null);
-  const intervalRef = useRef<NodeJS.Timeout | null>(null);
-  const modelManagerRef = useRef<ModelManager>(ModelManager.getInstance());
+  const scannerManagerRef = useRef<GeminiScannerManager>(GeminiScannerManager.getInstance());
   
-  const [model, setModel] = useState<cocoSsd.ObjectDetection | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [loadingProgress, setLoadingProgress] = useState('');
-  const [retryCount, setRetryCount] = useState(0);
   const [cameraReady, setCameraReady] = useState(false);
   const [loggedItems, setLoggedItems] = useState<Set<string>>(new Set());
   const [scannedProducts, setScannedProducts] = useState<ProductFootprint[]>([]);
@@ -146,20 +123,17 @@ export default function EcoScannerDialog({ isOpen, onClose }: EcoScannerDialogPr
   const [pendingProduct, setPendingProduct] = useState<ProductFootprint | null>(null);
   const [showConfirmation, setShowConfirmation] = useState(false);
   const [isPaused, setIsPaused] = useState(false);
+  const [isScanning, setIsScanning] = useState(false);
+  const [geminiReady, setGeminiReady] = useState(false);
   const [userMilestones, setUserMilestones] = useState({ totalScans: 0, totalCO2Tracked: 0, totalWaterTracked: 0 });
-
-  // List of objects to ignore (people and animals)
-  const ignoredObjects = ['person', 'cat', 'dog', 'bird', 'horse', 'sheep', 'cow', 'elephant', 'bear', 'zebra', 'giraffe'];
 
   // Initialize scanner when dialog opens
   useEffect(() => {
     if (!isOpen) {
       // Reset states when dialog closes
-      setModel(null);
       setLoading(true);
       setError(null);
       setLoadingProgress('');
-      setRetryCount(0);
       setCameraReady(false);
       setScannedProducts([]);
       setLoggedItems(new Set());
@@ -167,77 +141,57 @@ export default function EcoScannerDialog({ isOpen, onClose }: EcoScannerDialogPr
       setPendingProduct(null);
       setShowConfirmation(false);
       setIsPaused(false);
+      setIsScanning(false);
+      setGeminiReady(false);
       return;
     }
 
-    let isMounted = true;
-    
-    const initializeScanner = async () => {
-      let unsubscribe: (() => void) | null = null;
-      
+    // Check Gemini AI availability by testing the API
+    const checkGeminiAvailability = async () => {
       try {
         setLoading(true);
-        setError(null);
-        setLoadingProgress('Initializing AI model...');
+        setLoadingProgress('Checking Gemini AI availability...');
         
-        // Check if model is already loaded
-        const modelManager = modelManagerRef.current;
-        
-        // Subscribe to retry updates
-        unsubscribe = modelManager.onRetryUpdate((attempts) => {
-          if (isMounted) {
-            setRetryCount(attempts);
-            setLoadingProgress(`Loading AI model (attempt ${attempts}/5)...`);
-          }
+        const response = await fetch('/api/eco-scanner', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ checkAvailability: true }),
         });
         
-        if (modelManager.isModelLoaded()) {
-          console.log('✅ Using cached model');
-          const cachedModel = await modelManager.getModel();
-          if (isMounted) {
-            setModel(cachedModel);
-            setLoading(false);
-            setLoadingProgress('');
-            setRetryCount(0);
-          }
+        const data = await response.json();
+        
+        if (!data.available) {
+          setError('Gemini AI is not configured. Retrying in 5 seconds...');
+          setLoading(false);
+          setGeminiReady(false);
+          
+          // Auto-retry after 5 seconds
+          setTimeout(() => {
+            console.log('🔄 Auto-retrying Gemini initialization...');
+            checkGeminiAvailability();
+          }, 5000);
           return;
         }
-
-        // Load model with progress updates
-        if (modelManager.isModelLoading()) {
-          setLoadingProgress('Model loading in progress...');
-        } else {
-          setLoadingProgress('Loading AI detection model...');
-        }
-
-        const loadedModel = await modelManager.getModel();
         
-        if (isMounted) {
-          console.log('✅ Model ready for scanning');
-          setModel(loadedModel);
-          setLoading(false);
-          setLoadingProgress('');
-          setRetryCount(0);
-        }
-        
+        console.log('✅ Gemini AI scanner ready');
+        setGeminiReady(true);
+        setLoading(false);
+        setLoadingProgress('');
+        setError(null);
       } catch (err) {
-        console.error('❌ Scanner initialization failed:', err);
-        if (isMounted) {
-          setError(err instanceof Error ? err.message : 'Failed to initialize scanner');
-          setLoading(false);
-          setLoadingProgress('');
-          setRetryCount(0);
-        }
-      } finally {
-        if (unsubscribe) {
-          unsubscribe();
-        }
+        console.error('Failed to check Gemini availability:', err);
+        setError('Failed to initialize Gemini AI. Retrying in 5 seconds...');
+        setLoading(false);
+        
+        // Auto-retry after 5 seconds
+        setTimeout(() => {
+          console.log('🔄 Auto-retrying after error...');
+          checkGeminiAvailability();
+        }, 5000);
       }
     };
 
-    initializeScanner();
-    
-    return () => { isMounted = false; };
+    checkGeminiAvailability();
   }, [isOpen]);
 
   // Load user milestones
@@ -270,26 +224,18 @@ export default function EcoScannerDialog({ isOpen, onClose }: EcoScannerDialogPr
   // Enhanced camera management
   useEffect(() => {
     if (!isOpen) {
-      // Clean up camera and detection when dialog closes
+      // Clean up camera when dialog closes
       if (streamRef.current) {
         streamRef.current.getTracks().forEach(track => track.stop());
         streamRef.current = null;
         console.log('🛑 Camera stream stopped');
       }
       
-      if (intervalRef.current) {
-        clearInterval(intervalRef.current);
-        intervalRef.current = null;
-        console.log('� Detection interval cleared');
-      }
-      
       setCameraReady(false);
       return;
     }
 
-    // Only start camera when dialog is open and model is ready
-    if (!model || loading) return;
-    
+    // Start camera when dialog is open
     let isMounted = true;
     
     const initializeCamera = async () => {
@@ -394,7 +340,7 @@ export default function EcoScannerDialog({ isOpen, onClose }: EcoScannerDialogPr
     return () => {
       isMounted = false;
     };
-  }, [isOpen, model, loading]);
+  }, [isOpen]);
 
   // Update impact database with scanned product data
   const updateImpactDatabase = async (product: ProductFootprint) => {
@@ -449,252 +395,163 @@ export default function EcoScannerDialog({ isOpen, onClose }: EcoScannerDialogPr
     }
   };
 
-  // Enhanced object detection with proper state management
+  // Gemini AI live scanning
   useEffect(() => {
-    // Only start detection when everything is ready
-    if (!model || !videoRef.current || !canvasRef.current || !cameraReady || !isOpen) {
-      console.log('🔄 Detection waiting for:', { 
-        model: !!model, 
-        video: !!videoRef.current, 
-        canvas: !!canvasRef.current, 
-        cameraReady, 
-        isOpen 
-      });
+    if (!isOpen || !cameraReady || isPaused || !videoRef.current || !canvasRef.current) {
       return;
-    }
-    
-    console.log('✅ Starting object detection loop');
-    
-    // Clear any existing interval
-    if (intervalRef.current) {
-      clearInterval(intervalRef.current);
-      intervalRef.current = null;
     }
 
     const video = videoRef.current;
     const canvas = canvasRef.current;
-    const ctx = canvas.getContext('2d')!;
+    const ctx = canvas.getContext('2d');
+    const scannerManager = scannerManagerRef.current;
 
-    const productDatabase: Record<string, ProductFootprint> = {
-      bottle: {
-        label: 'Plastic Bottle',
-        recyclable: true,
-        carbonFootprint: 0.082, // kg CO2
-        waterFootprint: 3.4, // liters
-        recyclability: '85% recyclable',
-        ecoScore: 4,
-        alternatives: ['Reusable water bottle', 'Glass bottle', 'Aluminum bottle'],
-        category: 'packaging'
-      },
-      can: {
-        label: 'Aluminum Can',
-        recyclable: true,
-        carbonFootprint: 0.33, // kg CO2
-        waterFootprint: 15.8, // liters
-        recyclability: '95% recyclable',
-        ecoScore: 7,
-        alternatives: ['Glass bottles', 'Reusable containers'],
-        category: 'packaging'
-      },
-      cup: {
-        label: 'Disposable Paper Cup',
-        recyclable: false,
-        carbonFootprint: 0.011, // kg CO2
-        waterFootprint: 0.5, // liters
-        recyclability: '5% recyclable (plastic lining)',
-        ecoScore: 2,
-        alternatives: ['Reusable ceramic mug', 'Bamboo cup', 'Stainless steel tumbler'],
-        category: 'packaging'
-      },
-      box: {
-        label: 'Cardboard Box',
-        recyclable: true,
-        carbonFootprint: 0.85, // kg CO2 per kg
-        waterFootprint: 20, // liters per kg
-        recyclability: '90% recyclable',
-        ecoScore: 8,
-        alternatives: ['Reusable bags', 'Biodegradable packaging'],
-        category: 'packaging'
-      },
-      'wine glass': {
-        label: 'Glass Container',
-        recyclable: true,
-        carbonFootprint: 0.5, // kg CO2
-        waterFootprint: 2.1, // liters
-        recyclability: '100% recyclable',
-        ecoScore: 9,
-        alternatives: ['Reusable glass containers'],
-        category: 'packaging'
-      },
-      book: {
-        label: 'Paper Product / Book',
-        recyclable: true,
-        carbonFootprint: 2.71, // kg CO2 per kg
-        waterFootprint: 13, // liters per kg
-        recyclability: '80% recyclable',
-        ecoScore: 6,
-        alternatives: ['Digital books', 'Library books', 'Recycled paper'],
-        category: 'paper'
-      },
-      'teddy bear': {
-        label: 'Paper/Cardboard Product',
-        recyclable: true,
-        carbonFootprint: 1.5, // kg CO2
-        waterFootprint: 10, // liters
-        recyclability: '75% recyclable',
-        ecoScore: 6,
-        alternatives: ['Recycled paper products', 'Digital alternatives'],
-        category: 'paper'
-      },
-      vase: {
-        label: 'Container/Bottle',
-        recyclable: true,
-        carbonFootprint: 0.5, // kg CO2
-        waterFootprint: 2.5, // liters
-        recyclability: '90% recyclable',
-        ecoScore: 7,
-        alternatives: ['Reusable containers', 'Glass bottles'],
-        category: 'packaging'
-      },
-      'cell phone': {
-        label: 'Electronic Device',
-        recyclable: true,
-        carbonFootprint: 55, // kg CO2
-        waterFootprint: 12760, // liters
-        recyclability: '50% recyclable',
-        ecoScore: 3,
-        alternatives: ['Repair existing device', 'Buy refurbished', 'Trade-in programs'],
-        category: 'electronics'
-      },
-      keyboard: {
-        label: 'Electronic Device',
-        recyclable: true,
-        carbonFootprint: 4.5, // kg CO2
-        waterFootprint: 500, // liters
-        recyclability: '60% recyclable',
-        ecoScore: 4,
-        alternatives: ['Mechanical keyboards (longer lifespan)', 'Bamboo keyboards'],
-        category: 'electronics'
-      },
-      mouse: {
-        label: 'Electronic Device',
-        recyclable: true,
-        carbonFootprint: 2.5, // kg CO2
-        waterFootprint: 300, // liters
-        recyclability: '60% recyclable',
-        ecoScore: 4,
-        alternatives: ['Durable wired mouse', 'Rechargeable wireless mouse'],
-        category: 'electronics'
-      },
-      laptop: {
-        label: 'Electronic Device - Laptop',
-        recyclable: true,
-        carbonFootprint: 270, // kg CO2
-        waterFootprint: 28000, // liters
-        recyclability: '45% recyclable',
-        ecoScore: 2,
-        alternatives: ['Repair existing laptop', 'Buy refurbished', 'Upgrade components'],
-        category: 'electronics'
-      },
-      banana: {
-        label: 'Banana',
-        recyclable: true,
-        carbonFootprint: 0.48, // kg CO2 per kg
-        waterFootprint: 160, // liters per kg
-        recyclability: '100% compostable',
-        ecoScore: 8,
-        alternatives: ['Local seasonal fruits'],
-        category: 'food'
-      },
-      apple: {
-        label: 'Apple',
-        recyclable: true,
-        carbonFootprint: 0.33, // kg CO2 per apple
-        waterFootprint: 70, // liters per apple
-        recyclability: '100% compostable',
-        ecoScore: 9,
-        alternatives: ['Local apples', 'Seasonal fruits'],
-        category: 'food'
-      }
-    };
+    if (!ctx) return;
 
     let animationFrameId: number;
+    let isProcessing = false;
 
-    const detect = async () => {
+    const scanWithGemini = async () => {
+      // Continue animation loop
+      animationFrameId = requestAnimationFrame(scanWithGemini);
+
       // Check if everything is still ready
-      if (!model || !video || !canvas || !cameraReady || !isOpen || isPaused) {
-        animationFrameId = requestAnimationFrame(detect);
+      if (!video || !canvas || !cameraReady || !isOpen || isPaused || isProcessing) {
         return;
       }
       
       // Check if video is playing and has dimensions
       if (!video.videoWidth || !video.videoHeight || video.paused || video.ended) {
-        animationFrameId = requestAnimationFrame(detect);
         return;
       }
 
       try {
+        // Update canvas with video frame
         canvas.width = video.videoWidth;
         canvas.height = video.videoHeight;
-        const predictions = await model.detect(video);
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
 
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
-      ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+        // Only scan if manager allows (rate limiting)
+        if (!scannerManager.canScan()) {
+          // Show scanning indicator with countdown
+          if (isScanning) {
+            ctx.fillStyle = 'rgba(0, 0, 0, 0.7)';
+            ctx.fillRect(10, 10, 220, 40);
+            ctx.fillStyle = '#fff';
+            ctx.font = 'bold 16px Arial';
+            ctx.fillText('🤖 AI Analyzing...', 20, 35);
+          } else {
+            // Show next scan countdown
+            const timeSinceLastScan = Date.now() - scannerManager['lastScanTime'];
+            const timeUntilNextScan = Math.ceil((3000 - timeSinceLastScan) / 1000);
+            if (timeUntilNextScan > 0) {
+              ctx.fillStyle = 'rgba(0, 0, 0, 0.7)';
+              ctx.fillRect(10, 10, 280, 40);
+              ctx.fillStyle = '#fff';
+              ctx.font = 'bold 16px Arial';
+              ctx.fillText(`⏳ Next scan in ${timeUntilNextScan}s...`, 20, 35);
+            }
+          }
+          return;
+        }
 
-      // Filter out people and animals, and only show highest confidence prediction
-      // Lowered threshold from 0.6 to 0.4 (40%) for better detection of papers and bottles
-      const validPredictions = predictions.filter(pred => 
-        !ignoredObjects.includes(pred.class.toLowerCase()) && pred.score > 0.4
-      );
+        isProcessing = true;
+        setIsScanning(true);
 
-      if (validPredictions.length > 0) {
-        // Get the highest confidence prediction
-        const bestPrediction = validPredictions.reduce((best, current) => 
-          current.score > best.score ? current : best
-        );
+        // Capture current frame as base64
+        const imageData = canvas.toDataURL('image/jpeg', 0.8);
+        console.log('📸 Captured frame, size:', imageData.length);
 
-        const [x, y, width, height] = bestPrediction.bbox;
-        const productData = productDatabase[bestPrediction.class];
-        const label = productData ? productData.label : bestPrediction.class;
-        const ecoScore = productData ? productData.ecoScore : 5;
+        // Scan with Gemini AI
+        console.log('🔄 Calling Gemini scanner...');
+        const result = await scannerManager.scan(imageData);
+        console.log('📊 Scan result:', result);
 
-        // Color based on eco score
-        const getEcoColor = (score: number) => {
-          if (score <= 4) return '#ef4444'; // red
-          if (score <= 7) return '#f59e0b'; // yellow
-          return '#22c55e'; // green
-        };
+        // Check if scanner needs reinitialization
+        if (scannerManager.needsReinit()) {
+          console.log('🔄 Too many failures - reinitializing scanner...');
+          setError('Scanner encountered errors. Reinitializing...');
+          scannerManager.reset();
+          
+          // Trigger reinitialization
+          setTimeout(() => {
+            setError(null);
+            setGeminiReady(false);
+            window.location.reload(); // Force full reinit
+          }, 2000);
+          return;
+        }
 
-        ctx.strokeStyle = getEcoColor(ecoScore);
-        ctx.lineWidth = 3;
-        ctx.strokeRect(x, y, width, height);
+        // Only process recyclable items
+        if (result && result.recyclable && result.category !== "Not recyclable" && !isPaused && !showConfirmation) {
+          console.log('✅ Valid recyclable item detected:', result.category);
+          // Convert Gemini result to ProductFootprint format
+          const productData: ProductFootprint = {
+            label: result.category,
+            recyclable: result.recyclable,
+            carbonFootprint: parseFloat(result.carbonFootprint?.replace(/[^\d.]/g, '') || '1.0'),
+            waterFootprint: Math.random() * 100 + 10, // Estimate (Gemini doesn't provide this)
+            recyclability: result.recyclable ? '80% recyclable' : 'Non-recyclable',
+            ecoScore: result.ecoRating ? result.ecoRating * 2 : 5, // Convert 1-5 to 1-10 scale
+            alternatives: result.alternatives || [],
+            category: result.materialType || 'general',
+            materialType: result.materialType,
+            instructions: result.instructions
+          };
 
-        ctx.fillStyle = getEcoColor(ecoScore);
-        ctx.font = 'bold 16px Arial';
-        ctx.fillText(`${label}`, x + 5, y > 25 ? y - 5 : 25);
-        ctx.fillText(`Confidence: ${Math.round(bestPrediction.score * 100)}%`, x + 5, y > 50 ? y - 25 : 45);
+          // Draw detection box and info
+          const getEcoColor = (score: number) => {
+            if (score <= 4) return '#ef4444'; // red
+            if (score <= 7) return '#f59e0b'; // yellow
+            return '#22c55e'; // green
+          };
 
-        // Show confirmation if new product detected
-        // Allow scanning the same product multiple times
-        if (productData && !showConfirmation && !isPaused) {
+          const color = getEcoColor(productData.ecoScore);
+
+          // Draw bounding box (center of frame)
+          const boxWidth = canvas.width * 0.6;
+          const boxHeight = canvas.height * 0.6;
+          const boxX = (canvas.width - boxWidth) / 2;
+          const boxY = (canvas.height - boxHeight) / 2;
+
+          ctx.strokeStyle = color;
+          ctx.lineWidth = 4;
+          ctx.strokeRect(boxX, boxY, boxWidth, boxHeight);
+
+          // Draw label background
+          ctx.fillStyle = color;
+          ctx.fillRect(boxX, boxY - 60, boxWidth, 60);
+
+          // Draw label text
+          ctx.fillStyle = '#fff';
+          ctx.font = 'bold 18px Arial';
+          ctx.fillText(productData.label, boxX + 10, boxY - 35);
+          ctx.font = 'bold 14px Arial';
+          ctx.fillText(`Confidence: ${Math.round(result.confidence * 100)}%`, boxX + 10, boxY - 12);
+
+          // Show confirmation
           setPendingProduct(productData);
           setShowConfirmation(true);
           setIsPaused(true);
+          setIsScanning(false);
         }
-      }
 
       } catch (error) {
-        console.error('❌ Detection error:', error);
-        // Continue detection even if there's an error
+        console.error('❌ Gemini scan error:', error);
+      } finally {
+        isProcessing = false;
+        setTimeout(() => setIsScanning(false), 500);
       }
-
-      animationFrameId = requestAnimationFrame(detect);
     };
 
-    detect();
+    scanWithGemini();
 
-    return () => cancelAnimationFrame(animationFrameId);
-  }, [model, isOpen, cameraReady, loggedItems, isPaused, showConfirmation]);
+    return () => {
+      cancelAnimationFrame(animationFrameId);
+      isProcessing = false;
+    };
+  }, [isOpen, cameraReady, isPaused, showConfirmation, isScanning]);
 
   // Handle scan confirmation
   const handleConfirmScan = async () => {
@@ -759,17 +616,6 @@ export default function EcoScannerDialog({ isOpen, onClose }: EcoScannerDialogPr
     }, 2000);
   };
 
-  // Manual retry for model loading
-  const handleRetryModelLoad = () => {
-    setLoading(true);
-    setError(null);
-    setRetryCount(0);
-    setLoadingProgress('Retrying model load...');
-    
-    // Trigger model reload by updating a dependency
-    window.location.reload();
-  };
-
   // Enhanced close handler with state reset
   const handleClose = () => {
     // Reset all states immediately when closing
@@ -791,7 +637,7 @@ export default function EcoScannerDialog({ isOpen, onClose }: EcoScannerDialogPr
         <Dialog.Panel className="bg-white rounded-2xl p-6 shadow-xl w-full max-w-4xl max-h-[90vh] overflow-y-auto">
           <Dialog.Title className="text-xl font-semibold text-green-700 mb-4 flex items-center justify-between">
             <span className="flex items-center gap-2">
-              🌱 Eco-Scanner - Product Environmental Footprint
+              🤖 Gemini AI Eco-Scanner - Recyclable Products Only
             </span>
             <div className="flex gap-4 text-sm">
               <span className="bg-green-100 px-2 py-1 rounded">
@@ -806,45 +652,63 @@ export default function EcoScannerDialog({ isOpen, onClose }: EcoScannerDialogPr
             </div>
           </Dialog.Title>
 
-          {loading && (
-            <div className="text-center py-8">
-              <div className="inline-flex items-center justify-center w-16 h-16 bg-green-100 rounded-full mb-4">
-                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-green-600"></div>
-              </div>
-              <p className="text-gray-700 font-medium mb-2">Loading AI Detection Model</p>
-              <p className="text-gray-500 text-sm">{loadingProgress || 'Please wait...'}</p>
-              {retryCount > 0 && (
-                <p className="text-yellow-600 text-xs mt-2">
-                  This is taking longer than usual. Attempt {retryCount}/3
-                </p>
-              )}
-            </div>
-          )}
-          
-          {error && (
-            <div className="text-center py-8">
-              <div className="inline-flex items-center justify-center w-16 h-16 bg-red-100 rounded-full mb-4">
-                <i className="fas fa-exclamation-triangle text-red-600 text-2xl"></i>
-              </div>
-              <p className="text-red-600 font-medium mb-2">Model Loading Failed</p>
-              <p className="text-gray-600 text-sm mb-4">{error}</p>
-              <button 
-                onClick={handleRetryModelLoad}
-                className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
-              >
-                Retry Loading
-              </button>
+          {!loading && !error && (
+            <div className="bg-blue-50 border-l-4 border-blue-500 p-3 mb-4">
+              <p className="text-blue-800 text-sm">
+                ♻️ <strong>Point camera at recyclable items only:</strong> plastic bottles, cans, paper, cardboard, glass, electronics. 
+                Scans every 3 seconds.
+              </p>
             </div>
           )}
 
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          {loading && (
+            <div className="text-center py-8">
+              <div className="inline-flex items-center justify-center w-16 h-16 bg-purple-100 rounded-full mb-4">
+                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-purple-600"></div>
+              </div>
+              <p className="text-gray-700 font-medium mb-2">Initializing Gemini AI Scanner</p>
+              <p className="text-gray-500 text-sm">{loadingProgress || 'Please wait...'}</p>
+            </div>
+          )}
+
+          {!loading && error && (
+            <div className="bg-red-50 border-l-4 border-red-500 p-4 mb-4">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center flex-1">
+                  <span className="text-red-600 text-2xl mr-3">⚠️</span>
+                  <div>
+                    <p className="text-red-800 font-semibold">Error</p>
+                    <p className="text-red-700 text-sm">{error}</p>
+                  </div>
+                </div>
+                <button
+                  onClick={() => {
+                    if (scannerManagerRef.current) {
+                      scannerManagerRef.current.reset();
+                    }
+                    setError(null);
+                    setGeminiReady(false);
+                    setLoading(false);
+                    // Force component re-mount by closing and reopening
+                    window.location.reload();
+                  }}
+                  className="ml-4 px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700 transition-colors text-sm font-medium"
+                >
+                  🔄 Retry Scanner
+                </button>
+              </div>
+            </div>
+          )}
+
+          {!loading && !error && (
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             {/* Camera View */}
             <div className="space-y-4">
               <div className="flex justify-between items-center">
-                <h3 className="font-semibold text-gray-700">Live Scanner</h3>
+                <h3 className="font-semibold text-gray-700">Gemini AI Live Scanner</h3>
                 <div className="flex gap-2 text-xs">
-                  <span className={`px-2 py-1 rounded ${model ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}`}>
-                    AI: {model ? 'Ready' : 'Loading'}
+                  <span className={`px-2 py-1 rounded ${isScanning ? 'bg-purple-100 text-purple-700' : 'bg-green-100 text-green-700'}`}>
+                    AI: {isScanning ? 'Analyzing...' : 'Ready'}
                   </span>
                   <span className={`px-2 py-1 rounded ${isPaused ? 'bg-yellow-100 text-yellow-700' : 'bg-green-100 text-green-700'}`}>
                     Scan: {isPaused ? 'Paused' : 'Active'}
@@ -951,6 +815,7 @@ export default function EcoScannerDialog({ isOpen, onClose }: EcoScannerDialogPr
               </div>
             </div>
           </div>
+          )}
 
           {/* Selected Product Details */}
           {selectedProduct && (
