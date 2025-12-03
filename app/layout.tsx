@@ -35,6 +35,7 @@ export default function RootLayout({
       </head>
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
+        suppressHydrationWarning
       >
         {/* Skip link for keyboard users */}
         <a href="#main-content" className="skip-link">Skip to main content</a>

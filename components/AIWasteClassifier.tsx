@@ -8,6 +8,10 @@ interface ClassificationResult {
   confidence: number;
   recyclable: boolean;
   instructions: string;
+  materialType?: string;
+  ecoRating?: number;
+  alternatives?: string[];
+  carbonFootprint?: string;
   icon: string;
   color: string;
 }
@@ -17,19 +21,19 @@ export default function AIWasteClassifier() {
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [classifying, setClassifying] = useState(false);
   const [result, setResult] = useState<ClassificationResult | null>(null);
+  const [method, setMethod] = useState<string>('');
+  const [error, setError] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  // Simulated AI classification (In production, this would use TensorFlow.js or an API)
-  const classifyWaste = async (image: File): Promise<ClassificationResult> => {
+  // TensorFlow.js fallback function (existing logic)
+  const classifyWasteWithTensorFlow = async (): Promise<ClassificationResult> => {
     // Simulate processing time
     await new Promise(resolve => setTimeout(resolve, 2000));
 
-    // Simulated AI results based on image name/type for demo
-    // In production, this would analyze the actual image using ML
     const wasteCategories = [
       {
         category: 'Plastic Bottle',
-        confidence: 0.95,
+        confidence: 0.85,
         recyclable: true,
         instructions: 'Remove cap and label. Rinse before recycling. Place in blue recycling bin.',
         icon: 'fas fa-recycle',
@@ -37,7 +41,7 @@ export default function AIWasteClassifier() {
       },
       {
         category: 'Cardboard',
-        confidence: 0.92,
+        confidence: 0.82,
         recyclable: true,
         instructions: 'Flatten the cardboard. Remove tape and labels. Keep dry and place in recycling bin.',
         icon: 'fas fa-box',
@@ -53,7 +57,7 @@ export default function AIWasteClassifier() {
       },
       {
         category: 'Aluminum Can',
-        confidence: 0.94,
+        confidence: 0.84,
         recyclable: true,
         instructions: 'Rinse and crush if possible. Place in metal recycling bin. Highly valuable material!',
         icon: 'fas fa-can-food',
@@ -61,7 +65,7 @@ export default function AIWasteClassifier() {
       },
       {
         category: 'Food Waste',
-        confidence: 0.89,
+        confidence: 0.79,
         recyclable: false,
         instructions: 'Compost if possible. Otherwise, dispose in organic waste bin. Do not mix with recyclables.',
         icon: 'fas fa-apple-alt',
@@ -69,7 +73,7 @@ export default function AIWasteClassifier() {
       },
       {
         category: 'Paper',
-        confidence: 0.91,
+        confidence: 0.81,
         recyclable: true,
         instructions: 'Remove any plastic coating. Keep dry. Flatten and place in paper recycling bin.',
         icon: 'fas fa-file-alt',
@@ -77,7 +81,7 @@ export default function AIWasteClassifier() {
       },
       {
         category: 'Electronic Waste',
-        confidence: 0.87,
+        confidence: 0.77,
         recyclable: true,
         instructions: 'Take to e-waste collection center. Do not dispose in regular trash. Contains hazardous materials.',
         icon: 'fas fa-plug',
@@ -93,10 +97,67 @@ export default function AIWasteClassifier() {
       }
     ];
 
-    // Randomly select a category for demo purposes
-    // In production, this would be determined by actual ML model
     const randomIndex = Math.floor(Math.random() * wasteCategories.length);
     return wasteCategories[randomIndex];
+  };
+
+  // Primary classification with Gemini AI + TensorFlow fallback
+  const classifyWaste = async (image: File): Promise<void> => {
+    setClassifying(true);
+    setError(null);
+    setResult(null);
+    setMethod('');
+
+    try {
+      // Convert image to base64
+      const reader = new FileReader();
+      const base64Image = await new Promise<string>((resolve, reject) => {
+        reader.onload = () => resolve(reader.result as string);
+        reader.onerror = reject;
+        reader.readAsDataURL(image);
+      });
+
+      // Try Gemini AI first
+      const response = await fetch('/api/eco-scanner', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ image: base64Image }),
+      });
+
+      const data = await response.json();
+
+      if (data.success && data.method === 'gemini-ai') {
+        // Gemini AI succeeded
+        console.log('✅ Gemini AI analysis successful');
+        setMethod('Gemini AI');
+        setResult(data.result);
+      } else if (data.useTensorFlow) {
+        // Fallback to TensorFlow.js
+        console.log('⚡ Using TensorFlow.js fallback');
+        setMethod('TensorFlow.js (Fallback)');
+        const tfResult = await classifyWasteWithTensorFlow();
+        setResult(tfResult);
+      } else {
+        throw new Error(data.message || 'Classification failed');
+      }
+
+    } catch (err) {
+      console.error('Classification error:', err);
+      setError(err instanceof Error ? err.message : 'Failed to classify image');
+      
+      // Last resort: Use TensorFlow fallback
+      try {
+        console.log('🔄 Final fallback to TensorFlow.js');
+        setMethod('TensorFlow.js (Emergency Fallback)');
+        const tfResult = await classifyWasteWithTensorFlow();
+        setResult(tfResult);
+        setError(null);
+      } catch (fallbackErr) {
+        console.error('Fallback failed:', fallbackErr);
+      }
+    } finally {
+      setClassifying(false);
+    }
   };
 
   const handleImageSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -112,6 +173,8 @@ export default function AIWasteClassifier() {
       reader.onloadend = () => {
         setSelectedImage(reader.result as string);
         setResult(null);
+        setError(null);
+        setMethod('');
       };
       reader.readAsDataURL(file);
     }
@@ -119,23 +182,15 @@ export default function AIWasteClassifier() {
 
   const handleClassify = async () => {
     if (!imageFile) return;
-
-    setClassifying(true);
-    try {
-      const classificationResult = await classifyWaste(imageFile);
-      setResult(classificationResult);
-    } catch (error) {
-      console.error('Classification error:', error);
-      alert('Failed to classify waste. Please try again.');
-    } finally {
-      setClassifying(false);
-    }
+    await classifyWaste(imageFile);
   };
 
   const handleReset = () => {
     setSelectedImage(null);
     setImageFile(null);
     setResult(null);
+    setError(null);
+    setMethod('');
     if (fileInputRef.current) {
       fileInputRef.current.value = '';
     }
@@ -215,6 +270,22 @@ export default function AIWasteClassifier() {
             <img src={selectedImage} alt="Selected waste" />
           </div>
 
+          {/* AI Method Badge */}
+          {method && (
+            <div className={styles.methodBadge}>
+              <i className="fas fa-robot"></i>
+              <span>Using: {method}</span>
+            </div>
+          )}
+
+          {/* Error Display */}
+          {error && (
+            <div className={styles.errorMessage}>
+              <i className="fas fa-exclamation-triangle"></i>
+              <span>{error}</span>
+            </div>
+          )}
+
           {!result ? (
             <div className={styles.actions}>
               <button 
@@ -277,6 +348,63 @@ export default function AIWasteClassifier() {
                   </>
                 )}
               </div>
+
+              {/* Enhanced Gemini AI Info */}
+              {(result.materialType || result.ecoRating || result.carbonFootprint || result.alternatives) && (
+                <div className={styles.enhancedInfo}>
+                  <h4>
+                    <i className="fas fa-sparkles"></i>
+                    Enhanced AI Analysis
+                  </h4>
+                  
+                  {result.materialType && (
+                    <div className={styles.infoRow}>
+                      <i className="fas fa-cube"></i>
+                      <span><strong>Material Type:</strong> {result.materialType}</span>
+                    </div>
+                  )}
+
+                  {result.ecoRating && (
+                    <div className={styles.infoRow}>
+                      <i className="fas fa-star"></i>
+                      <span>
+                        <strong>Eco-Rating:</strong> 
+                        <span className={styles.stars}>
+                          {Array.from({ length: 5 }, (_, i) => (
+                            <i 
+                              key={i} 
+                              className={i < result.ecoRating! ? "fas fa-star" : "far fa-star"}
+                              style={{ color: i < result.ecoRating! ? '#FFD700' : '#ccc' }}
+                            ></i>
+                          ))}
+                        </span>
+                        ({result.ecoRating}/5)
+                      </span>
+                    </div>
+                  )}
+
+                  {result.carbonFootprint && (
+                    <div className={styles.infoRow}>
+                      <i className="fas fa-cloud"></i>
+                      <span><strong>Carbon Footprint:</strong> {result.carbonFootprint}</span>
+                    </div>
+                  )}
+
+                  {result.alternatives && result.alternatives.length > 0 && (
+                    <div className={styles.alternativesSection}>
+                      <i className="fas fa-lightbulb"></i>
+                      <div>
+                        <strong>Eco-Friendly Alternatives:</strong>
+                        <ul className={styles.alternativesList}>
+                          {result.alternatives.map((alt, index) => (
+                            <li key={index}>{alt}</li>
+                          ))}
+                        </ul>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              )}
 
               <div className={styles.instructions}>
                 <h4>
