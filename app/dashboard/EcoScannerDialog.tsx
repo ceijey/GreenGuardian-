@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from 'react';
 import { Dialog } from '@headlessui/react';
-import { collection, addDoc, serverTimestamp, doc, updateDoc, increment, getDoc, setDoc } from 'firebase/firestore';
+import { collection, addDoc, serverTimestamp, doc, updateDoc, increment, getDoc, setDoc, query, where, getDocs } from 'firebase/firestore';
 import { db } from '../../lib/firebase';
 import { useAuth } from '../../lib/AuthContext';
 import { useStatsTracker } from '../../lib/useStatsTracker';
@@ -194,23 +194,39 @@ export default function EcoScannerDialog({ isOpen, onClose }: EcoScannerDialogPr
     checkGeminiAvailability();
   }, [isOpen]);
 
-  // Load user milestones
+  // Load user milestones from actual scan data
   useEffect(() => {
     const loadUserMilestones = async () => {
       if (!user) return;
       
       try {
-        const userStatsRef = doc(db, 'userStats', user.uid);
-        const userStatsDoc = await getDoc(userStatsRef);
+        // Query all user's product scans
+        const q = query(
+          collection(db, 'userProductScans'),
+          where('userId', '==', user.uid)
+        );
         
-        if (userStatsDoc.exists()) {
-          const data = userStatsDoc.data();
-          setUserMilestones({
-            totalScans: data.totalScans || 0,
-            totalCO2Tracked: data.carbonFootprintTracked || 0,
-            totalWaterTracked: data.waterFootprintTracked || 0
-          });
-        }
+        const querySnapshot = await getDocs(q);
+        
+        // Calculate totals from actual scan data
+        let totalScans = 0;
+        let totalCO2 = 0;
+        let totalWater = 0;
+        
+        querySnapshot.forEach((doc) => {
+          const data = doc.data();
+          totalScans++;
+          totalCO2 += data.carbonFootprint || 0;
+          totalWater += data.waterFootprint || 0;
+        });
+        
+        console.log(`📊 Loaded from Firestore: ${totalScans} scans, ${totalCO2.toFixed(3)}kg CO2, ${totalWater.toFixed(1)}L water`);
+        
+        setUserMilestones({
+          totalScans,
+          totalCO2Tracked: totalCO2,
+          totalWaterTracked: totalWater
+        });
       } catch (error) {
         console.error('Error loading user milestones:', error);
       }
@@ -486,11 +502,27 @@ export default function EcoScannerDialog({ isOpen, onClose }: EcoScannerDialogPr
         // Only process recyclable items
         if (result && result.recyclable && result.category !== "Not recyclable" && !isPaused && !showConfirmation) {
           console.log('✅ Valid recyclable item detected:', result.category);
+          
+          // Parse carbon footprint and convert to kg
+          let carbonFootprintKg = 1.0;
+          if (result.carbonFootprint) {
+            const carbonStr = result.carbonFootprint.toLowerCase();
+            const numericValue = parseFloat(carbonStr.replace(/[^\d.]/g, ''));
+            
+            if (carbonStr.includes('g') && !carbonStr.includes('kg')) {
+              // Convert grams to kg (82g -> 0.082kg)
+              carbonFootprintKg = numericValue / 1000;
+            } else {
+              // Already in kg (55kg -> 55kg)
+              carbonFootprintKg = numericValue;
+            }
+          }
+          
           // Convert Gemini result to ProductFootprint format
           const productData: ProductFootprint = {
             label: result.category,
             recyclable: result.recyclable,
-            carbonFootprint: parseFloat(result.carbonFootprint?.replace(/[^\d.]/g, '') || '1.0'),
+            carbonFootprint: carbonFootprintKg,
             waterFootprint: Math.random() * 100 + 10, // Estimate (Gemini doesn't provide this)
             recyclability: result.recyclable ? '80% recyclable' : 'Non-recyclable',
             ecoScore: result.ecoRating ? result.ecoRating * 2 : 5, // Convert 1-5 to 1-10 scale
