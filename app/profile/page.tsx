@@ -60,7 +60,7 @@ interface WeeklyData {
 export default function ProfilePage() {
   const { user } = useAuth();
   const [userStats, setUserStats] = useState<UserStats>({
-    totalScore: 0,
+    totalScore: 500,
     weeklyScore: 0,
     monthlyScore: 0,
     rank: 0,
@@ -131,7 +131,7 @@ export default function ProfilePage() {
           const data = userStatsDoc.data();
           // Ensure totalImpact is properly structured
           const safeUserStats: UserStats = {
-            totalScore: data.totalScore || 0,
+            totalScore: data.totalScore || 500,
             weeklyScore: data.weeklyScore || 0,
             monthlyScore: data.monthlyScore || 0,
             rank: data.rank || 0,

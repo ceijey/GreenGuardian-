@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '@/lib/AuthContext';
 import Header from '@/components/Header';
-import { collection, addDoc, serverTimestamp, query, where, onSnapshot } from 'firebase/firestore';
+import { collection, addDoc, serverTimestamp, query, where, onSnapshot, updateDoc, doc } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
 import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 import { storage } from '@/lib/firebase';
@@ -139,18 +139,15 @@ export default function ReportIncidentPage() {
     }
   };
 
-  // Upload photos to Firebase Storage
+  // Upload photos to Firebase Storage (parallel upload for speed)
   const uploadPhotos = async (): Promise<string[]> => {
-    const uploadedUrls: string[] = [];
-
-    for (const photo of photos) {
+    const uploadPromises = photos.map(async (photo) => {
       const storageRef = ref(storage, `incident-reports/${user!.uid}/${Date.now()}-${photo.name}`);
       await uploadBytes(storageRef, photo);
-      const downloadURL = await getDownloadURL(storageRef);
-      uploadedUrls.push(downloadURL);
-    }
+      return getDownloadURL(storageRef);
+    });
 
-    return uploadedUrls;
+    return Promise.all(uploadPromises);
   };
 
   // Submit incident report
@@ -158,21 +155,14 @@ export default function ReportIncidentPage() {
     e.preventDefault();
     if (!user) return;
 
-    if (!gpsCoordinates) {
-      const confirm = window.confirm('No GPS location captured. Do you want to continue without location data?');
-      if (!confirm) return;
-    }
-
     setSubmitting(true);
+    
     try {
-      // Upload photos if any
-      let photoUrls: string[] = [];
-      if (photos.length > 0) {
-        photoUrls = await uploadPhotos();
-      }
-
-      // Create incident report
-      await addDoc(collection(db, 'incidentReports'), {
+      // Start photo upload and document creation in parallel for speed
+      const photoUploadPromise = photos.length > 0 ? uploadPhotos() : Promise.resolve([]);
+      
+      // Create incident report immediately (photos will be added when ready)
+      const reportData = {
         reporterId: user.uid,
         reporterEmail: user.email,
         reporterName: user.displayName || 'Anonymous',
@@ -181,17 +171,28 @@ export default function ReportIncidentPage() {
         description,
         location: {
           address,
-          coordinates: gpsCoordinates
+          coordinates: gpsCoordinates || null
         },
-        photos: photoUrls,
+        photos: [],
         status: 'pending',
-        priority: 'medium', // Default priority, can be adjusted by government
+        priority: 'medium',
         timestamp: serverTimestamp(),
         views: 0,
         upvotes: 0
-      });
+      };
 
-      // Reset form
+      const docRef = await addDoc(collection(db, 'incidentReports'), reportData);
+      
+      // Update with photos once uploaded (non-blocking)
+      if (photos.length > 0) {
+        photoUploadPromise.then(async (photoUrls) => {
+          await updateDoc(doc(db, 'incidentReports', docRef.id), {
+            photos: photoUrls
+          });
+        }).catch(err => console.error('Photo upload error:', err));
+      }
+
+      // Reset form immediately
       setTitle('');
       setDescription('');
       setAddress('');
@@ -200,12 +201,12 @@ export default function ReportIncidentPage() {
       setGpsCoordinates(null);
       setIncidentType('illegal-dumping');
       setShowForm(false);
+      setSubmitting(false);
 
       alert('✅ Incident reported successfully! Government officials will review it soon.');
     } catch (error) {
       console.error('Error submitting report:', error);
       alert('Failed to submit report. Please try again.');
-    } finally {
       setSubmitting(false);
     }
   };

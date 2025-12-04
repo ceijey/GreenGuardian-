@@ -40,6 +40,7 @@ interface Challenge {
   isActive: boolean;
   createdBy: string;
   relatedEventTypes?: string[]; // NEW: Link challenges to event types
+  completionInstructions?: string;
 }
 
 interface VolunteerEvent {

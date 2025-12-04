@@ -76,6 +76,30 @@ export default function NGOPortalPage() {
     }
   });
   const [reportGenerating, setReportGenerating] = useState(false);
+  
+  // Quick Actions States
+  const [showScheduleEventModal, setShowScheduleEventModal] = useState(false);
+  const [showAnnouncementModal, setShowAnnouncementModal] = useState(false);
+  const [showSettingsModal, setShowSettingsModal] = useState(false);
+  const [newEvent, setNewEvent] = useState({
+    title: '',
+    description: '',
+    date: '',
+    time: '',
+    location: '',
+    maxVolunteers: 20
+  });
+  const [announcement, setAnnouncement] = useState({
+    title: '',
+    message: '',
+    priority: 'normal'
+  });
+  const [ngoSettings, setNgoSettings] = useState({
+    organizationName: '',
+    contactEmail: '',
+    website: '',
+    description: ''
+  });
 
   useEffect(() => {
     const checkUserRole = async () => {
@@ -317,6 +341,142 @@ export default function NGOPortalPage() {
     }
   };
 
+  // Schedule Event Handler
+  const handleScheduleEvent = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!user) return;
+
+    try {
+      await addDoc(collection(db, 'volunteerEvents'), {
+        title: newEvent.title,
+        description: newEvent.description,
+        date: new Date(newEvent.date + 'T' + newEvent.time),
+        location: newEvent.location,
+        maxVolunteers: newEvent.maxVolunteers,
+        volunteers: [],
+        type: 'ngo-event',
+        organizer: {
+          id: user.uid,
+          name: user.displayName || 'NGO Partner',
+          email: user.email || ''
+        },
+        createdAt: serverTimestamp()
+      });
+
+      setNewEvent({
+        title: '',
+        description: '',
+        date: '',
+        time: '',
+        location: '',
+        maxVolunteers: 20
+      });
+      setShowScheduleEventModal(false);
+      alert('✅ Event scheduled successfully!');
+    } catch (error) {
+      console.error('Error scheduling event:', error);
+      alert('Failed to schedule event');
+    }
+  };
+
+  // Send Announcement Handler
+  const handleSendAnnouncement = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!user) return;
+
+    try {
+      await addDoc(collection(db, 'announcements'), {
+        title: announcement.title,
+        message: announcement.message,
+        priority: announcement.priority,
+        sender: {
+          id: user.uid,
+          name: user.displayName || 'NGO Partner',
+          email: user.email || ''
+        },
+        createdAt: serverTimestamp(),
+        read: false
+      });
+
+      setAnnouncement({
+        title: '',
+        message: '',
+        priority: 'normal'
+      });
+      setShowAnnouncementModal(false);
+      alert('✅ Announcement sent successfully!');
+    } catch (error) {
+      console.error('Error sending announcement:', error);
+      alert('Failed to send announcement');
+    }
+  };
+
+  // Export Data Handler
+  const handleExportData = async () => {
+    try {
+      const exportData = {
+        exportDate: new Date().toISOString(),
+        challenges: challenges.map(c => ({
+          title: c.title,
+          category: c.category,
+          participants: c.participants.length,
+          targetActions: c.targetActions,
+          isActive: c.isActive
+        })),
+        events: events.map(e => ({
+          title: e.title,
+          volunteers: e.volunteers.length,
+          date: e.date
+        })),
+        summary: {
+          totalChallenges: challenges.length,
+          totalParticipants,
+          totalVolunteerHours
+        }
+      };
+
+      const dataStr = JSON.stringify(exportData, null, 2);
+      const dataBlob = new Blob([dataStr], { type: 'application/json' });
+      const url = URL.createObjectURL(dataBlob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `ngo-data-export-${new Date().toISOString().split('T')[0]}.json`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
+
+      alert('✅ Data exported successfully!');
+    } catch (error) {
+      console.error('Error exporting data:', error);
+      alert('Failed to export data');
+    }
+  };
+
+  // Save NGO Settings Handler
+  const handleSaveSettings = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!user) return;
+
+    try {
+      const userRef = doc(db, 'users', user.uid);
+      await addDoc(collection(db, 'ngoSettings'), {
+        userId: user.uid,
+        organizationName: ngoSettings.organizationName,
+        contactEmail: ngoSettings.contactEmail,
+        website: ngoSettings.website,
+        description: ngoSettings.description,
+        updatedAt: serverTimestamp()
+      });
+
+      setShowSettingsModal(false);
+      alert('✅ Settings saved successfully!');
+    } catch (error) {
+      console.error('Error saving settings:', error);
+      alert('Failed to save settings');
+    }
+  };
+
   if (loading || isLoading) {
     return (
       <div className={styles.loadingContainer}>
@@ -554,19 +714,31 @@ export default function NGOPortalPage() {
           <section className={styles.quickActions}>
             <h2 className={styles.sectionTitle}>Quick Actions</h2>
             <div className={styles.actionGrid}>
-              <button className={styles.actionButton}>
+              <button 
+                className={styles.actionButton}
+                onClick={() => setShowScheduleEventModal(true)}
+              >
                 <i className="fas fa-calendar-alt"></i>
                 <span>Schedule Event</span>
               </button>
-              <button className={styles.actionButton}>
+              <button 
+                className={styles.actionButton}
+                onClick={() => setShowAnnouncementModal(true)}
+              >
                 <i className="fas fa-megaphone"></i>
                 <span>Send Announcement</span>
               </button>
-              <button className={styles.actionButton}>
+              <button 
+                className={styles.actionButton}
+                onClick={handleExportData}
+              >
                 <i className="fas fa-file-download"></i>
                 <span>Export Data</span>
               </button>
-              <button className={styles.actionButton}>
+              <button 
+                className={styles.actionButton}
+                onClick={() => setShowSettingsModal(true)}
+              >
                 <i className="fas fa-cog"></i>
                 <span>NGO Settings</span>
               </button>
@@ -1053,6 +1225,248 @@ export default function NGOPortalPage() {
                   </button>
                 </div>
               </div>
+            </div>
+          </div>
+        )}
+
+        {/* Schedule Event Modal */}
+        {showScheduleEventModal && (
+          <div className={styles.modal} onClick={() => setShowScheduleEventModal(false)}>
+            <div className={styles.modalContent} onClick={(e) => e.stopPropagation()}>
+              <div className={styles.modalHeader}>
+                <h2>
+                  <i className="fas fa-calendar-alt"></i> Schedule Event
+                </h2>
+                <button 
+                  onClick={() => setShowScheduleEventModal(false)} 
+                  className={styles.closeBtn}
+                >
+                  ✕
+                </button>
+              </div>
+
+              <form onSubmit={handleScheduleEvent} className={styles.form}>
+                <div className={styles.formGroup}>
+                  <label>Event Title *</label>
+                  <input
+                    type="text"
+                    value={newEvent.title}
+                    onChange={(e) => setNewEvent({...newEvent, title: e.target.value})}
+                    required
+                    placeholder="e.g., Beach Cleanup Drive"
+                  />
+                </div>
+
+                <div className={styles.formGroup}>
+                  <label>Description *</label>
+                  <textarea
+                    value={newEvent.description}
+                    onChange={(e) => setNewEvent({...newEvent, description: e.target.value})}
+                    required
+                    placeholder="Describe the event details..."
+                    rows={4}
+                  />
+                </div>
+
+                <div className={styles.formRow}>
+                  <div className={styles.formGroup}>
+                    <label>Date *</label>
+                    <input
+                      type="date"
+                      value={newEvent.date}
+                      onChange={(e) => setNewEvent({...newEvent, date: e.target.value})}
+                      required
+                    />
+                  </div>
+
+                  <div className={styles.formGroup}>
+                    <label>Time *</label>
+                    <input
+                      type="time"
+                      value={newEvent.time}
+                      onChange={(e) => setNewEvent({...newEvent, time: e.target.value})}
+                      required
+                    />
+                  </div>
+                </div>
+
+                <div className={styles.formGroup}>
+                  <label>Location *</label>
+                  <input
+                    type="text"
+                    value={newEvent.location}
+                    onChange={(e) => setNewEvent({...newEvent, location: e.target.value})}
+                    required
+                    placeholder="e.g., Rizal Park, Manila"
+                  />
+                </div>
+
+                <div className={styles.formGroup}>
+                  <label>Max Volunteers</label>
+                  <input
+                    type="number"
+                    value={newEvent.maxVolunteers}
+                    onChange={(e) => setNewEvent({...newEvent, maxVolunteers: parseInt(e.target.value)})}
+                    min="1"
+                    placeholder="20"
+                  />
+                </div>
+
+                <div className={styles.formActions}>
+                  <button 
+                    type="button" 
+                    onClick={() => setShowScheduleEventModal(false)}
+                    className={styles.cancelBtn}
+                  >
+                    Cancel
+                  </button>
+                  <button type="submit" className={styles.submitBtn}>
+                    <i className="fas fa-calendar-check"></i> Schedule Event
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+        )}
+
+        {/* Send Announcement Modal */}
+        {showAnnouncementModal && (
+          <div className={styles.modal} onClick={() => setShowAnnouncementModal(false)}>
+            <div className={styles.modalContent} onClick={(e) => e.stopPropagation()}>
+              <div className={styles.modalHeader}>
+                <h2>
+                  <i className="fas fa-megaphone"></i> Send Announcement
+                </h2>
+                <button 
+                  onClick={() => setShowAnnouncementModal(false)} 
+                  className={styles.closeBtn}
+                >
+                  ✕
+                </button>
+              </div>
+
+              <form onSubmit={handleSendAnnouncement} className={styles.form}>
+                <div className={styles.formGroup}>
+                  <label>Announcement Title *</label>
+                  <input
+                    type="text"
+                    value={announcement.title}
+                    onChange={(e) => setAnnouncement({...announcement, title: e.target.value})}
+                    required
+                    placeholder="e.g., Upcoming Community Cleanup Event"
+                  />
+                </div>
+
+                <div className={styles.formGroup}>
+                  <label>Message *</label>
+                  <textarea
+                    value={announcement.message}
+                    onChange={(e) => setAnnouncement({...announcement, message: e.target.value})}
+                    required
+                    placeholder="Write your announcement message..."
+                    rows={6}
+                  />
+                </div>
+
+                <div className={styles.formGroup}>
+                  <label>Priority</label>
+                  <select
+                    value={announcement.priority}
+                    onChange={(e) => setAnnouncement({...announcement, priority: e.target.value})}
+                  >
+                    <option value="normal">Normal</option>
+                    <option value="high">High Priority</option>
+                    <option value="urgent">Urgent</option>
+                  </select>
+                </div>
+
+                <div className={styles.formActions}>
+                  <button 
+                    type="button" 
+                    onClick={() => setShowAnnouncementModal(false)}
+                    className={styles.cancelBtn}
+                  >
+                    Cancel
+                  </button>
+                  <button type="submit" className={styles.submitBtn}>
+                    <i className="fas fa-paper-plane"></i> Send Announcement
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+        )}
+
+        {/* NGO Settings Modal */}
+        {showSettingsModal && (
+          <div className={styles.modal} onClick={() => setShowSettingsModal(false)}>
+            <div className={styles.modalContent} onClick={(e) => e.stopPropagation()}>
+              <div className={styles.modalHeader}>
+                <h2>
+                  <i className="fas fa-cog"></i> NGO Settings
+                </h2>
+                <button 
+                  onClick={() => setShowSettingsModal(false)} 
+                  className={styles.closeBtn}
+                >
+                  ✕
+                </button>
+              </div>
+
+              <form onSubmit={handleSaveSettings} className={styles.form}>
+                <div className={styles.formGroup}>
+                  <label>Organization Name</label>
+                  <input
+                    type="text"
+                    value={ngoSettings.organizationName}
+                    onChange={(e) => setNgoSettings({...ngoSettings, organizationName: e.target.value})}
+                    placeholder="Your NGO Name"
+                  />
+                </div>
+
+                <div className={styles.formGroup}>
+                  <label>Contact Email</label>
+                  <input
+                    type="email"
+                    value={ngoSettings.contactEmail}
+                    onChange={(e) => setNgoSettings({...ngoSettings, contactEmail: e.target.value})}
+                    placeholder="contact@yourngo.org"
+                  />
+                </div>
+
+                <div className={styles.formGroup}>
+                  <label>Website</label>
+                  <input
+                    type="url"
+                    value={ngoSettings.website}
+                    onChange={(e) => setNgoSettings({...ngoSettings, website: e.target.value})}
+                    placeholder="https://yourngo.org"
+                  />
+                </div>
+
+                <div className={styles.formGroup}>
+                  <label>Description</label>
+                  <textarea
+                    value={ngoSettings.description}
+                    onChange={(e) => setNgoSettings({...ngoSettings, description: e.target.value})}
+                    placeholder="Brief description of your organization..."
+                    rows={4}
+                  />
+                </div>
+
+                <div className={styles.formActions}>
+                  <button 
+                    type="button" 
+                    onClick={() => setShowSettingsModal(false)}
+                    className={styles.cancelBtn}
+                  >
+                    Cancel
+                  </button>
+                  <button type="submit" className={styles.submitBtn}>
+                    <i className="fas fa-save"></i> Save Settings
+                  </button>
+                </div>
+              </form>
             </div>
           </div>
         )}
