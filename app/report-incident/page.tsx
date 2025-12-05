@@ -30,11 +30,33 @@ interface IncidentReport {
   timestamp: any;
   governmentResponse?: string;
   resolvedAt?: any;
+  // Verification & accuracy tracking
+  verified?: boolean;
+  verifiedBy?: string;
+  verifiedAt?: any;
+  accuracy?: {
+    communityVotes: number;
+    upvotes: number;
+    downvotes: number;
+    flags: number;
+    flagReasons: string[];
+  };
+  duplicateOf?: string; // Reference to original report if duplicate
+  isDuplicate?: boolean;
+  relatedReports?: string[]; // Similar reports in area
+  reporterReputation?: number;
+  lastUpdated?: any;
+  updateHistory?: Array<{
+    updatedAt: any;
+    updateType: string;
+    details: string;
+  }>;
 }
 
 export default function ReportIncidentPage() {
   const { user } = useAuth();
   const [myReports, setMyReports] = useState<IncidentReport[]>([]);
+  const [allReports, setAllReports] = useState<IncidentReport[]>([]); // For duplicate detection
   const [loading, setLoading] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [showForm, setShowForm] = useState(true);
@@ -48,6 +70,11 @@ export default function ReportIncidentPage() {
   const [photoPreview, setPhotoPreview] = useState<string[]>([]);
   const [gpsCoordinates, setGpsCoordinates] = useState<{ latitude: number; longitude: number } | null>(null);
   const [gettingLocation, setGettingLocation] = useState(false);
+  
+  // Duplicate detection & verification
+  const [similarReports, setSimilarReports] = useState<IncidentReport[]>([]);
+  const [showDuplicateWarning, setShowDuplicateWarning] = useState(false);
+  const [reporterReputation, setReporterReputation] = useState<number>(100);
 
   const incidentTypes = [
     { id: 'illegal-dumping', label: 'Illegal Dumping', icon: 'fas fa-dumpster', color: '#F44336', description: 'Unauthorized waste disposal' },
@@ -80,10 +107,131 @@ export default function ReportIncidentPage() {
       });
       setMyReports(reports);
       setLoading(false);
+      
+      // Calculate reporter reputation based on report history
+      calculateReporterReputation(reports);
     });
 
     return unsubscribe;
   }, [user]);
+
+  // Load all reports for duplicate detection
+  useEffect(() => {
+    const allReportsQuery = query(collection(db, 'incidentReports'));
+    const unsubscribe = onSnapshot(allReportsQuery, (snapshot) => {
+      const reports: IncidentReport[] = [];
+      snapshot.forEach((doc) => {
+        reports.push({ id: doc.id, ...doc.data() } as IncidentReport);
+      });
+      setAllReports(reports);
+    });
+
+    return unsubscribe;
+  }, []);
+
+  // Calculate reporter reputation
+  const calculateReporterReputation = (reports: IncidentReport[]) => {
+    if (reports.length === 0) {
+      setReporterReputation(100);
+      return;
+    }
+
+    let score = 100;
+    reports.forEach(report => {
+      // Increase score for verified reports
+      if (report.verified) score += 10;
+      // Decrease score for rejected reports
+      if (report.status === 'rejected') score -= 20;
+      // Consider community voting
+      const accuracy = report.accuracy;
+      if (accuracy) {
+        if (accuracy.downvotes > accuracy.upvotes) score -= 5;
+        if (accuracy.flags > 3) score -= 15;
+      }
+    });
+
+    setReporterReputation(Math.max(0, Math.min(100, score)));
+  };
+
+  // Check for duplicate reports
+  const checkForDuplicates = () => {
+    if (!gpsCoordinates || allReports.length === 0) return;
+
+    const RADIUS_KM = 0.5; // 500 meters
+    const TIME_WINDOW_DAYS = 7;
+    const now = new Date();
+    
+    const similar = allReports.filter(report => {
+      // Skip own reports
+      if (report.reporterId === user?.uid) return false;
+      
+      // Check if report is within time window
+      const reportDate = report.timestamp?.toDate?.() || new Date(0);
+      const daysDiff = (now.getTime() - reportDate.getTime()) / (1000 * 60 * 60 * 24);
+      if (daysDiff > TIME_WINDOW_DAYS) return false;
+
+      // Check if same incident type
+      if (report.incidentType !== incidentType) return false;
+
+      // Check GPS proximity if available
+      if (report.location.coordinates) {
+        const distance = calculateDistance(
+          gpsCoordinates.latitude,
+          gpsCoordinates.longitude,
+          report.location.coordinates.latitude,
+          report.location.coordinates.longitude
+        );
+        if (distance <= RADIUS_KM) return true;
+      }
+
+      // Check text similarity
+      const titleSimilarity = calculateTextSimilarity(title, report.title);
+      const descSimilarity = calculateTextSimilarity(description, report.description);
+      
+      if (titleSimilarity > 0.7 || descSimilarity > 0.6) return true;
+
+      return false;
+    });
+
+    setSimilarReports(similar);
+    if (similar.length > 0) {
+      setShowDuplicateWarning(true);
+    }
+  };
+
+  // Calculate distance between two GPS coordinates (Haversine formula)
+  const calculateDistance = (lat1: number, lon1: number, lat2: number, lon2: number): number => {
+    const R = 6371; // Earth's radius in km
+    const dLat = (lat2 - lat1) * Math.PI / 180;
+    const dLon = (lon2 - lon1) * Math.PI / 180;
+    const a = 
+      Math.sin(dLat/2) * Math.sin(dLat/2) +
+      Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+      Math.sin(dLon/2) * Math.sin(dLon/2);
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+    return R * c;
+  };
+
+  // Simple text similarity (Jaccard similarity)
+  const calculateTextSimilarity = (text1: string, text2: string): number => {
+    const words1 = new Set(text1.toLowerCase().split(/\s+/));
+    const words2 = new Set(text2.toLowerCase().split(/\s+/));
+    
+    const intersection = new Set([...words1].filter(x => words2.has(x)));
+    const union = new Set([...words1, ...words2]);
+    
+    return intersection.size / union.size;
+  };
+
+  // Check for duplicates when form changes
+  useEffect(() => {
+    if (title && description && gpsCoordinates) {
+      const timer = setTimeout(() => {
+        checkForDuplicates();
+      }, 1000); // Debounce
+      return () => clearTimeout(timer);
+    }
+  }, [title, description, gpsCoordinates, incidentType]);
 
   // Get current GPS location
   const getCurrentLocation = () => {
@@ -155,13 +303,41 @@ export default function ReportIncidentPage() {
     e.preventDefault();
     if (!user) return;
 
+    // Validation
+    if (!title || !description || !address) {
+      alert('⚠️ Please fill in all required fields.');
+      return;
+    }
+
+    if (!gpsCoordinates) {
+      alert('⚠️ GPS location is required for verification. Please enable location.');
+      return;
+    }
+
+    if (photos.length === 0) {
+      const confirmWithoutPhoto = confirm('⚠️ No photo evidence provided. Reports with photos have higher credibility. Continue anyway?');
+      if (!confirmWithoutPhoto) return;
+    }
+
+    // Check for potential duplicates one more time
+    checkForDuplicates();
+    if (similarReports.length > 0 && !showDuplicateWarning) {
+      const continueAnyway = confirm(
+        `⚠️ We found ${similarReports.length} similar report(s) in this area. Are you sure this is a new incident?`
+      );
+      if (!continueAnyway) return;
+    }
+
     setSubmitting(true);
     
     try {
       // Start photo upload and document creation in parallel for speed
       const photoUploadPromise = photos.length > 0 ? uploadPhotos() : Promise.resolve([]);
       
-      // Create incident report immediately (photos will be added when ready)
+      // Determine priority based on incident type and evidence
+      const priority = determinePriority();
+      
+      // Create incident report with verification fields
       const reportData = {
         reporterId: user.uid,
         reporterEmail: user.email,
@@ -171,14 +347,25 @@ export default function ReportIncidentPage() {
         description,
         location: {
           address,
-          coordinates: gpsCoordinates || null
+          coordinates: gpsCoordinates
         },
         photos: [],
         status: 'pending',
-        priority: 'medium',
+        priority,
         timestamp: serverTimestamp(),
-        views: 0,
-        upvotes: 0
+        verified: false,
+        accuracy: {
+          communityVotes: 0,
+          upvotes: 0,
+          downvotes: 0,
+          flags: 0,
+          flagReasons: []
+        },
+        reporterReputation,
+        isDuplicate: false,
+        relatedReports: similarReports.map(r => r.id),
+        lastUpdated: serverTimestamp(),
+        updateHistory: []
       };
 
       const docRef = await addDoc(collection(db, 'incidentReports'), reportData);
@@ -200,15 +387,42 @@ export default function ReportIncidentPage() {
       setPhotoPreview([]);
       setGpsCoordinates(null);
       setIncidentType('illegal-dumping');
+      setSimilarReports([]);
+      setShowDuplicateWarning(false);
       setShowForm(false);
       setSubmitting(false);
 
-      alert('✅ Incident reported successfully! Government officials will review it soon.');
+      alert('✅ Incident reported successfully! Government officials will review it soon.\n\n💡 Tip: Reports with photo evidence and GPS location are processed faster.');
     } catch (error) {
       console.error('Error submitting report:', error);
       alert('Failed to submit report. Please try again.');
       setSubmitting(false);
     }
+  };
+
+  // Determine priority based on incident type and evidence quality
+  const determinePriority = (): 'low' | 'medium' | 'high' | 'urgent' => {
+    let score = 0;
+    
+    // Incident type severity
+    if (incidentType === 'illegal-dumping') score += 3;
+    if (incidentType === 'water-contamination') score += 4;
+    if (incidentType === 'air-pollution') score += 3;
+    if (incidentType === 'tree-cutting') score += 2;
+    
+    // Evidence quality
+    if (photos.length > 0) score += 2;
+    if (photos.length >= 3) score += 1;
+    if (gpsCoordinates) score += 1;
+    
+    // Reporter credibility
+    if (reporterReputation >= 90) score += 1;
+    if (reporterReputation < 50) score -= 2;
+    
+    if (score >= 7) return 'urgent';
+    if (score >= 5) return 'high';
+    if (score >= 3) return 'medium';
+    return 'low';
   };
 
   const getStatusColor = (status: string) => {
@@ -293,6 +507,62 @@ export default function ReportIncidentPage() {
         {showForm ? (
           <section className={styles.formSection}>
             <h2>📝 Report an Environmental Incident</h2>
+            
+            {/* Reporter Reputation Badge */}
+            <div className={styles.reputationBadge}>
+              <span className={styles.reputationLabel}>Your Reporter Score:</span>
+              <div className={styles.reputationBar}>
+                <div 
+                  className={styles.reputationFill}
+                  style={{ 
+                    width: `${reporterReputation}%`,
+                    backgroundColor: reporterReputation >= 80 ? '#4CAF50' : reporterReputation >= 50 ? '#FF9800' : '#F44336'
+                  }}
+                ></div>
+              </div>
+              <span className={styles.reputationScore}>{reporterReputation}/100</span>
+              <small className={styles.reputationHint}>
+                {reporterReputation >= 80 ? '✅ Excellent - Your reports are highly trusted' :
+                 reporterReputation >= 50 ? '⚠️ Good - Keep providing accurate reports' :
+                 '❌ Low - Improve accuracy to restore credibility'}
+              </small>
+            </div>
+
+            {/* Duplicate Warning */}
+            {showDuplicateWarning && similarReports.length > 0 && (
+              <div className={styles.duplicateWarning}>
+                <div className={styles.warningHeader}>
+                  <i className="fas fa-exclamation-triangle"></i>
+                  <strong>Possible Duplicate Report Detected</strong>
+                </div>
+                <p>We found {similarReports.length} similar report(s) in this area from the past week:</p>
+                <div className={styles.similarReportsList}>
+                  {similarReports.slice(0, 3).map(report => (
+                    <div key={report.id} className={styles.similarReportItem}>
+                      <div className={styles.similarReportHeader}>
+                        <strong>{report.title}</strong>
+                        <span className={styles.similarReportDate}>
+                          {report.timestamp?.toDate?.().toLocaleDateString()}
+                        </span>
+                      </div>
+                      <p>{report.description.substring(0, 100)}...</p>
+                      <small>📍 {report.location.address}</small>
+                    </div>
+                  ))}
+                </div>
+                <p className={styles.warningNote}>
+                  <strong>💡 Tip:</strong> If this is the same incident, consider adding a comment to the existing report instead. 
+                  Duplicate reports may affect your reporter score.
+                </p>
+                <button 
+                  type="button"
+                  onClick={() => setShowDuplicateWarning(false)}
+                  className={styles.dismissWarning}
+                >
+                  I understand, this is a different incident
+                </button>
+              </div>
+            )}
             
             <form onSubmit={handleSubmit} className={styles.form}>
               {/* Incident Type Selection */}
@@ -495,11 +765,51 @@ export default function ReportIncidentPage() {
                           >
                             {report.priority.toUpperCase()}
                           </span>
+                          {report.verified && (
+                            <span className={styles.verifiedBadge} title="Verified by officials">
+                              <i className="fas fa-check-circle"></i> VERIFIED
+                            </span>
+                          )}
+                          {report.isDuplicate && (
+                            <span className={styles.duplicateBadge} title="Marked as duplicate">
+                              <i className="fas fa-copy"></i> DUPLICATE
+                            </span>
+                          )}
                         </div>
                       </div>
 
                       <h3>{report.title}</h3>
                       <p className={styles.description}>{report.description}</p>
+
+                      {/* Accuracy Metrics */}
+                      {report.accuracy && (
+                        <div className={styles.accuracyMetrics}>
+                          <div className={styles.metric}>
+                            <i className="fas fa-thumbs-up" style={{ color: '#4CAF50' }}></i>
+                            <span>{report.accuracy.upvotes}</span>
+                          </div>
+                          <div className={styles.metric}>
+                            <i className="fas fa-thumbs-down" style={{ color: '#F44336' }}></i>
+                            <span>{report.accuracy.downvotes}</span>
+                          </div>
+                          {report.accuracy.flags > 0 && (
+                            <div className={styles.metric}>
+                              <i className="fas fa-flag" style={{ color: '#FF9800' }}></i>
+                              <span>{report.accuracy.flags} flag(s)</span>
+                            </div>
+                          )}
+                        </div>
+                      )}
+
+                      {/* Duplicate Warning for Reporter */}
+                      {report.relatedReports && report.relatedReports.length > 0 && (
+                        <div className={styles.relatedReportsNote}>
+                          <i className="fas fa-info-circle"></i>
+                          <span>
+                            This report is related to {report.relatedReports.length} other report(s) in the area
+                          </span>
+                        </div>
+                      )}
 
                       <div className={styles.reportDetails}>
                         <div className={styles.detail}>

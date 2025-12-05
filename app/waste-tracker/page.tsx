@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import toast from 'react-hot-toast';
 import { useAuth } from '@/lib/AuthContext';
 import CitizenOnly from '@/components/CitizenOnly';
 import Header from '../../components/Header';
@@ -160,9 +161,9 @@ export default function WasteTrackerPage() {
           : daysUntilCollection === 1
           ? `✓ Recorded! ${schedule.dayName} collection is tomorrow!`
           : `✓ Recorded! Next collection: ${schedule.dayName} (${daysUntilCollection} days)`;
-        alert(message);
+        toast.success(message);
       } else {
-        alert('⚠️ Warning: No collection schedule found for this waste type. Please check back later.');
+        toast('⚠️ Warning: No collection schedule found for this waste type. Please check back later.');
       }
 
       // Reset form
@@ -171,7 +172,7 @@ export default function WasteTrackerPage() {
       setWasteType('plastic');
     } catch (error) {
       console.error('Error adding waste entry:', error);
-      alert('Failed to record waste entry');
+      toast.error('Failed to record waste entry');
     } finally {
       setSubmitting(false);
     }
@@ -204,7 +205,7 @@ export default function WasteTrackerPage() {
     // Auto-fill form with classified waste type
     setWasteType(result.wasteType);
     setNotes(`AI Classified: ${result.category} (${Math.round(result.confidence * 100)}% confidence)`);
-    alert(`Waste classified as: ${result.category}\n\nThe form has been pre-filled. Please enter the weight and submit.`);
+    toast(`Waste classified as: ${result.category}\n\nThe form has been pre-filled. Please enter the weight and submit.`);
   };
 
   if (!user) {

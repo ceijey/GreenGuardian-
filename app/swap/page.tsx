@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import toast from 'react-hot-toast';
 import { useAuth } from '@/lib/AuthContext';
 import CitizenOnly from '@/components/CitizenOnly';
 import Header from '../../components/Header';
@@ -134,28 +135,47 @@ export default function SwapPage() {
         [`swapRequestDetails.${user.uid}`]: swapRequest
       });
       
-      alert('Swap request sent! The item owner will review your offer.');
+      toast.success('Swap request sent! The item owner will review your offer.');
     } catch (error) {
       console.error('Error sending swap request:', error);
-      alert('Failed to send swap request. Please try again.');
+      toast.error('Failed to send swap request. Please try again.');
     }
   };
 
   const handleDeleteItem = async (itemId: string) => {
     if (!user) return;
-    
-    if (!confirm('Are you sure you want to delete this item?')) {
-      return;
-    }
-    
-    try {
-      const { deleteDoc } = await import('firebase/firestore');
-      await deleteDoc(doc(db, 'swapItems', itemId));
-      alert('Item deleted successfully!');
-    } catch (error) {
-      console.error('Error deleting item:', error);
-      alert('Failed to delete item. Please try again.');
-    }
+
+    toast((t) => (
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', alignItems: 'center' }}>
+        <span>Are you sure you want to delete this item?</span>
+        <div style={{ display: 'flex', gap: '10px' }}>
+          <button
+            style={{ background: '#d9534f', color: 'white', border: 'none', padding: '8px 12px', borderRadius: '4px', cursor: 'pointer' }}
+            onClick={async () => {
+              toast.dismiss(t.id);
+              try {
+                const { deleteDoc } = await import('firebase/firestore');
+                await deleteDoc(doc(db, 'swapItems', itemId));
+                toast.success('Item deleted successfully!');
+              } catch (error) {
+                console.error('Error deleting item:', error);
+                toast.error('Failed to delete item. Please try again.');
+              }
+            }}
+          >
+            Delete
+          </button>
+          <button
+            style={{ background: '#aaa', color: 'white', border: 'none', padding: '8px 12px', borderRadius: '4px', cursor: 'pointer' }}
+            onClick={() => toast.dismiss(t.id)}
+          >
+            Cancel
+          </button>
+        </div>
+      </div>
+    ), {
+      duration: 10000, // Keep toast open longer for confirmation
+    });
   };
 
   return (

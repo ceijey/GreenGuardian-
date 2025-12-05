@@ -31,7 +31,7 @@
 
 .description {
   font-size: 16px;
-  color: #666;
+  color: #000000;
   max-width: 600px;
   margin: 0 auto 20px;
   line-height: 1.6;
@@ -89,7 +89,7 @@
 
 .statLabel {
   font-size: 14px;
-  color: #666;
+  color: #333;
 }
 
 .controls {
@@ -115,6 +115,7 @@
   font-size: 16px;
   outline: none;
   transition: border-color 0.3s;
+  color: #333;
 }
 
 .searchInput:focus {
@@ -137,7 +138,7 @@
 
 .filters label {
   font-weight: 600;
-  color: #2d5a2d;
+  color: #333;
 }
 
 .categorySelect {
@@ -148,6 +149,7 @@
   outline: none;
   background: white;
   cursor: pointer;
+  color: #333;
 }
 
 .categorySelect:focus {
@@ -259,7 +261,7 @@
 }
 
 .emptyState p {
-  color: #666;
+  color: #333;
   font-size: 16px;
 }
 
@@ -316,7 +318,7 @@
   align-items: center;
   gap: 8px;
   margin-bottom: 8px;
-  color: #f57c00;
+  color: #333;
   font-size: 14px;
 }
 
@@ -357,7 +359,7 @@
   align-items: center;
   gap: 6px;
   margin-top: 8px;
-  color: #2e7d32;
+  color: #333;
   font-weight: 600;
   font-size: 14px;
 }
@@ -365,4 +367,51 @@
 .offerValue i {
   color: #4caf50;
   font-size: 13px;
+}
+
+/* Confirmation Toast Styles */
+.confirmation-toast {
+  background: #fff;
+  padding: 15px;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.confirmation-toast p {
+  margin: 0;
+  color: #333;
+  font-size: 16px;
+}
+
+.confirmation-buttons {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+}
+
+.confirmation-buttons button {
+  background: #4caf50;
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 25px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.3s;
+}
+
+.confirmation-buttons button:hover {
+  background: #45a049;
+}
+
+.confirmation-buttons button:last-child {
+  background: #f44336;
+}
+
+.confirmation-buttons button:last-child:hover {
+  background: #e53935;
 }

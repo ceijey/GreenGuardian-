@@ -1,4 +1,5 @@
 import { useState, useRef } from 'react';
+import toast from 'react-hot-toast';
 import { User } from 'firebase/auth';
 import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
@@ -191,7 +192,7 @@ export default function AddItemModal({ isOpen, onClose, currentUser }: AddItemMo
     e.preventDefault();
     
     if (!currentUser) {
-      alert('Please login to add items');
+      toast.error('Please login to add items to swap.');
       return;
     }
 
@@ -221,12 +222,16 @@ export default function AddItemModal({ isOpen, onClose, currentUser }: AddItemMo
         estimatedValue: '',
         imageUrl: ''
       });
+      setImagePreview('');
+      if (fileInputRef.current) fileInputRef.current.value = '';
+      if (cameraInputRef.current) cameraInputRef.current.value = '';
 
+
+      toast.success('Item added successfully!');
       onClose();
-      alert('Item added successfully!');
     } catch (error) {
       console.error('Error adding item:', error);
-      alert('Failed to add item. Please try again.');
+      toast.error('Failed to add item. Please try again.');
     } finally {
       setLoading(false);
     }
@@ -235,200 +240,202 @@ export default function AddItemModal({ isOpen, onClose, currentUser }: AddItemMo
   if (!isOpen) return null;
 
   return (
-    <div className={styles.overlay}>
-      <div className={styles.modal}>
-        <div className={styles.header}>
-          <h2>Add New Item</h2>
-          <button onClick={onClose} className={styles.closeButton}>
-            <i className="fas fa-times"></i>
-          </button>
-        </div>
-
-        <div className={styles.policyReminder}>
-          <i className="fas fa-info-circle"></i>
-          <span>Please ensure your item follows our <strong>Swap Policy</strong>. No prohibited items, accurate descriptions, and honest condition ratings required.</span>
-        </div>
-
-        <form onSubmit={handleSubmit} className={styles.form}>
-          <div className={styles.formGroup}>
-            <label htmlFor="title">Item Title *</label>
-            <input
-              type="text"
-              id="title"
-              name="title"
-              value={formData.title}
-              onChange={handleInputChange}
-              placeholder="What are you swapping?"
-              className={errors.title ? styles.error : ''}
-            />
-            {errors.title && <span className={styles.errorText}>{errors.title}</span>}
+    <>
+      <div className={styles.overlay}>
+        <div className={styles.modal}>
+          <div className={styles.header}>
+            <h2>Add New Item</h2>
+            <button onClick={onClose} className={styles.closeButton}>
+              <i className="fas fa-times"></i>
+            </button>
           </div>
 
-          <div className={styles.formRow}>
-            <div className={styles.formGroup}>
-              <label htmlFor="category">Category</label>
-              <select
-                id="category"
-                name="category"
-                value={formData.category}
-                onChange={handleInputChange}
-              >
-                {categories.map(cat => (
-                  <option key={cat.value} value={cat.value}>
-                    {cat.label}
-                  </option>
-                ))}
-              </select>
-            </div>
+          <div className={styles.policyReminder}>
+            <i className="fas fa-info-circle"></i>
+            <span>Please ensure your item follows our <strong>Swap Policy</strong>. No prohibited items, accurate descriptions, and honest condition ratings required.</span>
+          </div>
 
+          <form onSubmit={handleSubmit} className={styles.form}>
             <div className={styles.formGroup}>
-              <label htmlFor="estimatedValue">Estimated Value (₱) *</label>
+              <label htmlFor="title">Item Title *</label>
               <input
-                type="number"
-                id="estimatedValue"
-                name="estimatedValue"
-                value={formData.estimatedValue}
+                type="text"
+                id="title"
+                name="title"
+                value={formData.title}
                 onChange={handleInputChange}
-                placeholder="0.00"
-                min="0"
-                step="0.01"
-                className={errors.estimatedValue ? styles.error : ''}
+                placeholder="What are you swapping?"
+                className={errors.title ? styles.error : ''}
               />
-              {errors.estimatedValue && <span className={styles.errorText}>{errors.estimatedValue}</span>}
+              {errors.title && <span className={styles.errorText}>{errors.title}</span>}
             </div>
-          </div>
 
-          <div className={styles.formGroup}>
-            <label htmlFor="condition">Condition</label>
-            <div className={styles.conditionOptions}>
-              {conditions.map(cond => (
-                <label key={cond.value} className={styles.conditionOption}>
+            <div className={styles.formRow}>
+              <div className={styles.formGroup}>
+                <label htmlFor="category">Category</label>
+                <select
+                  id="category"
+                  name="category"
+                  value={formData.category}
+                  onChange={handleInputChange}
+                >
+                  {categories.map(cat => (
+                    <option key={cat.value} value={cat.value}>
+                      {cat.label}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              <div className={styles.formGroup}>
+                <label htmlFor="estimatedValue">Estimated Value (₱) *</label>
+                <input
+                  type="number"
+                  id="estimatedValue"
+                  name="estimatedValue"
+                  value={formData.estimatedValue}
+                  onChange={handleInputChange}
+                  placeholder="0.00"
+                  min="0"
+                  step="0.01"
+                  className={errors.estimatedValue ? styles.error : ''}
+                />
+                {errors.estimatedValue && <span className={styles.errorText}>{errors.estimatedValue}</span>}
+              </div>
+            </div>
+
+            <div className={styles.formGroup}>
+              <label htmlFor="condition">Condition</label>
+              <div className={styles.conditionOptions}>
+                {conditions.map(cond => (
+                  <label key={cond.value} className={styles.conditionOption}>
+                    <input
+                      type="radio"
+                      name="condition"
+                      value={cond.value}
+                      checked={formData.condition === cond.value}
+                      onChange={handleInputChange}
+                    />
+                    <div className={styles.conditionLabel}>
+                      <span className={styles.conditionName}>{cond.label}</span>
+                      <span className={styles.conditionDesc}>{cond.description}</span>
+                    </div>
+                  </label>
+                ))}
+              </div>
+            </div>
+
+            <div className={styles.formGroup}>
+              <label htmlFor="description">Description *</label>
+              <textarea
+                id="description"
+                name="description"
+                value={formData.description}
+                onChange={handleInputChange}
+                placeholder="Describe your item, its condition, and any details..."
+                rows={4}
+                className={errors.description ? styles.error : ''}
+              />
+              {errors.description && <span className={styles.errorText}>{errors.description}</span>}
+            </div>
+
+            <div className={styles.formGroup}>
+              <label>Item Photo</label>
+              {!imagePreview ? (
+                <div
+                  className={`${styles.imageUploadZone} ${isDragging ? styles.dragging : ''}`}
+                  onDragOver={handleDragOver}
+                  onDragLeave={handleDragLeave}
+                  onDrop={handleDrop}
+                >
+                  {uploadingImage ? (
+                    <div className={styles.uploadingState}>
+                      <i className="fas fa-spinner fa-spin"></i>
+                      <p>Compressing image...</p>
+                    </div>
+                  ) : (
+                    <>
+                      <i className="fas fa-cloud-upload-alt"></i>
+                      <p>Drag & drop image here</p>
+                      <p className={styles.orText}>or</p>
+                      <div className={styles.uploadButtons}>
+                        <button
+                          type="button"
+                          onClick={() => fileInputRef.current?.click()}
+                          className={styles.uploadButton}
+                        >
+                          <i className="fas fa-folder-open"></i>
+                          Choose File
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => cameraInputRef.current?.click()}
+                          className={styles.uploadButton}
+                        >
+                          <i className="fas fa-camera"></i>
+                          Take Photo
+                        </button>
+                      </div>
+                      <small>Max 5MB • Will be compressed for storage</small>
+                    </>
+                  )}
                   <input
-                    type="radio"
-                    name="condition"
-                    value={cond.value}
-                    checked={formData.condition === cond.value}
-                    onChange={handleInputChange}
+                    ref={fileInputRef}
+                    type="file"
+                    accept="image/*"
+                    onChange={handleFileSelect}
+                    style={{ display: 'none' }}
                   />
-                  <div className={styles.conditionLabel}>
-                    <span className={styles.conditionName}>{cond.label}</span>
-                    <span className={styles.conditionDesc}>{cond.description}</span>
+                  <input
+                    ref={cameraInputRef}
+                    type="file"
+                    accept="image/*"
+                    capture="environment"
+                    onChange={handleFileSelect}
+                    style={{ display: 'none' }}
+                  />
+                </div>
+              ) : (
+                <div className={styles.imagePreviewContainer}>
+                  <img src={imagePreview} alt="Preview" className={styles.imagePreview} />
+                  <button
+                    type="button"
+                    onClick={removeImage}
+                    className={styles.removeImageButton}
+                    title="Remove image"
+                  >
+                    <i className="fas fa-times"></i>
+                  </button>
+                  <div className={styles.imageInfo}>
+                    <i className="fas fa-check-circle"></i>
+                    Image compressed and ready
                   </div>
-                </label>
-              ))}
+                </div>
+              )}
+              {errors.imageUrl && <span className={styles.errorText}>{errors.imageUrl}</span>}
             </div>
-          </div>
 
-          <div className={styles.formGroup}>
-            <label htmlFor="description">Description *</label>
-            <textarea
-              id="description"
-              name="description"
-              value={formData.description}
-              onChange={handleInputChange}
-              placeholder="Describe your item, its condition, and any details..."
-              rows={4}
-              className={errors.description ? styles.error : ''}
-            />
-            {errors.description && <span className={styles.errorText}>{errors.description}</span>}
-          </div>
-
-          <div className={styles.formGroup}>
-            <label>Item Photo</label>
-            {!imagePreview ? (
-              <div
-                className={`${styles.imageUploadZone} ${isDragging ? styles.dragging : ''}`}
-                onDragOver={handleDragOver}
-                onDragLeave={handleDragLeave}
-                onDrop={handleDrop}
-              >
-                {uploadingImage ? (
-                  <div className={styles.uploadingState}>
+            <div className={styles.actions}>
+              <button type="button" onClick={onClose} className={styles.cancelButton}>
+                Cancel
+              </button>
+              <button type="submit" disabled={loading} className={styles.submitButton}>
+                {loading ? (
+                  <>
                     <i className="fas fa-spinner fa-spin"></i>
-                    <p>Compressing image...</p>
-                  </div>
+                    Adding...
+                  </>
                 ) : (
                   <>
-                    <i className="fas fa-cloud-upload-alt"></i>
-                    <p>Drag & drop image here</p>
-                    <p className={styles.orText}>or</p>
-                    <div className={styles.uploadButtons}>
-                      <button
-                        type="button"
-                        onClick={() => fileInputRef.current?.click()}
-                        className={styles.uploadButton}
-                      >
-                        <i className="fas fa-folder-open"></i>
-                        Choose File
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => cameraInputRef.current?.click()}
-                        className={styles.uploadButton}
-                      >
-                        <i className="fas fa-camera"></i>
-                        Take Photo
-                      </button>
-                    </div>
-                    <small>Max 5MB • Will be compressed for storage</small>
+                    <i className="fas fa-plus"></i>
+                    Add Item
                   </>
                 )}
-                <input
-                  ref={fileInputRef}
-                  type="file"
-                  accept="image/*"
-                  onChange={handleFileSelect}
-                  style={{ display: 'none' }}
-                />
-                <input
-                  ref={cameraInputRef}
-                  type="file"
-                  accept="image/*"
-                  capture="environment"
-                  onChange={handleFileSelect}
-                  style={{ display: 'none' }}
-                />
-              </div>
-            ) : (
-              <div className={styles.imagePreviewContainer}>
-                <img src={imagePreview} alt="Preview" className={styles.imagePreview} />
-                <button
-                  type="button"
-                  onClick={removeImage}
-                  className={styles.removeImageButton}
-                  title="Remove image"
-                >
-                  <i className="fas fa-times"></i>
-                </button>
-                <div className={styles.imageInfo}>
-                  <i className="fas fa-check-circle"></i>
-                  Image compressed and ready
-                </div>
-              </div>
-            )}
-            {errors.imageUrl && <span className={styles.errorText}>{errors.imageUrl}</span>}
-          </div>
-
-          <div className={styles.actions}>
-            <button type="button" onClick={onClose} className={styles.cancelButton}>
-              Cancel
-            </button>
-            <button type="submit" disabled={loading} className={styles.submitButton}>
-              {loading ? (
-                <>
-                  <i className="fas fa-spinner fa-spin"></i>
-                  Adding...
-                </>
-              ) : (
-                <>
-                  <i className="fas fa-plus"></i>
-                  Add Item
-                </>
-              )}
-            </button>
-          </div>
-        </form>
+              </button>
+            </div>
+          </form>
+        </div>
       </div>
-    </div>
+    </>
   );
 }
