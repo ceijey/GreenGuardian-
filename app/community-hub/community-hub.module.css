@@ -1,7 +1,7 @@
 .container {
   max-width: 1400px;
   margin: 0 auto;
-  padding: 20px;
+  padding: 50px;
   background: #f5f7fa;
   min-height: 100vh;
   color: #000;
@@ -9,7 +9,7 @@
 
 .loginPrompt {
   text-align: center;
-  padding: 100px 20px;
+  padding:  52px;
   background: white;
   border-radius: 16px;
   box-shadow: 0 4px 20px rgba(0,0,0,0.08);

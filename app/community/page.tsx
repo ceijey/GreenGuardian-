@@ -279,7 +279,7 @@ export default function CommunityPage() {
       <Header />
       
       {/* Global Announcements Section */}
-      <div style={{ padding: '2rem', maxWidth: '1400px', margin: '0 auto' }}>
+      <div style={{ padding: '50px', maxWidth: '1400px', margin: '0 auto' }}>
         <GlobalAnnouncements position="sidebar" maxVisible={5} showCreateButton={true} />
       </div>
       
