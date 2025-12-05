@@ -8,7 +8,7 @@ import { db } from '@/lib/firebase';
 import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 import { storage } from '@/lib/firebase';
 import styles from './report-incident.module.css';
-import InfoModal from '@/components/InfoModal';
+import toast from 'react-hot-toast';
 import ConfirmModal from '@/components/ConfirmModal';
 
 interface IncidentReport {
@@ -72,11 +72,7 @@ export default function ReportIncidentPage() {
   const [photoPreview, setPhotoPreview] = useState<string[]>([]);
   const [gpsCoordinates, setGpsCoordinates] = useState<{ latitude: number; longitude: number } | null>(null);
   const [gettingLocation, setGettingLocation] = useState(false);
-  const [modalInfo, setModalInfo] = useState<{ isOpen: boolean; title: string; message: string }>({
-    isOpen: false,
-    title: '',
-    message: '',
-  });
+  
   const [confirmModalInfo, setConfirmModalInfo] = useState<{
     isOpen: boolean;
     title: string;
@@ -265,7 +261,7 @@ export default function ReportIncidentPage() {
   // Get current GPS location
   const getCurrentLocation = () => {
     if (!navigator.geolocation) {
-      setModalInfo({ isOpen: true, title: 'Geolocation Error', message: 'Geolocation is not supported by your browser' });
+      toast.error('Geolocation is not supported by your browser');
       return;
     }
 
@@ -281,7 +277,7 @@ export default function ReportIncidentPage() {
           setAddress(fetchedAddress);
         }
         setGettingLocation(false);
-        setModalInfo({ isOpen: true, title: 'Location Captured', message: '📍 Location captured successfully!' });
+        toast.success('📍 Location captured successfully!');
       },
       (error) => {
         // Gracefully handle geolocation errors
@@ -302,7 +298,7 @@ export default function ReportIncidentPage() {
         }
         
         console.warn('Geolocation error:', error.code, error.message);
-        setModalInfo({ isOpen: true, title: 'Location Error', message: errorMessage });
+        toast.error(errorMessage);
         setGettingLocation(false);
       }
     );
@@ -338,12 +334,12 @@ export default function ReportIncidentPage() {
 
     // Validation
     if (!title || !description || !address) {
-      setModalInfo({ isOpen: true, title: 'Validation Error', message: '⚠️ Please fill in all required fields.' });
+      toast.error('⚠️ Please fill in all required fields.');
       return;
     }
 
     if (!gpsCoordinates) {
-      setModalInfo({ isOpen: true, title: 'Validation Error', message: '⚠️ GPS location is required for verification. Please enable location.' });
+      toast.error('⚠️ GPS location is required for verification. Please enable location.');
       return;
     }
 
@@ -450,10 +446,10 @@ export default function ReportIncidentPage() {
       setShowForm(false);
       setSubmitting(false);
 
-      setModalInfo({ isOpen: true, title: 'Success', message: '✅ Incident reported successfully! Government officials will review it soon.\n\n💡 Tip: Reports with photo evidence and GPS location are processed faster.' });
+      toast.success('✅ Incident reported successfully! Government officials will review it soon.');
     } catch (error) {
       console.error('Error submitting report:', error);
-      setModalInfo({ isOpen: true, title: 'Error', message: 'Failed to submit report. Please try again.' });
+      toast.error('Failed to submit report. Please try again.');
       setSubmitting(false);
     }
   };
@@ -523,12 +519,6 @@ export default function ReportIncidentPage() {
       <Header logo="fas fa-exclamation-triangle" title="GREENGUARDIAN" />
       
       <main className="main-content">
-        <InfoModal
-          isOpen={modalInfo.isOpen}
-          onClose={() => setModalInfo({ isOpen: false, title: '', message: '' })}
-          title={modalInfo.title}
-          message={modalInfo.message}
-        />
         <ConfirmModal
           isOpen={confirmModalInfo.isOpen}
           onClose={() => setConfirmModalInfo({ isOpen: false, title: '', message: '', onConfirm: () => {} })}
