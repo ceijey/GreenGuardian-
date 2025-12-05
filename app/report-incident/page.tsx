@@ -8,6 +8,8 @@ import { db } from '@/lib/firebase';
 import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 import { storage } from '@/lib/firebase';
 import styles from './report-incident.module.css';
+import InfoModal from '@/components/InfoModal';
+import ConfirmModal from '@/components/ConfirmModal';
 
 interface IncidentReport {
   id: string;
@@ -70,6 +72,22 @@ export default function ReportIncidentPage() {
   const [photoPreview, setPhotoPreview] = useState<string[]>([]);
   const [gpsCoordinates, setGpsCoordinates] = useState<{ latitude: number; longitude: number } | null>(null);
   const [gettingLocation, setGettingLocation] = useState(false);
+  const [modalInfo, setModalInfo] = useState<{ isOpen: boolean; title: string; message: string }>({
+    isOpen: false,
+    title: '',
+    message: '',
+  });
+  const [confirmModalInfo, setConfirmModalInfo] = useState<{
+    isOpen: boolean;
+    title: string;
+    message: string;
+    onConfirm: () => void;
+  }>({
+    isOpen: false,
+    title: '',
+    message: '',
+    onConfirm: () => {},
+  });
   
   // Duplicate detection & verification
   const [similarReports, setSimilarReports] = useState<IncidentReport[]>([]);
@@ -223,6 +241,17 @@ export default function ReportIncidentPage() {
     return intersection.size / union.size;
   };
 
+  const reverseGeocode = async (lat: number, lon: number) => {
+    try {
+      const response = await fetch(`https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=${lat}&lon=${lon}`);
+      const data = await response.json();
+      return data.display_name || 'Address not found';
+    } catch (error) {
+      console.error('Reverse geocoding error:', error);
+      return '';
+    }
+  };
+
   // Check for duplicates when form changes
   useEffect(() => {
     if (title && description && gpsCoordinates) {
@@ -236,19 +265,23 @@ export default function ReportIncidentPage() {
   // Get current GPS location
   const getCurrentLocation = () => {
     if (!navigator.geolocation) {
-      alert('Geolocation is not supported by your browser');
+      setModalInfo({ isOpen: true, title: 'Geolocation Error', message: 'Geolocation is not supported by your browser' });
       return;
     }
 
     setGettingLocation(true);
     navigator.geolocation.getCurrentPosition(
-      (position) => {
+      async (position) => {
         setGpsCoordinates({
           latitude: position.coords.latitude,
           longitude: position.coords.longitude
         });
+        const fetchedAddress = await reverseGeocode(position.coords.latitude, position.coords.longitude);
+        if (fetchedAddress) {
+          setAddress(fetchedAddress);
+        }
         setGettingLocation(false);
-        alert('📍 Location captured successfully!');
+        setModalInfo({ isOpen: true, title: 'Location Captured', message: '📍 Location captured successfully!' });
       },
       (error) => {
         // Gracefully handle geolocation errors
@@ -269,7 +302,7 @@ export default function ReportIncidentPage() {
         }
         
         console.warn('Geolocation error:', error.code, error.message);
-        alert(errorMessage);
+        setModalInfo({ isOpen: true, title: 'Location Error', message: errorMessage });
         setGettingLocation(false);
       }
     );
@@ -305,29 +338,54 @@ export default function ReportIncidentPage() {
 
     // Validation
     if (!title || !description || !address) {
-      alert('⚠️ Please fill in all required fields.');
+      setModalInfo({ isOpen: true, title: 'Validation Error', message: '⚠️ Please fill in all required fields.' });
       return;
     }
 
     if (!gpsCoordinates) {
-      alert('⚠️ GPS location is required for verification. Please enable location.');
+      setModalInfo({ isOpen: true, title: 'Validation Error', message: '⚠️ GPS location is required for verification. Please enable location.' });
       return;
     }
 
     if (photos.length === 0) {
-      const confirmWithoutPhoto = confirm('⚠️ No photo evidence provided. Reports with photos have higher credibility. Continue anyway?');
-      if (!confirmWithoutPhoto) return;
+      setConfirmModalInfo({
+        isOpen: true,
+        title: 'No Photo Evidence',
+        message: '⚠️ No photo evidence provided. Reports with photos have higher credibility. Continue anyway?',
+        onConfirm: () => {
+          setConfirmModalInfo({ isOpen: false, title: '', message: '', onConfirm: () => {} });
+          proceedWithSubmission();
+        },
+      });
+      return;
     }
+
+    proceedWithSubmission();
+  };
+
+  const proceedWithSubmission = async () => {
+    if (!user || !gpsCoordinates) return;
 
     // Check for potential duplicates one more time
     checkForDuplicates();
     if (similarReports.length > 0 && !showDuplicateWarning) {
-      const continueAnyway = confirm(
-        `⚠️ We found ${similarReports.length} similar report(s) in this area. Are you sure this is a new incident?`
-      );
-      if (!continueAnyway) return;
+      setConfirmModalInfo({
+        isOpen: true,
+        title: 'Possible Duplicate',
+        message: `⚠️ We found ${similarReports.length} similar report(s) in this area. Are you sure this is a new incident?`,
+        onConfirm: () => {
+          setConfirmModalInfo({ isOpen: false, title: '', message: '', onConfirm: () => {} });
+          submitReportData();
+        },
+      });
+      return;
     }
 
+    submitReportData();
+  }
+
+  const submitReportData = async () => {
+    if (!user || !gpsCoordinates) return;
     setSubmitting(true);
     
     try {
@@ -392,10 +450,10 @@ export default function ReportIncidentPage() {
       setShowForm(false);
       setSubmitting(false);
 
-      alert('✅ Incident reported successfully! Government officials will review it soon.\n\n💡 Tip: Reports with photo evidence and GPS location are processed faster.');
+      setModalInfo({ isOpen: true, title: 'Success', message: '✅ Incident reported successfully! Government officials will review it soon.\n\n💡 Tip: Reports with photo evidence and GPS location are processed faster.' });
     } catch (error) {
       console.error('Error submitting report:', error);
-      alert('Failed to submit report. Please try again.');
+      setModalInfo({ isOpen: true, title: 'Error', message: 'Failed to submit report. Please try again.' });
       setSubmitting(false);
     }
   };
@@ -465,6 +523,21 @@ export default function ReportIncidentPage() {
       <Header logo="fas fa-exclamation-triangle" title="GREENGUARDIAN" />
       
       <main className="main-content">
+        <InfoModal
+          isOpen={modalInfo.isOpen}
+          onClose={() => setModalInfo({ isOpen: false, title: '', message: '' })}
+          title={modalInfo.title}
+          message={modalInfo.message}
+        />
+        <ConfirmModal
+          isOpen={confirmModalInfo.isOpen}
+          onClose={() => setConfirmModalInfo({ isOpen: false, title: '', message: '', onConfirm: () => {} })}
+          onConfirm={confirmModalInfo.onConfirm}
+          title={confirmModalInfo.title}
+          message={confirmModalInfo.message}
+          confirmText="Continue"
+          cancelText="Cancel"
+        />
         <div className={styles.container}>
         {/* Hero Section */}
         <section className={styles.hero}>

@@ -31,9 +31,6 @@ export default function RootLayout({
               color: #6c757d !important;
               opacity: 1;
             }
-            button, [role="button"] {
-              color: black !important;
-            }
             select, option {
               color: black !important;
             }

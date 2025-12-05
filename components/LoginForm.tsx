@@ -278,6 +278,7 @@ export default function LoginForm() {
                   onClick={() => setShowTermsModal(true)}
                   className={styles.termsLink}
                   disabled={isLoading}
+                  style={{ color: 'green' }}
                 >
                   Terms and Conditions
                 </button>
