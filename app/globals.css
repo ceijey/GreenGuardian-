@@ -59,13 +59,34 @@ body {
   min-height: 100vh;
   overflow-x: hidden;
   margin: 0;
+  padding: 0;
+}
+
+/* Main content padding - except for fullscreen pages like login */
+.main-content {
   padding: 50px;
+}
+
+/* Login and signup pages should be fullscreen */
+.main-content:has([class*="LoginForm"]),
+.main-content:has([class*="SignupForm"]),
+.main-content:has([class*="loginContainer"]),
+.main-content:has([class*="signupContainer"]) {
+  padding: 0;
 }
 
 /* Responsive adjustments for mobile */
 @media (max-width: 767px) {
   .main-content {
+    padding: 20px;
     padding-top: 52px; /* Same space on mobile */
+  }
+  
+  .main-content:has([class*="LoginForm"]),
+  .main-content:has([class*="SignupForm"]),
+  .main-content:has([class*="loginContainer"]),
+  .main-content:has([class*="signupContainer"]) {
+    padding: 0;
   }
 }
 

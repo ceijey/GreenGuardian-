@@ -4,11 +4,11 @@
   max-height: 100vh;
   display: flex;
   flex-direction: row;
-  background: #ffffff;
   position: relative;
   margin: 0;
   padding: 0;
   overflow: hidden;
+  width: 100vw;
 }
 
 /* Hero Section - Left Side */
@@ -522,43 +522,138 @@
 }
 
 /* Mobile Responsive */
-@media (max-width: 968px) {
+/* Tablets and smaller desktops */
+@media (max-width: 1024px) {
   .container {
     flex-direction: column;
+    height: auto;
+    min-height: 100vh;
   }
 
   .heroSection {
-    min-height: 40vh;
-    padding: 40px 24px;
+    min-height: 35vh;
+    padding: 40px 30px;
   }
 
   .heroTitle {
-    font-size: 36px;
+    font-size: 40px;
   }
 
   .heroDescription {
-    font-size: 16px;
+    font-size: 17px;
   }
 
   .formSection {
-    min-height: 60vh;
-    padding: 24px;
+    min-height: 65vh;
+    padding: 30px 24px;
+  }
+
+  .formWrapper {
+    max-width: 500px;
+  }
+
+  .error {
+    font-size: 13px;
+    padding: 10px 14px;
+  }
+
+  .checkboxLabel {
+    font-size: 12px;
+  }
+
+  .footerText, .forgotLink {
+    font-size: 13px;
+  }
+}
+
+/* Mobile landscape and tablets */
+@media (max-width: 768px) {
+  .heroSection {
+    min-height: 30vh;
+    padding: 30px 20px;
+  }
+
+  .heroTitle {
+    font-size: 32px;
+    margin-bottom: 16px;
+  }
+
+  .heroDescription {
+    font-size: 15px;
+  }
+
+  .formSection {
+    min-height: 70vh;
+    padding: 24px 20px;
+  }
+
+  .title {
+    font-size: 28px;
+  }
+
+  .logoContainer img {
+    width: 70px;
+    height: 70px;
   }
 
   .formWrapper {
     max-width: 100%;
+    gap: 18px;
+  }
+
+  .input {
+    padding: 12px 14px;
+    font-size: 14px;
+  }
+
+  .passwordWrapper input {
+    padding-right: 48px;
+  }
+
+  .togglePassword {
+    width: 30px;
+    height: 30px;
+    right: 10px;
+  }
+
+  .togglePassword i {
+    font-size: 16px;
+  }
+
+  .error {
+    font-size: 13px;
+    padding: 10px 12px;
+  }
+
+  .checkboxLabel {
+    font-size: 12px;
+  }
+
+  .checkbox {
+    width: 16px;
+    height: 16px;
+  }
+
+  .submitButton {
+    padding: 13px;
+    font-size: 15px;
+  }
+
+  .footerText, .forgotLink, .footerLink {
+    font-size: 13px;
   }
 }
 
+/* Mobile portrait */
 @media (max-width: 640px) {
   .heroSection {
-    min-height: 30vh;
+    min-height: 25vh;
     padding: 24px 16px;
   }
 
   .heroTitle {
-    font-size: 28px;
-    margin-bottom: 16px;
+    font-size: 26px;
+    margin-bottom: 12px;
   }
 
   .heroDescription {
@@ -567,10 +662,17 @@
 
   .formSection {
     padding: 20px 16px;
+    min-height: 75vh;
+    overflow-y: auto;
   }
 
   .title {
-    font-size: 26px;
+    font-size: 24px;
+    margin-bottom: 8px;
+  }
+
+  .logoContainer {
+    margin-bottom: 6px;
   }
 
   .logoContainer img {
@@ -578,25 +680,99 @@
     height: 60px;
   }
 
+  .instructionsButton {
+    font-size: 12px;
+    padding: 5px 10px;
+    gap: 4px;
+  }
+
+  .formWrapper {
+    gap: 16px;
+  }
+
+  .form {
+    gap: 14px;
+  }
+
+  .formGroup {
+    gap: 6px;
+  }
+
+  .label {
+    font-size: 13px;
+    gap: 4px;
+  }
+
   .input {
-    padding: 10px 14px;
+    padding: 11px 12px;
     font-size: 14px;
+    border-radius: 8px;
+  }
+
+  .passwordWrapper input {
+    padding-right: 45px;
+  }
+
+  .togglePassword {
+    width: 28px;
+    height: 28px;
+    right: 8px;
+  }
+
+  .togglePassword i {
+    font-size: 15px;
+  }
+
+  .error {
+    font-size: 12px;
+    padding: 10px 12px;
+    gap: 6px;
+  }
+
+  .resendButton {
+    font-size: 12px;
+    padding: 5px 10px;
+  }
+
+  .checkboxGroup {
+    gap: 8px;
+  }
+
+  .checkbox {
+    width: 16px;
+    height: 16px;
+    margin-top: 2px;
+  }
+
+  .checkboxLabel {
+    font-size: 12px;
   }
 
   .submitButton {
-    padding: 12px;
+    padding: 13px;
     font-size: 15px;
+    border-radius: 8px;
+  }
+
+  .footer {
+    gap: 10px;
+    margin-top: 6px;
+  }
+
+  .footerText, .forgotLink, .footerLink {
+    font-size: 13px;
   }
 }
 
+/* Small mobile devices */
 @media (max-width: 480px) {
   .heroSection {
-    min-height: 25vh;
-    padding: 20px 12px;
+    min-height: 20vh;
+    padding: 18px 12px;
   }
 
   .heroTitle {
-    font-size: 24px;
+    font-size: 22px;
   }
 
   .heroDescription {
@@ -604,16 +780,199 @@
     line-height: 1.5;
   }
 
+  .formSection {
+    padding: 16px 12px;
+    overflow-y: auto;
+  }
+
   .title {
-    font-size: 24px;
+    font-size: 22px;
+  }
+
+  .logoContainer {
+    margin-bottom: 4px;
+  }
+
+  .logoContainer img {
+    width: 50px;
+    height: 50px;
+    padding: 8px;
+  }
+
+  .instructionsButton {
+    font-size: 11px;
+    padding: 4px 8px;
+  }
+
+  .formWrapper {
+    gap: 14px;
   }
 
   .form {
-    gap: 16px;
+    gap: 12px;
   }
 
   .formGroup {
-    gap: 6px;
+    gap: 5px;
+  }
+
+  .label {
+    font-size: 12px;
+  }
+
+  .input {
+    padding: 10px 11px;
+    font-size: 14px;
+    border-radius: 8px;
+  }
+
+  .passwordWrapper input {
+    padding-right: 42px;
+  }
+
+  .togglePassword {
+    width: 26px;
+    height: 26px;
+    right: 7px;
+  }
+
+  .togglePassword i {
+    font-size: 14px;
+  }
+
+  .error {
+    font-size: 12px;
+    padding: 9px 10px;
+  }
+
+  .resendButton {
+    font-size: 11px;
+    padding: 4px 8px;
+  }
+
+  .checkboxGroup {
+    gap: 7px;
+  }
+
+  .checkbox {
+    width: 15px;
+    height: 15px;
+  }
+
+  .checkboxLabel {
+    font-size: 11px;
+  }
+
+  .submitButton {
+    padding: 12px;
+    font-size: 14px;
+  }
+
+  .footer {
+    gap: 8px;
+  }
+
+  .footerText, .forgotLink, .footerLink {
+    font-size: 12px;
+  }
+}
+
+/* Extra small devices */
+@media (max-width: 375px) {
+  .heroSection {
+    min-height: 18vh;
+    padding: 16px 10px;
+  }
+
+  .heroTitle {
+    font-size: 20px;
+  }
+
+  .heroDescription {
+    font-size: 12px;
+  }
+
+  .formSection {
+    padding: 12px 10px;
+    overflow-y: auto;
+  }
+
+  .title {
+    font-size: 20px;
+  }
+
+  .logoContainer img {
+    width: 45px;
+    height: 45px;
+    padding: 6px;
+  }
+
+  .instructionsButton {
+    font-size: 10px;
+    padding: 4px 8px;
+  }
+
+  .formWrapper {
+    gap: 12px;
+  }
+
+  .form {
+    gap: 10px;
+  }
+
+  .formGroup {
+    gap: 4px;
+  }
+
+  .label {
+    font-size: 11px;
+  }
+
+  .input {
+    padding: 9px 10px;
+    font-size: 13px;
+  }
+
+  .passwordWrapper input {
+    padding-right: 40px;
+  }
+
+  .togglePassword {
+    width: 24px;
+    height: 24px;
+    right: 6px;
+  }
+
+  .togglePassword i {
+    font-size: 13px;
+  }
+
+  .error {
+    font-size: 11px;
+    padding: 8px 10px;
+  }
+
+  .resendButton {
+    font-size: 10px;
+    padding: 4px 8px;
+  }
+
+  .checkbox {
+    width: 14px;
+    height: 14px;
+  }
+
+  .checkboxLabel {
+    font-size: 10px;
+  }
+
+  .submitButton {
+    padding: 11px;
+    font-size: 13px;
+  }
+
+  .footerText, .forgotLink, .footerLink {
+    font-size: 11px;
   }
 }
 
