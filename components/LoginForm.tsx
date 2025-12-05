@@ -20,6 +20,7 @@ export default function LoginForm() {
   const [acceptedTerms, setAcceptedTerms] = useState(false);
   const [showTermsModal, setShowTermsModal] = useState(false);
   const [showPrivacyModal, setShowPrivacyModal] = useState(false);
+  const [showInstructions, setShowInstructions] = useState(false);
   const { login } = useAuth();
   const router = useRouter();
   
@@ -149,6 +150,15 @@ export default function LoginForm() {
 
           <div className={styles.header}>
             <h1 className={styles.title} id="login-heading">Login</h1>
+            <button
+              type="button"
+              onClick={() => setShowInstructions(true)}
+              className={styles.instructionsButton}
+              aria-label="View login instructions"
+            >
+              <i className="fas fa-info-circle"></i>
+              <span>Login Instructions</span>
+            </button>
           </div>
 
           <form 
@@ -338,6 +348,33 @@ export default function LoginForm() {
         isOpen={showPrivacyModal}
         onClose={() => setShowPrivacyModal(false)}
       />
+
+      {/* Instructions Modal */}
+      {showInstructions && (
+        <div className={styles.modalOverlay} onClick={() => setShowInstructions(false)}>
+          <div className={styles.instructionsModal} onClick={(e) => e.stopPropagation()}>
+            <button 
+              className={styles.closeButton}
+              onClick={() => setShowInstructions(false)}
+              aria-label="Close instructions"
+            >
+              <i className="fas fa-times"></i>
+            </button>
+            <div className={styles.modalHeader}>
+              <i className="fas fa-info-circle"></i>
+              <h3>Login Instructions</h3>
+            </div>
+            <div className={styles.modalContent}>
+              <p className={styles.instruction}>
+                If you use your <span className={styles.highlight}>@gordoncollege.edu.ph</span> email, you will be redirected to the <strong>Gov Portal</strong>.
+              </p>
+              <p className={styles.instruction}>
+                If you use a regular <span className={styles.highlightAlt}>@gmail.com</span> email, you will be redirected to the <strong>Dashboard</strong> for usual users.
+              </p>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
