@@ -8,7 +8,6 @@ import Image from 'next/image';
 import * as roleUtils from '@/lib/roleUtils';
 import TermsModal from './TermsModal';
 import PrivacyModal from './PrivacyModal';
-import LoginInstructions from './LoginInstructions';
 import styles from './LoginForm.module.css';
 
 export default function LoginForm() {
@@ -125,39 +124,39 @@ export default function LoginForm() {
 
   return (
     <div className={styles.container} role="main">
-      <Link 
-        href="/" 
-        className={styles.backButton} 
-        aria-label="Go back to home page"
-        tabIndex={0}
-      >
-        <i className="fas fa-arrow-left" aria-hidden="true"></i>
-        <span className={styles.srOnly}>Back to home</span>
-      </Link>
-      
-      <div className={styles.formWrapper}>
-        <div className={styles.header}>
+      {/* Left Side - Hero Section */}
+      <div className={styles.heroSection}>
+        <div className={styles.heroContent}>
+          <h1 className={styles.heroTitle}>Welcome to Green Guardian</h1>
+          <p className={styles.heroDescription}>
+            Visualize Your Footprint, Swap Smart, and Create a Zero-Waste Future
+          </p>
+        </div>
+      </div>
+
+      {/* Right Side - Login Form */}
+      <div className={styles.formSection}>
+        <div className={styles.formWrapper}>
           <div className={styles.logoContainer}>
             <Image 
               src="/greenguardian logo.png" 
-              alt="Green Guardian Logo - Environmental sustainability platform" 
-              width={60} 
-              height={60}
+              alt="Green Guardian Logo" 
+              width={80} 
+              height={80}
               priority
             />
           </div>
-          <h1 className={styles.title} id="login-heading">Welcome Back</h1>
-          <p className={styles.subtitle}>Sign in to continue to Green Guardian</p>
-        </div>
 
-        <LoginInstructions />
+          <div className={styles.header}>
+            <h1 className={styles.title} id="login-heading">Login</h1>
+          </div>
 
-        <form 
-          className={styles.form} 
-          onSubmit={handleSubmit}
-          aria-labelledby="login-heading"
-          noValidate
-        >
+          <form 
+            className={styles.form} 
+            onSubmit={handleSubmit}
+            aria-labelledby="login-heading"
+            noValidate
+          >
           {error && (
             <div 
               ref={errorRef}
@@ -299,22 +298,18 @@ export default function LoginForm() {
                 <span>Signing in...</span>
               </>
             ) : (
-              'Sign in'
+              'Login'
             )}
           </button>
 
-          <div className={styles.forgotPassword}>
+          <div className={styles.footer}>
             <Link 
               href="/forgot-password" 
               className={styles.forgotLink}
               aria-label="Reset your password"
             >
-              <i className="fas fa-key" aria-hidden="true"></i>
-              Forgot your password?
+              Forgot Password?
             </Link>
-          </div>
-
-          <div className={styles.footer}>
             <p className={styles.footerText}>
               Don&apos;t have an account?{' '}
               <Link 
@@ -322,11 +317,12 @@ export default function LoginForm() {
                 className={styles.footerLink}
                 aria-label="Go to sign up page"
               >
-                Sign up here
+                Sign up
               </Link>
             </p>
           </div>
         </form>
+        </div>
       </div>
 
       <TermsModal 

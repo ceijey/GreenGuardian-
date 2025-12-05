@@ -138,37 +138,39 @@ export default function SignupForm() {
 
   return (
     <div className={styles.container} role="main">
-      <Link 
-        href="/" 
-        className={styles.backButton} 
-        aria-label="Go back to home page"
-        tabIndex={0}
-      >
-        <i className="fas fa-arrow-left" aria-hidden="true"></i>
-        <span className={styles.srOnly}>Back to home</span>
-      </Link>
-      
-      <div className={styles.formWrapper}>
-        <div className={styles.header}>
+      {/* Left Side - Hero Section */}
+      <div className={styles.heroSection}>
+        <div className={styles.heroContent}>
+          <h1 className={styles.heroTitle}>Join Green Guardian</h1>
+          <p className={styles.heroDescription}>
+            Visualize Your Footprint, Swap Smart, and Create a Zero-Waste Future
+          </p>
+        </div>
+      </div>
+
+      {/* Right Side - Signup Form */}
+      <div className={styles.formSection}>
+        <div className={styles.formWrapper}>
           <div className={styles.logoContainer}>
             <Image 
               src="/greenguardian logo.png" 
-              alt="Green Guardian Logo - Environmental sustainability platform" 
-              width={60} 
-              height={60}
+              alt="Green Guardian Logo" 
+              width={80} 
+              height={80}
               priority
             />
           </div>
-          <h1 className={styles.title} id="signup-heading">Create Account</h1>
-          <p className={styles.subtitle}>Join Green Guardian today</p>
-        </div>
 
-        <form 
-          className={styles.form} 
-          onSubmit={handleSubmit}
-          aria-labelledby="signup-heading"
-          noValidate
-        >
+          <div className={styles.header}>
+            <h1 className={styles.title} id="signup-heading">Create Account</h1>
+          </div>
+
+          <form 
+            className={styles.form} 
+            onSubmit={handleSubmit}
+            aria-labelledby="signup-heading"
+            noValidate
+          >
           {error && (
             <div 
               ref={messageRef}
@@ -485,11 +487,12 @@ export default function SignupForm() {
                 className={styles.footerLink}
                 aria-label="Go to sign in page"
               >
-                Sign in here
+                Sign in
               </Link>
             </p>
           </div>
         </form>
+        </div>
       </div>
 
       <TermsModal 

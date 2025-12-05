@@ -16,7 +16,7 @@
     "firebase": "^12.3.0",
     "html5-qrcode": "^2.3.8",
     "leaflet": "^1.9.4",
-    "next": "15.5.4",
+    "next": "^15.5.7",
     "qrcode.react": "^4.2.0",
     "react": "19.1.0",
     "react-dom": "19.1.0",

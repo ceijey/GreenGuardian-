@@ -62,11 +62,6 @@ body {
   padding: 0;
 }
 
-/* Add padding for pages with fixed header */
-.main-content {
-  padding-top: 52px; /* Space for fixed header (48px header + 4px buffer) */
-}
-
 /* Responsive adjustments for mobile */
 @media (max-width: 767px) {
   .main-content {
