@@ -1,0 +1,144 @@
+.dialog {
+    position: relative;
+    z-index: 50;
+  }
+  
+  .backdrop {
+    position: fixed;
+    inset: 0;
+    background-color: rgba(0, 0, 0, 0.6);
+    backdrop-filter: blur(4px);
+  }
+  
+  .panelContainer {
+    position: fixed;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 1rem;
+  }
+  
+  .panel {
+    width: 100%;
+    max-width: 500px;
+    background-color: #fff;
+    border-radius: 16px;
+    padding: 1.5rem;
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+    transform: scale(0.95);
+    opacity: 0;
+    animation: fadeIn 0.2s ease-out forwards, scaleUp 0.2s ease-out forwards;
+  }
+  
+  @keyframes fadeIn {
+    to {
+      opacity: 1;
+    }
+  }
+  
+  @keyframes scaleUp {
+    to {
+      transform: scale(1);
+    }
+  }
+  
+  .title {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: #1e40af; /* Dark blue */
+    margin-bottom: 0.5rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  
+  .closeButton {
+    background: none;
+    border: none;
+    color: #9ca3af; /* Gray 400 */
+    font-size: 1.25rem;
+    cursor: pointer;
+    transition: color 0.2s;
+  }
+  
+  .closeButton:hover {
+    color: #4b5563; /* Gray 600 */
+  }
+  
+  .description {
+    font-size: 0.9rem;
+    color: #6b7280; /* Gray 500 */
+    margin-bottom: 1.5rem;
+  }
+  
+  .shareGrid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+  }
+  
+  .shareOption {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.75rem;
+    padding: 0.75rem;
+    border-radius: 8px;
+    text-decoration: none;
+    color: #fff;
+    background-color: var(--option-color);
+    font-weight: 600;
+    transition: transform 0.2s, box-shadow 0.2s;
+  }
+  
+  .shareOption:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+  }
+  
+  .shareOption i {
+    font-size: 1.25rem;
+  }
+  
+  .copySection {
+    display: flex;
+    gap: 0.5rem;
+  }
+  
+  .urlInput {
+    flex-grow: 1;
+    padding: 0.5rem 0.75rem;
+    border: 1px solid #d1d5db; /* Gray 300 */
+    border-radius: 8px;
+    background-color: #f9fafb; /* Gray 50 */
+    color: #4b5563; /* Gray 600 */
+    font-size: 0.9rem;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  
+  .copyButton {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.5rem 1rem;
+    background-color: #10b981; /* Emerald 500 */
+    color: #fff;
+    border: none;
+    border-radius: 8px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background-color 0.2s;
+  }
+  
+  .copyButton:hover {
+    background-color: #059669; /* Emerald 600 */
+  }
+  
+  .copyButton i {
+    font-size: 1rem;
+  }
+  

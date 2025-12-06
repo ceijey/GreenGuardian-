@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { collection, query, where, onSnapshot } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
 import styles from './CollectionCalendar.module.css';
+import ConfirmModal from '@/components/ConfirmModal';
 
 interface CollectionSchedule {
   id?: string;
@@ -40,6 +41,8 @@ export default function CollectionCalendar({ schedules, onRequestPickup }: Colle
   const [currentDate, setCurrentDate] = useState(new Date());
   const [selectedDay, setSelectedDay] = useState<number | null>(null);
   const [wasteServices, setWasteServices] = useState<WasteCollectionService[]>([]);
+  const [isConfirmOpen, setIsConfirmOpen] = useState(false);
+  const [serviceToCall, setServiceToCall] = useState<WasteCollectionService | null>(null);
 
   // Load waste collection services from private partners
   useEffect(() => {
@@ -138,6 +141,14 @@ export default function CollectionCalendar({ schedules, onRequestPickup }: Colle
     if (type.includes('organic')) return '#4CAF50';
     if (type.includes('electronic') || type.includes('e-waste')) return '#9C27B0';
     return '#FF9800';
+  };
+
+  const handleCallConfirm = () => {
+    if (serviceToCall) {
+      window.location.href = `tel:${serviceToCall.contactNumber}`;
+    }
+    setIsConfirmOpen(false);
+    setServiceToCall(null);
   };
 
   // Build calendar grid
@@ -356,13 +367,16 @@ export default function CollectionCalendar({ schedules, onRequestPickup }: Colle
                 </div>
                 
                 <div className={styles.serviceActions}>
-                  <a 
-                    href={`tel:${service.contactNumber}`}
+                  <button 
+                    onClick={() => {
+                      setServiceToCall(service);
+                      setIsConfirmOpen(true);
+                    }}
                     className={styles.contactButton}
                   >
                     <i className="fas fa-phone"></i>
                     Call Now
-                  </a>
+                  </button>
                   <button 
                     className={styles.requestButton}
                     onClick={() => onRequestPickup?.(service.id, service.providerName, service.wasteTypes)}
@@ -376,6 +390,14 @@ export default function CollectionCalendar({ schedules, onRequestPickup }: Colle
           </div>
         </div>
       )}
+
+      <ConfirmModal
+        isOpen={isConfirmOpen}
+        onClose={() => setIsConfirmOpen(false)}
+        onConfirm={handleCallConfirm}
+        title="Confirm Call"
+        message={`Are you sure you want to call ${serviceToCall?.providerName}?`}
+      />
     </div>
   );
 }

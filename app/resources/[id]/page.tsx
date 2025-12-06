@@ -7,6 +7,8 @@ import { db } from '@/lib/firebase';
 import { useAuth } from '@/lib/AuthContext';
 import Header from '@/components/Header';
 import styles from './resource.module.css';
+import { Toaster, toast } from 'react-hot-toast';
+import ShareModal from '@/components/ShareModal';
 
 interface Resource {
   id: string;
@@ -37,6 +39,7 @@ export default function ResourceViewPage() {
   const [quizAnswers, setQuizAnswers] = useState<{[key: number]: number}>({});
   const [quizSubmitted, setQuizSubmitted] = useState(false);
   const [quizScore, setQuizScore] = useState(0);
+  const [isShareModalOpen, setIsShareModalOpen] = useState(false);
 
   useEffect(() => {
     const loadResource = async () => {
@@ -146,9 +149,10 @@ export default function ResourceViewPage() {
         timestamp: serverTimestamp()
       });
 
-      alert('Great job! Your completion has been recorded.');
+      toast.success('Great job! Your completion has been recorded.');
     } catch (error) {
       console.error('Error marking as complete:', error);
+      toast.error('Could not record completion. Please try again.');
     }
   };
 
@@ -223,7 +227,7 @@ export default function ResourceViewPage() {
                 <button 
                   onClick={() => {
                     if (Object.keys(quizAnswers).length < questions.length) {
-                      alert('Please answer all questions before submitting!');
+                      toast.error('Please answer all questions before submitting!');
                       return;
                     }
                     
@@ -390,6 +394,14 @@ export default function ResourceViewPage() {
         <button onClick={() => router.back()} className={styles.backBtn}>
           <i className="fas fa-arrow-left"></i> Back
         </button>
+        <Toaster />
+        <ShareModal
+          isOpen={isShareModalOpen}
+          onClose={() => setIsShareModalOpen(false)}
+          url={typeof window !== 'undefined' ? window.location.href : ''}
+          title={resource.title}
+          text={resource.description}
+        />
 
         {/* Resource Header */}
         <div className={styles.resourceHeader}>
@@ -435,18 +447,7 @@ export default function ResourceViewPage() {
             <i className="fas fa-check-circle"></i> Mark as Complete
           </button>
           <button 
-            onClick={() => {
-              if (navigator.share) {
-                navigator.share({
-                  title: resource.title,
-                  text: resource.description,
-                  url: window.location.href
-                });
-              } else {
-                navigator.clipboard.writeText(window.location.href);
-                alert('Link copied to clipboard!');
-              }
-            }} 
+            onClick={() => setIsShareModalOpen(true)} 
             className={styles.actionButton}
           >
             <i className="fas fa-share"></i> Share

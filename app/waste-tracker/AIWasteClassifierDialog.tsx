@@ -7,6 +7,7 @@ import '@tensorflow/tfjs';
 import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
 import { db } from '../../lib/firebase';
 import { useAuth } from '../../lib/AuthContext';
+import { Toaster, toast } from 'react-hot-toast';
 
 // Global model manager (same pattern as EcoScannerDialog)
 class ModelManager {
@@ -621,9 +622,10 @@ export default function AIWasteClassifierDialog({ isOpen, onClose, onClassified 
         onClassified(detectedItem);
       }
       
-      alert(`✅ Classification logged successfully!\n\n${detectedItem.category}\n${detectedItem.recyclable ? '♻️ Recyclable' : '⚠️ Non-recyclable'}`);
+      toast.success('Classification logged successfully!');
     } catch (error) {
       console.error('❌ Error logging classification:', error);
+      toast.error('Failed to log classification.');
     }
   };
 
@@ -649,6 +651,7 @@ export default function AIWasteClassifierDialog({ isOpen, onClose, onClassified 
       <div className="fixed inset-0 bg-black/60 backdrop-blur-sm" aria-hidden="true" />
       <div className="fixed inset-0 flex items-center justify-center p-4">
         <Dialog.Panel className="bg-white rounded-2xl p-6 shadow-xl w-full max-w-4xl max-h-[90vh] overflow-y-auto">
+          <Toaster containerStyle={{ zIndex: 9999 }} />
           <Dialog.Title className="text-2xl font-semibold text-green-700 mb-4 flex items-center justify-between">
             <span className="flex items-center gap-2">
               🧠 AI Waste Classifier

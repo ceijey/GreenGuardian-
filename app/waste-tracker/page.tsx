@@ -12,6 +12,7 @@ import { initializeCollectionSchedules, getDaysUntilCollection, getScheduleForWa
 import AIWasteClassifierDialog from './AIWasteClassifierDialog';
 import CollectionCalendar from './CollectionCalendar';
 import RequestPickupModal from './RequestPickupModal';
+import ConfirmModal from '@/components/ConfirmModal';
 
 interface WasteEntry {
   id: string;
@@ -48,6 +49,8 @@ export default function WasteTrackerPage() {
     name: string;
     wasteTypes: string[];
   } | null>(null);
+  const [isConfirmOpen, setIsConfirmOpen] = useState(false);
+  const [entryToMark, setEntryToMark] = useState<string | null>(null);
   
   // Form states
   const [wasteType, setWasteType] = useState<'plastic' | 'paper' | 'glass' | 'metal' | 'organic' | 'electronics'>('plastic');
@@ -185,9 +188,13 @@ export default function WasteTrackerPage() {
         collected: true,
         collectedAt: serverTimestamp()
       });
+      toast.success('Item marked as collected!');
     } catch (error) {
       console.error('Error updating entry:', error);
+      toast.error('Failed to mark item as collected.');
     }
+    setEntryToMark(null);
+    setIsConfirmOpen(false);
   };
 
   // Calculate statistics
@@ -395,7 +402,10 @@ export default function WasteTrackerPage() {
                     <div className={styles.entryActions}>
                       {!entry.collected && (
                         <button
-                          onClick={() => handleMarkCollected(entry.id)}
+                          onClick={() => {
+                            setEntryToMark(entry.id);
+                            setIsConfirmOpen(true);
+                          }}
                           className={styles.collectButton}
                         >
                           Mark Collected
@@ -419,6 +429,15 @@ export default function WasteTrackerPage() {
         isOpen={isClassifierOpen}
         onClose={() => setIsClassifierOpen(false)}
         onClassified={handleClassified}
+      />
+
+      <ConfirmModal
+        isOpen={isConfirmOpen}
+        onClose={() => setIsConfirmOpen(false)}
+        onConfirm={() => entryToMark && handleMarkCollected(entryToMark)}
+        title="Confirm Action"
+        message="Are you sure you want to mark this item as collected?"
+        confirmText="Confirm"
       />
 
       {/* Request Pickup Modal */}

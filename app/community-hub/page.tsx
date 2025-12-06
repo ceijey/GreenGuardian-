@@ -25,6 +25,7 @@ import {
 } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
 import styles from './community-hub.module.css';
+import toast from 'react-hot-toast';
 
 // Interfaces
 interface Challenge {
@@ -499,18 +500,18 @@ export default function CommunityHubPage() {
 
       // Update total actions count
       const userRef = doc(db, 'users', user.uid);
-      await updateDoc(userRef, {
+      await setDoc(userRef, {
         totalActions: increment(1)
-      });
+      }, { merge: true });
       
       if (relatedChallenges.length > 0) {
-        alert(`✅ Successfully joined!\n🏆 You earned ${pointsAwarded} points in ${relatedChallenges.length} related challenge(s)!`);
+        toast.success(`✅ Successfully joined! 🏆 You earned ${pointsAwarded} points in ${relatedChallenges.length} related challenge(s)!`);
       } else {
-        alert('Successfully joined the event!');
+        toast.success('Successfully joined the event!');
       }
     } catch (error) {
       console.error('Error:', error);
-      alert('Failed to join event');
+      toast.error('Failed to join event');
     }
   };
 
@@ -524,10 +525,10 @@ export default function CommunityHubPage() {
       await updateDoc(profileRef, {
         upcomingEvents: arrayRemove(eventId)
       });
-      alert('Successfully left the event');
+      toast.success('Successfully left the event');
     } catch (error) {
       console.error('Error:', error);
-      alert('Failed to leave event');
+      toast.error('Failed to leave event');
     }
   };
 
