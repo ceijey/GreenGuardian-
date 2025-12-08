@@ -280,7 +280,19 @@ export default function CommunityHubPage() {
         // Get user's volunteer events
         const userEvents = events.filter(e => e.volunteers?.includes(user.uid));
         userEvents.forEach(e => {
-          const eventDate = e.date?.toDate?.() || new Date(e.date);
+          let eventDate;
+          if (e.date?.seconds) {
+            eventDate = new Date(e.date.seconds * 1000);
+          } else if (typeof e.date === 'string') {
+            eventDate = new Date(e.date);
+          } else {
+            eventDate = new Date(); // Fallback
+          }
+          
+          if (isNaN(eventDate.getTime())) {
+            eventDate = new Date(); // Fallback for invalid date
+          }
+
           const now = new Date();
           const status = eventDate > now ? 'upcoming' : 'past';
 

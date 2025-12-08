@@ -610,7 +610,7 @@ export default function DashboardPage() {
           {/* Local Projects Section */}
           <section id="projects" className={styles.projectsSection}>
             <h2 className={styles.projectsTitle}>
-              🌱 Ongoing Local Eco-Projects
+              Ongoing Local Eco-Projects
             </h2>
             
             <div className={styles.categoryContainer}>
@@ -660,7 +660,7 @@ export default function DashboardPage() {
                       <span className={styles.categoryBadge}>{project.category}</span>
                     </div>
                     <h3 style={{ fontSize: '20px', color: '#2c3e50', marginBottom: '12px' }}>{project.title}</h3>
-                    <p style={{ color: '#7f8c8d', fontSize: '14px', lineHeight: '1.6', marginBottom: '20px' }}>{project.description}</p>
+                    <p style={{ color: 'white', fontSize: '14px', lineHeight: '1.6', marginBottom: '20px' }}>{project.description}</p>
                     <div className={styles.projectMeta}>
                       <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
                         <i className="fas fa-map-marker-alt" style={{ color: '#3498db', width: '16px' }}></i>

@@ -266,7 +266,7 @@
   padding: 10px 20px;
   background: linear-gradient(135deg, #2a7838 0%, #02ff20 100%);
   color: white;
-  border: 2px solid #8b5cf6;
+  border: 2px solid #7ea27a;
   border-radius: 25px;
   cursor: pointer;
   transition: all 0.3s ease;
@@ -284,12 +284,12 @@
   gap: 25px;
 }
 .projectCard {
-  background: linear-gradient(135deg, #a78bfa 0%, #8b5cf6 100%);
+  background: linear-gradient(135deg, #2f933ad2 0%, #0aae7a 100%);
   padding: 25px;
   border-radius: 12px;
   box-shadow: 0 2px 15px rgba(139, 92, 246, 0.3);
   transition: all 0.3s ease;
-  color: white;
+  color: rgb(0, 0, 0);
 }
 
 .projectCard:hover {
