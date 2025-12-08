@@ -225,7 +225,7 @@ export default function ResourceViewPage() {
                 ))}
 
                 <button 
-                  onClick={() => {
+                  onClick={async () => {
                     if (Object.keys(quizAnswers).length < questions.length) {
                       toast.error('Please answer all questions before submitting!');
                       return;
@@ -240,7 +240,24 @@ export default function ResourceViewPage() {
                     
                     setQuizScore(score);
                     setQuizSubmitted(true);
-                    handleComplete();
+                    
+                    // Record completion
+                    if (resource && user) {
+                      try {
+                        await addDoc(collection(db, 'resourceInteractions'), {
+                          resourceId: resource.id,
+                          resourceTitle: resource.title,
+                          userId: user.uid,
+                          userName: user.displayName || 'Anonymous',
+                          userEmail: user.email || '',
+                          type: 'complete',
+                          timestamp: serverTimestamp()
+                        });
+                        toast.success('Great job! Your completion has been recorded.');
+                      } catch (error) {
+                        console.error('Error marking as complete:', error);
+                      }
+                    }
                   }}
                   className={styles.submitQuizButton}
                   disabled={Object.keys(quizAnswers).length < questions.length}

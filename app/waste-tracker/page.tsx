@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import toast from 'react-hot-toast';
+import toast, { Toaster } from 'react-hot-toast';
 import { useAuth } from '@/lib/AuthContext';
 import CitizenOnly from '@/components/CitizenOnly';
 import Header from '../../components/Header';
@@ -233,6 +233,18 @@ export default function WasteTrackerPage() {
     <>
       <CitizenOnly />
       <Header logo="fas fa-trash-alt" title="GREENGUARDIAN" />
+      <Toaster 
+        position="top-center"
+        toastOptions={{
+          style: {
+            zIndex: 99999,
+          },
+          duration: 3000,
+        }}
+        containerStyle={{
+          zIndex: 99999,
+        }}
+      />
       
       <main className="main-content">
         <div className={styles.container}>

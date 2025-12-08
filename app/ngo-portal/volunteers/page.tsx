@@ -3,6 +3,8 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/lib/AuthContext';
+import toast, { Toaster } from 'react-hot-toast';
+import ConfirmModal from '@/components/ConfirmModal';
 import { db } from '@/lib/firebase';
 import { collection, addDoc, onSnapshot, deleteDoc, doc, updateDoc, query, serverTimestamp, getDocs, getDoc } from 'firebase/firestore';
 import NGOHeader from '@/components/NGOHeader';
@@ -187,18 +189,29 @@ export default function VolunteersPage() {
       setIsCreateModalOpen(false);
     } catch (error) {
       console.error('Error creating event:', error);
-      alert('Failed to create event. Please try again.');
+      toast.error('Failed to create event. Please try again.');
     }
   };
 
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [eventToDelete, setEventToDelete] = useState<string | null>(null);
+
   const handleDeleteEvent = async (eventId: string) => {
-    if (!confirm('Are you sure you want to delete this event?')) return;
+    setEventToDelete(eventId);
+    setShowDeleteModal(true);
+  };
+
+  const confirmDeleteEvent = async () => {
+    if (!eventToDelete) return;
 
     try {
-      await deleteDoc(doc(db, 'volunteerEvents', eventId));
+      await deleteDoc(doc(db, 'volunteerEvents', eventToDelete));
+      toast.success('Event deleted successfully!');
+      setShowDeleteModal(false);
+      setEventToDelete(null);
     } catch (error) {
       console.error('Error deleting event:', error);
-      alert('Failed to delete event.');
+      toast.error('Failed to delete event.');
     }
   };
 
@@ -209,7 +222,7 @@ export default function VolunteersPage() {
       });
     } catch (error) {
       console.error('Error updating event status:', error);
-      alert('Failed to update event status.');
+      toast.error('Failed to update event status.');
     }
   };
 
@@ -642,6 +655,23 @@ export default function VolunteersPage() {
           </div>
         </div>
       )}
+
+      <Toaster position="top-center" toastOptions={{
+        style: { zIndex: 99999 },
+        duration: 3000,
+      }} />
+
+      <ConfirmModal
+        isOpen={showDeleteModal}
+        onClose={() => {
+          setShowDeleteModal(false);
+          setEventToDelete(null);
+        }}
+        onConfirm={confirmDeleteEvent}
+        title="Delete Event"
+        message="Are you sure you want to delete this event? This action cannot be undone."
+        confirmText="Delete"
+      />
       </div>
     </>
   );

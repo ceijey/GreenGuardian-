@@ -6,6 +6,7 @@ import { useEffect, useState } from 'react';
 import { doc, getDoc, collection, query, where, getDocs } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
 import PartnerHeader from '@/components/PartnerHeader';
+import toast from 'react-hot-toast';
 import styles from './reports.module.css';
 
 interface Report {
@@ -174,7 +175,7 @@ export default function ReportsPage() {
   const generatePDF = (reportType: string) => {
     const reportWindow = window.open('', '_blank');
     if (!reportWindow) {
-      alert('Please allow popups to generate reports');
+      toast.error('Please allow popups to generate reports');
       return;
     }
 
@@ -439,7 +440,7 @@ export default function ReportsPage() {
 
   const handleEmailShare = async () => {
     if (!selectedReport || !shareEmail) {
-      alert('Please enter an email address');
+      toast.error('Please enter an email address');
       return;
     }
 
@@ -457,12 +458,12 @@ export default function ReportsPage() {
       window.location.href = `mailto:${shareEmail}?subject=${subject}&body=${body}`;
       
       setTimeout(() => {
-        alert('Email client opened! Please send the email.');
+        toast.success('Great job! Your completion has been recorded.');
         setShowShareModal(false);
       }, 500);
     } catch (error) {
       console.error('Error sharing via email:', error);
-      alert('Failed to open email client. Please try copying the link instead.');
+      toast.error('Failed to open email client. Please try copying the link instead.');
     }
   };
 

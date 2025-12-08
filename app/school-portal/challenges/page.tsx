@@ -4,6 +4,8 @@ import { useAuth } from '@/lib/AuthContext';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { useEffect, useState } from 'react';
+import toast, { Toaster } from 'react-hot-toast';
+import ConfirmModal from '@/components/ConfirmModal';
 import { 
   doc, 
   getDoc, 
@@ -53,6 +55,8 @@ export default function SchoolChallengesPage() {
   
   const [challenges, setChallenges] = useState<Challenge[]>([]);
   const [showCreateModal, setShowCreateModal] = useState(false);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [challengeToDelete, setChallengeToDelete] = useState<string | null>(null);
   const [showEditModal, setShowEditModal] = useState(false);
   const [editingChallenge, setEditingChallenge] = useState<Challenge | null>(null);
   
@@ -180,7 +184,7 @@ export default function SchoolChallengesPage() {
     );
 
     if (validQuestions.length === 0) {
-      alert('Please add at least one complete question with all options filled.');
+      toast.error('Please add at least one complete question with all options filled.');
       return;
     }
 
@@ -232,25 +236,30 @@ export default function SchoolChallengesPage() {
         points: 10
       }]);
       setShowCreateModal(false);
-      alert('Quiz created successfully!');
+      toast.success('Quiz created successfully!');
     } catch (error) {
       console.error('Error creating challenge:', error);
-      alert('Failed to create quiz');
+      toast.error('Failed to create quiz');
     }
   };
 
   // Delete challenge
   const handleDeleteChallenge = async (challengeId: string) => {
-    if (!confirm('Are you sure you want to delete this quiz? This action cannot be undone.')) {
-      return;
-    }
+    setChallengeToDelete(challengeId);
+    setShowDeleteModal(true);
+  };
+
+  const confirmDelete = async () => {
+    if (!challengeToDelete) return;
 
     try {
-      await deleteDoc(doc(db, 'challenges', challengeId));
-      alert('Quiz deleted successfully!');
+      await deleteDoc(doc(db, 'challenges', challengeToDelete));
+      toast.success('Quiz deleted successfully!');
+      setShowDeleteModal(false);
+      setChallengeToDelete(null);
     } catch (error) {
       console.error('Error deleting challenge:', error);
-      alert('Failed to delete quiz');
+      toast.error('Failed to delete quiz');
     }
   };
 
@@ -262,7 +271,7 @@ export default function SchoolChallengesPage() {
       });
     } catch (error) {
       console.error('Error updating challenge status:', error);
-      alert('Failed to update quiz status');
+      toast.error('Failed to update quiz status');
     }
   };
 
@@ -282,6 +291,10 @@ export default function SchoolChallengesPage() {
   return (
     <>
       <SchoolHeader />
+      <Toaster position="top-center" toastOptions={{
+        style: { zIndex: 99999 },
+        duration: 3000,
+      }} />
       <main className={styles.container}>
         <div className={styles.header}>
           <div>
@@ -612,6 +625,18 @@ export default function SchoolChallengesPage() {
           </div>
         </div>
       )}
+
+      <ConfirmModal
+        isOpen={showDeleteModal}
+        onClose={() => {
+          setShowDeleteModal(false);
+          setChallengeToDelete(null);
+        }}
+        onConfirm={confirmDelete}
+        title="Delete Quiz"
+        message="Are you sure you want to delete this quiz? This action cannot be undone."
+        confirmText="Delete"
+      />
     </>
   );
 }

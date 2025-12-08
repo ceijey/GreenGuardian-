@@ -4,6 +4,8 @@ import { useAuth } from '@/lib/AuthContext';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { useEffect, useState } from 'react';
+import toast, { Toaster } from 'react-hot-toast';
+import ConfirmModal from '@/components/ConfirmModal';
 import { 
   doc, 
   getDoc, 
@@ -48,6 +50,8 @@ export default function SchoolResourcesPage() {
   const [editingResource, setEditingResource] = useState<Resource | null>(null);
   const [filterType, setFilterType] = useState<'all' | 'article' | 'video' | 'lesson-plan'>('all');
   const [filterStatus, setFilterStatus] = useState<'all' | 'published' | 'draft'>('all');
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [resourceToDelete, setResourceToDelete] = useState<string | null>(null);
   
   const [newResource, setNewResource] = useState({
     title: '',
@@ -147,10 +151,10 @@ export default function SchoolResourcesPage() {
         status: 'published'
       });
       setShowCreateModal(false);
-      alert(`${newResource.type.charAt(0).toUpperCase() + newResource.type.slice(1)} created successfully!`);
+      toast.success(`${newResource.type.charAt(0).toUpperCase() + newResource.type.slice(1)} created successfully!`);
     } catch (error) {
       console.error('Error creating resource:', error);
-      alert('Failed to create resource');
+      toast.error('Failed to create resource');
     }
   };
 
@@ -172,25 +176,30 @@ export default function SchoolResourcesPage() {
 
       setShowEditModal(false);
       setEditingResource(null);
-      alert('Resource updated successfully!');
+      toast.success('Resource updated successfully!');
     } catch (error) {
       console.error('Error updating resource:', error);
-      alert('Failed to update resource');
+      toast.error('Failed to update resource');
     }
   };
 
   // Delete resource
   const handleDeleteResource = async (resourceId: string) => {
-    if (!confirm('Are you sure you want to delete this resource? This action cannot be undone.')) {
-      return;
-    }
+    setResourceToDelete(resourceId);
+    setShowDeleteModal(true);
+  };
+
+  const confirmDelete = async () => {
+    if (!resourceToDelete) return;
 
     try {
-      await deleteDoc(doc(db, 'educationalResources', resourceId));
-      alert('Resource deleted successfully!');
+      await deleteDoc(doc(db, 'educationalResources', resourceToDelete));
+      toast.success('Resource deleted successfully!');
+      setShowDeleteModal(false);
+      setResourceToDelete(null);
     } catch (error) {
       console.error('Error deleting resource:', error);
-      alert('Failed to delete resource');
+      toast.error('Failed to delete resource');
     }
   };
 
@@ -627,6 +636,23 @@ export default function SchoolResourcesPage() {
           </div>
         </div>
       )}
+
+      <Toaster position="top-center" toastOptions={{
+        style: { zIndex: 99999 },
+        duration: 3000,
+      }} />
+
+      <ConfirmModal
+        isOpen={showDeleteModal}
+        onClose={() => {
+          setShowDeleteModal(false);
+          setResourceToDelete(null);
+        }}
+        onConfirm={confirmDelete}
+        title="Delete Resource"
+        message="Are you sure you want to delete this resource? This action cannot be undone."
+        confirmText="Delete"
+      />
     </>
   );
 }

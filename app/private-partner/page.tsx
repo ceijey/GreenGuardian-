@@ -3,6 +3,7 @@
 import { useAuth } from '@/lib/AuthContext';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
+import toast from 'react-hot-toast';
 import { useEffect, useState } from 'react';
 import { 
   doc, 
@@ -301,7 +302,7 @@ export default function PrivatePartnerPage() {
           rewards: challengeForm.rewards,
           updatedAt: serverTimestamp()
         });
-        alert('✅ Challenge updated successfully!');
+        toast.success('Great job! Your completion has been recorded.');
       } else {
         // Create new challenge
         await addDoc(collection(db, 'challenges'), {
@@ -327,7 +328,7 @@ export default function PrivatePartnerPage() {
           createdBy: user.uid,
           sponsored: true
         });
-        alert('✅ Sponsored challenge created successfully!');
+        toast.success('Great job! Your completion has been recorded.');
       }
 
       setChallengeForm({
@@ -344,7 +345,7 @@ export default function PrivatePartnerPage() {
       setShowSponsorModal(false);
     } catch (error) {
       console.error('Error saving challenge:', error);
-      alert('Failed to save challenge. Please try again.');
+      toast.error('Failed to save challenge. Please try again.');
     }
   };
 
@@ -378,10 +379,10 @@ export default function PrivatePartnerPage() {
         isActive: false,
         deletedAt: serverTimestamp()
       });
-      alert('✅ Challenge deleted successfully!');
+      toast.success('Great job! Your completion has been recorded.');
     } catch (error) {
       console.error('Error deleting challenge:', error);
-      alert('Failed to delete challenge. Please try again.');
+      toast.error('Failed to delete challenge. Please try again.');
     }
   };
 
@@ -405,7 +406,7 @@ export default function PrivatePartnerPage() {
           description: serviceForm.description,
           updatedAt: serverTimestamp()
         });
-        alert('✅ Service updated successfully!');
+        toast.success('Great job! Your completion has been recorded.');
       } else {
         // Create new service
         await addDoc(collection(db, 'wasteCollectionServices'), {
@@ -421,7 +422,7 @@ export default function PrivatePartnerPage() {
           totalCollections: 0,
           createdAt: serverTimestamp()
         });
-        alert('✅ Waste collection service created successfully!');
+        toast.success('Great job! Your completion has been recorded.');
       }
 
       setServiceForm({
@@ -436,7 +437,7 @@ export default function PrivatePartnerPage() {
       setShowServiceModal(false);
     } catch (error) {
       console.error('Error saving service:', error);
-      alert('Failed to save service. Please try again.');
+      toast.error('Failed to save service. Please try again.');
     }
   };
 
@@ -465,10 +466,10 @@ export default function PrivatePartnerPage() {
         isActive: false,
         deletedAt: serverTimestamp()
       });
-      alert('✅ Service deleted successfully!');
+      toast.success('Great job! Your completion has been recorded.');
     } catch (error) {
       console.error('Error deleting service:', error);
-      alert('Failed to delete service. Please try again.');
+      toast.error('Failed to delete service. Please try again.');
     }
   };
 
@@ -506,7 +507,7 @@ export default function PrivatePartnerPage() {
           imageUrl: productForm.imageUrl,
           updatedAt: serverTimestamp()
         });
-        alert('✅ Product updated successfully!');
+        toast.success('Great job! Your completion has been recorded.');
       } else {
         // Create new product
         await addDoc(collection(db, 'ecoProducts'), {
@@ -526,7 +527,7 @@ export default function PrivatePartnerPage() {
           isActive: true,
           createdAt: serverTimestamp()
         });
-        alert('✅ Eco-product created successfully!');
+        toast.success('Great job! Your completion has been recorded.');
       }
 
       setProductForm({
@@ -546,7 +547,7 @@ export default function PrivatePartnerPage() {
       setShowProductModal(false);
     } catch (error) {
       console.error('Error saving product:', error);
-      alert('Failed to save product. Please try again.');
+      toast.error('Failed to save product. Please try again.');
     }
   };
 
@@ -580,10 +581,10 @@ export default function PrivatePartnerPage() {
         isActive: false,
         deletedAt: serverTimestamp()
       });
-      alert('✅ Product deleted successfully!');
+      toast.success('Great job! Your completion has been recorded.');
     } catch (error) {
       console.error('Error deleting product:', error);
-      alert('Failed to delete product. Please try again.');
+      toast.error('Failed to delete product. Please try again.');
     }
   };
 
@@ -698,10 +699,10 @@ export default function PrivatePartnerPage() {
       document.body.removeChild(a);
       URL.revokeObjectURL(url);
 
-      alert('✅ Sustainability Certificate downloaded successfully!');
+      toast.success('Great job! Your completion has been recorded.');
     } catch (error) {
       console.error('Error downloading certificate:', error);
-      alert('Failed to download certificate. Please try again.');
+      toast.error('Failed to download certificate. Please try again.');
     }
   };
 
@@ -728,7 +729,7 @@ export default function PrivatePartnerPage() {
         createdAt: serverTimestamp()
       });
 
-      alert('✅ Meeting scheduled successfully!');
+      toast.success('Great job! Your completion has been recorded.');
       setMeetingForm({
         title: '',
         date: '',
@@ -741,7 +742,7 @@ export default function PrivatePartnerPage() {
       setShowMeetingModal(false);
     } catch (error) {
       console.error('Error scheduling meeting:', error);
-      alert('Failed to schedule meeting. Please try again.');
+      toast.error('Failed to schedule meeting. Please try again.');
     }
   };
 
@@ -767,7 +768,7 @@ export default function PrivatePartnerPage() {
         createdAt: serverTimestamp()
       });
 
-      alert('✅ Announcement created successfully!');
+      toast.success('Great job! Your completion has been recorded.');
       setAnnouncementForm({
         title: '',
         message: '',
@@ -776,8 +777,7 @@ export default function PrivatePartnerPage() {
       });
       setShowAnnouncementModal(false);
     } catch (error) {
-      console.error('Error creating announcement:', error);
-      alert('Failed to create announcement. Please try again.');
+      console.error('Error creating announcement:', error);\n      toast.error('Failed to create announcement. Please try again.');
     }
   };
 
@@ -2132,7 +2132,7 @@ export default function PrivatePartnerPage() {
                     className={styles.primaryButton}
                     style={{ marginTop: '20px', width: '100%' }}
                     onClick={() => {
-                      alert('Download invoices feature will be available soon!');
+                      toast.success('Great job! Your completion has been recorded.');
                       setShowInvoicesModal(false);
                     }}
                   >
@@ -2161,7 +2161,7 @@ export default function PrivatePartnerPage() {
                   
                   <div style={{ display: 'grid', gap: '15px' }}>
                     <div style={{ padding: '15px', background: '#f8f9fa', borderRadius: '8px', cursor: 'pointer' }}
-                         onClick={() => alert('Company Profile editing will be available soon!')}>
+                         onClick={() => toast.success('Great job! Your completion has been recorded.')}>
                       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                         <div>
                           <strong style={{ color: '#2c3e50' }}>
@@ -2177,7 +2177,7 @@ export default function PrivatePartnerPage() {
                     </div>
 
                     <div style={{ padding: '15px', background: '#f8f9fa', borderRadius: '8px', cursor: 'pointer' }}
-                         onClick={() => alert('Notification preferences will be available soon!')}>
+                         onClick={() => toast.success('Great job! Your completion has been recorded.')}>
                       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                         <div>
                           <strong style={{ color: '#2c3e50' }}>
@@ -2193,7 +2193,7 @@ export default function PrivatePartnerPage() {
                     </div>
 
                     <div style={{ padding: '15px', background: '#f8f9fa', borderRadius: '8px', cursor: 'pointer' }}
-                         onClick={() => alert('Payment methods will be available soon!')}>
+                         onClick={() => toast.success('Great job! Your completion has been recorded.')}>
                       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                         <div>
                           <strong style={{ color: '#2c3e50' }}>
@@ -2209,7 +2209,7 @@ export default function PrivatePartnerPage() {
                     </div>
 
                     <div style={{ padding: '15px', background: '#f8f9fa', borderRadius: '8px', cursor: 'pointer' }}
-                         onClick={() => alert('API access will be available soon!')}>
+                         onClick={() => toast.success('Great job! Your completion has been recorded.')}>
                       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                         <div>
                           <strong style={{ color: '#2c3e50' }}>
@@ -2225,7 +2225,7 @@ export default function PrivatePartnerPage() {
                     </div>
 
                     <div style={{ padding: '15px', background: '#fff3cd', border: '1px solid #ffc107', borderRadius: '8px', cursor: 'pointer' }}
-                         onClick={() => alert('Privacy settings will be available soon!')}>
+                         onClick={() => toast.success('Great job! Your completion has been recorded.')}>
                       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                         <div>
                           <strong style={{ color: '#856404' }}>

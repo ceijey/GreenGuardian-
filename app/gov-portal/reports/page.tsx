@@ -5,6 +5,7 @@ import { useAuth } from '@/lib/AuthContext';
 import GovHeader from '@/components/GovHeader';
 import dynamic from 'next/dynamic';
 import Link from 'next/link';
+import toast from 'react-hot-toast';
 import { 
   collection, 
   query, 
@@ -120,10 +121,10 @@ export default function GovReportsPage() {
       setShowModal(false);
       setSelectedReport(null);
       setResponse('');
-      alert('Report updated successfully!');
+      toast.success('Great job! Your completion has been recorded.');
     } catch (error) {
       console.error('Error updating report:', error);
-      alert('Failed to update report');
+      toast.error('Failed to update report');
     }
   };
 
@@ -136,10 +137,10 @@ export default function GovReportsPage() {
         archivedAt: serverTimestamp(),
         archivedBy: user!.email
       });
-      alert('Report archived successfully!');
+      toast.success('Great job! Your completion has been recorded.');
     } catch (error) {
       console.error('Error archiving report:', error);
-      alert('Failed to archive report');
+      toast.error('Failed to archive report');
     }
   };
 
@@ -152,10 +153,10 @@ export default function GovReportsPage() {
         archivedAt: null,
         archivedBy: null
       });
-      alert('Report unarchived successfully!');
+      toast.success('Great job! Your completion has been recorded.');
     } catch (error) {
       console.error('Error unarchiving report:', error);
-      alert('Failed to unarchive report');
+      toast.error('Failed to unarchive report');
     }
   };
 

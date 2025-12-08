@@ -6,6 +6,7 @@ import { useEffect, useState } from 'react';
 import { doc, getDoc, updateDoc } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
 import NGOHeader from '@/components/NGOHeader';
+import toast from 'react-hot-toast';
 import styles from './profile.module.css';
 
 interface NGOProfile {
@@ -100,10 +101,10 @@ export default function NGOProfilePage() {
 
       setProfile(formData);
       setEditing(false);
-      alert('Profile updated successfully!');
+      toast.success('Great job! Your completion has been recorded.');
     } catch (error) {
       console.error('Error updating profile:', error);
-      alert('Failed to update profile. Please try again.');
+      toast.error('Failed to update profile. Please try again.');
     } finally {
       setSaving(false);
     }

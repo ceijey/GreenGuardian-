@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { useAuth } from '@/lib/AuthContext';
 import GovHeader from '@/components/GovHeader';
 import ProfileReminder from '@/components/ProfileReminder';
+import toast from 'react-hot-toast';
 import { 
   collection, 
   query, 
@@ -232,10 +233,10 @@ export default function GovPortalPage() {
       setShowResponseModal(false);
       setSelectedReport(null);
       setResponse('');
-      alert('Report updated successfully!');
+      toast.success('Great job! Your completion has been recorded.');
     } catch (error) {
       console.error('Error updating report:', error);
-      alert('Failed to update report');
+      toast.error('Failed to update report');
     }
   };
 

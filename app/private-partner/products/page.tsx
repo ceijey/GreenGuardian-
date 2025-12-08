@@ -3,6 +3,7 @@
 import { useAuth } from '@/lib/AuthContext';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
+import toast from 'react-hot-toast';
 import { 
   doc, 
   getDoc, 
@@ -154,12 +155,12 @@ export default function ProductsPage() {
     if (!file) return;
 
     if (!file.type.startsWith('image/')) {
-      alert('Please select an image file');
+      toast.error('Please select an image file');
       return;
     }
 
     if (file.size > 5 * 1024 * 1024) {
-      alert('Image size should be less than 5MB');
+      toast.error('Image size should be less than 5MB');
       return;
     }
 
@@ -171,7 +172,7 @@ export default function ProductsPage() {
       setFormData({ ...formData, imageUrl: compressedImage });
     } catch (error) {
       console.error('Error compressing image:', error);
-      alert('Failed to process image');
+      toast.error('Failed to process image');
     } finally {
       setUploading(false);
     }
@@ -220,14 +221,14 @@ export default function ProductsPage() {
       if (editingProduct) {
         // Update existing product
         await updateDoc(doc(db, 'products', editingProduct.id), productData);
-        alert('✅ Product updated successfully!');
+        toast.success('Great job! Your completion has been recorded.');
       } else {
         // Add new product
         await addDoc(collection(db, 'products'), {
           ...productData,
           createdAt: serverTimestamp()
         });
-        alert('✅ Product registered successfully!');
+        toast.success('Great job! Your completion has been recorded.');
       }
 
       // Reset form
@@ -249,7 +250,7 @@ export default function ProductsPage() {
       setShowAddModal(false);
     } catch (error) {
       console.error('Error saving product:', error);
-      alert('Failed to save product. Please try again.');
+      toast.error('Failed to save product. Please try again.');
     } finally {
       setSubmitting(false);
     }
@@ -260,10 +261,10 @@ export default function ProductsPage() {
 
     try {
       await deleteDoc(doc(db, 'products', productId));
-      alert('Product deleted successfully!');
+      toast.success('Great job! Your completion has been recorded.');
     } catch (error) {
       console.error('Error deleting product:', error);
-      alert('Failed to delete product.');
+      toast.error('Failed to delete product.');
     }
   };
 

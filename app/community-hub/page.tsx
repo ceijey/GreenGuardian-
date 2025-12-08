@@ -25,7 +25,7 @@ import {
 } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
 import styles from './community-hub.module.css';
-import toast from 'react-hot-toast';
+import toast, { Toaster } from 'react-hot-toast';
 
 // Interfaces
 interface Challenge {
@@ -86,7 +86,7 @@ interface UserProfile {
   totalActions: number; // NEW
 }
 
-// NEW: Combined Activity Interface (Option 3)
+// Combined Activity Interface
 interface CombinedActivity {
   type: 'challenge' | 'event' | 'action';
   id: string;
@@ -97,7 +97,14 @@ interface CombinedActivity {
   points?: number;
   icon: string;
   color: string;
-  relatedItems?: { type: string; id: string; title: string; }[];
+  progress?: number;
+  location?: string;
+  isSponsored?: boolean;
+  time?: string;
+  duration?: string;
+  volunteerCount?: number;
+  maxVolunteers?: number;
+  isJoined?: boolean;
 }
 
 export default function CommunityHubPage() {
@@ -247,7 +254,7 @@ export default function CommunityHubPage() {
       const activityList: CombinedActivity[] = [];
 
       try {
-        // Get user's challenges
+        // 1. Get user's challenges
         const userChallenges = challenges.filter(c => c.participants?.includes(user.uid));
         userChallenges.forEach(c => {
           const startDate = c.startDate ? new Date(c.startDate.seconds * 1000) : new Date();
@@ -272,25 +279,36 @@ export default function CommunityHubPage() {
             status,
             points: c.targetActions * 10,
             icon: c.badge?.icon || 'fas fa-award',
-            color: c.badge?.color || '#4CAF50',
-            relatedItems: relatedEvents
+            color: '#3B82F6',
+            progress: status === 'completed' ? 100 : 0,
+            location: '',
+            isJoined: c.participants?.includes(user.uid) || false,
+            isSponsored: false
           });
         });
 
-        // Get user's volunteer events
+        // 2. Get user's volunteer events - FIXED DATE PARSING
         const userEvents = events.filter(e => e.volunteers?.includes(user.uid));
         userEvents.forEach(e => {
-          let eventDate;
-          if (e.date?.seconds) {
-            eventDate = new Date(e.date.seconds * 1000);
-          } else if (typeof e.date === 'string') {
-            eventDate = new Date(e.date);
-          } else {
-            eventDate = new Date(); // Fallback
+          let eventDate: Date;
+          
+          try {
+            if (e.date?.seconds) {
+              eventDate = new Date(e.date.seconds * 1000);
+            } else if (e.date?.toDate) {
+              eventDate = e.date.toDate();
+            } else if (typeof e.date === 'string') {
+              eventDate = new Date(e.date);
+            } else {
+              eventDate = new Date();
+            }
+          } catch (error) {
+            console.error('Error parsing date:', error);
+            eventDate = new Date();
           }
           
           if (isNaN(eventDate.getTime())) {
-            eventDate = new Date(); // Fallback for invalid date
+            eventDate = new Date();
           }
 
           const now = new Date();
@@ -306,42 +324,50 @@ export default function CommunityHubPage() {
             type: 'event',
             id: e.id,
             title: e.title,
-            description: e.description,
+            description: e.description || e.location || 'Volunteer Event',
             date: eventDate,
             status: status as any,
             points: e.duration * 15,
             icon: typeInfo?.icon || 'fas fa-calendar',
-            color: typeInfo?.color || '#999',
-            relatedItems: relatedChallenges
+            color: '#10B981',
+            progress: 0,
+            location: e.location,
+            time: e.time || 'TBA',
+            duration: `${e.duration} hours`,
+            volunteerCount: e.volunteers?.length || 0,
+            maxVolunteers: e.maxVolunteers || 0,
+            isJoined: e.volunteers?.includes(user.uid) || false,
+            isSponsored: e.title.toLowerCase().includes('sponsored') || false
           });
         });
 
-        // Get user's recent actions
+        // 3. Get user's recent actions
         const actionsQuery = query(
           collection(db, 'actions'),
           where('userId', '==', user.uid)
         );
         const actionsSnapshot = await getDocs(actionsQuery);
         
-        actionsSnapshot.docs.slice(0, 10).forEach(actionDoc => {
+        actionsSnapshot.docs.slice(0, 5).forEach(actionDoc => {
           const action = actionDoc.data();
           activityList.push({
             type: 'action',
             id: actionDoc.id,
-            title: action.description || 'Action Logged',
-            description: action.category,
+            title: action.description || 'Eco Action Completed',
+            description: `Category: ${action.category || 'General'}`,
             date: action.timestamp?.toDate() || new Date(),
             status: 'completed',
             points: action.points || 10,
             icon: 'fas fa-check-circle',
-            color: '#4CAF50',
-            relatedItems: action.challengeId ? [
-              { type: 'challenge', id: action.challengeId, title: 'Related Challenge' }
-            ] : []
+            color: '#8B5CF6',
+            progress: 100,
+            location: '',
+            duration: 'Action',
+            isSponsored: false
           });
         });
 
-        // Sort by date
+        // Sort by date (newest first)
         activityList.sort((a, b) => b.date.getTime() - a.date.getTime());
         setActivities(activityList);
       } catch (error) {
@@ -447,11 +473,25 @@ export default function CommunityHubPage() {
           message += `\n\n🤝 ${relatedEvents.length} related volunteer event(s) available to boost your progress!`;
         }
         
-        alert(message);
+        toast.success('Great job! Your completion has been recorded.');
       }
     } catch (error) {
       console.error('Error:', error);
-      alert('Failed to join challenge. Please try again.');
+      toast.error('Failed to join challenge. Please try again.');
+    }
+  };
+
+  // Leave challenge
+  const handleLeaveChallenge = async (challengeId: string) => {
+    if (!user) return;
+    try {
+      await updateDoc(doc(db, 'challenges', challengeId), {
+        participants: arrayRemove(user.uid)
+      });
+      toast.success('Successfully left the challenge');
+    } catch (error) {
+      console.error('Error:', error);
+      toast.error('Failed to leave challenge');
     }
   };
 
@@ -961,13 +1001,11 @@ export default function CommunityHubPage() {
           </div>
         )}
 
-        {/* NEW: Activity Feed Tab (Option 3) */}
+        {/* Activity Feed Section - FIXED DESIGN v3 */}
         {mainTab === 'activity' && (
           <div className={styles.section}>
-            <div className={styles.activityHeader}>
-              <h2>
-                <i className="fas fa-stream"></i> Your Environmental Journey
-              </h2>
+            <div className={styles.journeyHeader}>
+              <h1>Your Environmental Journey</h1>
               <p>All your challenges, volunteer events, and actions in one place</p>
             </div>
 
@@ -978,54 +1016,114 @@ export default function CommunityHubPage() {
                 <p>Join a challenge or volunteer event to see your activity here!</p>
               </div>
             ) : (
-              <div className={styles.activityFeed}>
-                {activities.map((activity, index) => (
-                  <div key={`${activity.type}-${activity.id}-${index}`} className={styles.activityCard}>
-                    <div className={styles.activityIcon} style={{ backgroundColor: activity.color }}>
-                      <i className={activity.icon}></i>
-                    </div>
-                    
-                    <div className={styles.activityContent}>
-                      <div className={styles.activityHeader}>
-                        <div>
-                          <h3>{activity.title}</h3>
-                          <span className={styles.activityType}>
-                            {activity.type === 'challenge' ? '🏆 Challenge' : 
-                             activity.type === 'event' ? '📅 Event' : '✅ Action'}
-                          </span>
-                        </div>
-                        <div className={styles.activityMeta}>
-                          <span className={styles.activityDate}>
-                            {activity.date.toLocaleDateString()}
-                          </span>
-                          {activity.points && (
-                            <span className={styles.activityPoints}>
-                              +{activity.points} pts
+              <div className={styles.activityGrid}>
+                {activities.map((activity, index) => {
+                  const formattedDate = activity.date.toLocaleDateString('en-US', {
+                    month: '2-digit',
+                    day: '2-digit',
+                    year: 'numeric'
+                  });
+                  
+                  const isEvent = activity.type === 'event';
+                  const isChallenge = activity.type === 'challenge';
+                  const isAction = activity.type === 'action';
+                  
+                  return (
+                    <div key={`${activity.type}-${activity.id}-${index}`} className={styles.activityCardContainer}>
+                      <div className={styles.activityCard}>
+                        <div className={styles.activityCardHeader}>
+                          <div className={styles.activityTypeBadge}>
+                            <span className={styles.activityTypeLabel}>
+                              {isEvent ? 'EVENT' : isChallenge ? 'CHALLENGE' : 'ACTION'}
                             </span>
+                          </div>
+                          <div className={styles.activityStatusBadge}>
+                            <span className={`${styles.statusLabel} ${styles[activity.status]}`}>
+                              {activity.status.charAt(0).toUpperCase() + activity.status.slice(1)}
+                            </span>
+                          </div>
+                        </div>
+                        
+                        <div className={styles.activityCardBody}>
+                          <h3 className={styles.activityTitle}>{activity.title}</h3>
+                          
+                          {activity.description && (
+                            <p className={styles.activityDescription}>{activity.description}</p>
+                          )}
+                          
+                          <div className={styles.activityDetails}>
+                            {isEvent && activity.location && (
+                              <div className={styles.activityDetailItem}>
+                                <i className="fas fa-map-marker-alt"></i>
+                                <span>{activity.location}</span>
+                              </div>
+                            )}
+                            
+                            <div className={styles.activityDetailItem}>
+                              <i className="fas fa-calendar"></i>
+                              <span>{formattedDate}</span>
+                            </div>
+                            
+                            {isEvent && activity.time && (
+                              <div className={styles.activityDetailItem}>
+                                <i className="fas fa-clock"></i>
+                                <span>{activity.time}</span>
+                              </div>
+                            )}
+                            
+                            {activity.duration && (
+                              <div className={styles.activityDetailItem}>
+                                <i className="fas fa-hourglass-half"></i>
+                                <span>{activity.duration}</span>
+                              </div>
+                            )}
+                            
+                            {isEvent && activity.volunteerCount !== undefined && (
+                              <div className={styles.activityDetailItem}>
+                                <i className="fas fa-users"></i>
+                                <span>{activity.volunteerCount} / {activity.maxVolunteers || '∞'} volunteers</span>
+                              </div>
+                            )}
+                            
+                            {!isEvent && activity.points && (
+                              <div className={styles.activityDetailItem}>
+                                <i className="fas fa-star"></i>
+                                <span>+{activity.points} pts</span>
+                              </div>
+                            )}
+                          </div>
+                          
+                          {isEvent && activity.isJoined && (
+                            <button
+                              className={styles.leaveEventBtn}
+                              onClick={() => handleLeaveEvent(activity.id)}
+                            >
+                              Leave Event
+                            </button>
+                          )}
+                          
+                          {isChallenge && activity.status !== 'completed' && (
+                            activity.isJoined ? (
+                              <button
+                                className={styles.leaveEventBtn}
+                                onClick={() => handleLeaveChallenge(activity.id)}
+                              >
+                                Leave Challenge
+                              </button>
+                            ) : (
+                              <button
+                                className={styles.joinChallengeBtn}
+                                onClick={() => handleJoinChallenge(activity.id)}
+                              >
+                                Join Challenge
+                              </button>
+                            )
                           )}
                         </div>
                       </div>
-                      
-                      <p className={styles.activityDesc}>{activity.description}</p>
-                      
-                      <div className={styles.activityStatus}>
-                        <span className={`${styles.statusBadge} ${styles[activity.status]}`}>
-                          {activity.status.charAt(0).toUpperCase() + activity.status.slice(1)}
-                        </span>
-                      </div>
-
-                      {/* Show related items */}
-                      {activity.relatedItems && activity.relatedItems.length > 0 && (
-                        <div className={styles.activityRelated}>
-                          <small>
-                            <i className="fas fa-link"></i> 
-                            {activity.relatedItems.length} related {activity.type === 'challenge' ? 'event(s)' : 'challenge(s)'}
-                          </small>
-                        </div>
-                      )}
                     </div>
-                  </div>
-                ))}
+                  );
+                })}
               </div>
             )}
           </div>

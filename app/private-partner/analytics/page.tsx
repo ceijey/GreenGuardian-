@@ -6,6 +6,7 @@ import { useEffect, useState } from 'react';
 import { doc, getDoc, collection, query, where, onSnapshot } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
 import PartnerHeader from '@/components/PartnerHeader';
+import toast from 'react-hot-toast';
 import styles from './analytics.module.css';
 
 export default function AnalyticsPage() {
@@ -228,12 +229,12 @@ ${reportData.recommendations.map((rec, i) => `${i + 1}. ${rec}`).join('\n')}
       window.URL.revokeObjectURL(textUrl);
 
       setTimeout(() => {
-        alert(`Report downloaded successfully!\n\nFiles:\n- JSON data file\n- TXT readable report`);
+        toast.success('Great job! Your completion has been recorded.');
       }, 300);
 
     } catch (error) {
       console.error('Error generating report:', error);
-      alert('Failed to generate report. Please try again.');
+      toast.error('Failed to generate report. Please try again.');
     } finally {
       setDownloading(null);
     }

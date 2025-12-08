@@ -4,6 +4,7 @@ import { useAuth } from '@/lib/AuthContext';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { useEffect, useState } from 'react';
+import toast, { Toaster } from 'react-hot-toast';
 import { 
   doc, 
   getDoc, 
@@ -242,10 +243,10 @@ export default function NGOPortalPage() {
         duration: 7
       });
       setShowCreateChallengeModal(false);
-      alert('Challenge created successfully! It will appear in the Community Hub.');
+      toast.success('Challenge created successfully! It will appear in the Community Hub.');
     } catch (error) {
       console.error('Error creating challenge:', error);
-      alert('Failed to create challenge');
+      toast.error('Failed to create challenge');
     }
   };
 
@@ -279,10 +280,10 @@ export default function NGOPortalPage() {
         }
       });
       setShowCreatePostModal(false);
-      alert('Success story posted! It will appear in the community feed.');
+      toast.success('Success story posted! It will appear in the community feed.');
     } catch (error) {
       console.error('Error creating post:', error);
-      alert('Failed to create post');
+      toast.error('Failed to create post');
     }
   };
 
@@ -332,10 +333,10 @@ export default function NGOPortalPage() {
       });
 
       setShowGenerateReportModal(false);
-      alert('Report generated successfully! Check your downloads folder.');
+      toast.success('Report generated successfully! Check your downloads folder.');
     } catch (error) {
       console.error('Error generating report:', error);
-      alert('Failed to generate report');
+      toast.error('Failed to generate report');
     } finally {
       setReportGenerating(false);
     }
@@ -372,10 +373,10 @@ export default function NGOPortalPage() {
         maxVolunteers: 20
       });
       setShowScheduleEventModal(false);
-      alert('✅ Event scheduled successfully!');
+      toast.success('Event scheduled successfully!');
     } catch (error) {
       console.error('Error scheduling event:', error);
-      alert('Failed to schedule event');
+      toast.error('Failed to schedule event');
     }
   };
 
@@ -404,10 +405,10 @@ export default function NGOPortalPage() {
         priority: 'normal'
       });
       setShowAnnouncementModal(false);
-      alert('✅ Announcement sent successfully!');
+      toast.success('Announcement sent successfully!');
     } catch (error) {
       console.error('Error sending announcement:', error);
-      alert('Failed to send announcement');
+      toast.error('Failed to send announcement');
     }
   };
 
@@ -446,10 +447,10 @@ export default function NGOPortalPage() {
       document.body.removeChild(link);
       URL.revokeObjectURL(url);
 
-      alert('✅ Data exported successfully!');
+      toast.success('Data exported successfully!');
     } catch (error) {
       console.error('Error exporting data:', error);
-      alert('Failed to export data');
+      toast.error('Failed to export data');
     }
   };
 
@@ -470,10 +471,10 @@ export default function NGOPortalPage() {
       });
 
       setShowSettingsModal(false);
-      alert('✅ Settings saved successfully!');
+      toast.success('Great job! Your completion has been recorded.');
     } catch (error) {
       console.error('Error saving settings:', error);
-      alert('Failed to save settings');
+      toast.error('Failed to save settings');
     }
   };
 
@@ -1470,6 +1471,11 @@ export default function NGOPortalPage() {
             </div>
           </div>
         )}
+
+      <Toaster position="top-center" toastOptions={{
+        style: { zIndex: 99999 },
+        duration: 3000,
+      }} />
       </main>
     </>
   );

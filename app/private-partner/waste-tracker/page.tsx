@@ -3,6 +3,7 @@
 import { useAuth } from '@/lib/AuthContext';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
+import toast from 'react-hot-toast';
 import { 
   doc, 
   getDoc, 
@@ -260,10 +261,10 @@ export default function PartnerWasteTrackerPage() {
         status: newStatus,
         updatedAt: serverTimestamp()
       });
-      alert(`Request ${newStatus} successfully!`);
+      toast.success('Great job! Your completion has been recorded.');
     } catch (error) {
       console.error('Error updating request status:', error);
-      alert('Failed to update request status');
+      toast.error('Failed to update request status');
     }
   };
 

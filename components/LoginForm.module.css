@@ -241,7 +241,7 @@
   border: 2px solid #374151;
   border-radius: 10px;
   font-size: 15px;
-  background: #111827;
+  background: #f7f7f7;
   color: #ffffff;
   transition: all 0.3s ease;
   outline: none;
@@ -258,7 +258,7 @@
 
 .input:focus {
   border-color: #10b981;
-  background: #1f2937;
+  background: #edeff1;
   box-shadow: 0 0 0 4px rgba(16, 185, 129, 0.15),
               0 4px 12px rgba(16, 185, 129, 0.2);
   transform: translateY(-1px);

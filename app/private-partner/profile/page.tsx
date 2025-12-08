@@ -6,6 +6,7 @@ import { useRouter } from 'next/navigation';
 import PartnerHeader from '@/components/PartnerHeader';
 import { doc, getDoc, setDoc } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
+import toast from 'react-hot-toast';
 import styles from './profile.module.css';
 
 export default function SponsorProfilePage() {
@@ -103,12 +104,12 @@ export default function SponsorProfilePage() {
     const file = e.target.files[0];
     
     if (file.size > 5 * 1024 * 1024) {
-      alert('File size must be less than 5MB');
+      toast.error('File size must be less than 5MB');
       return;
     }
     
     if (!file.type.startsWith('image/')) {
-      alert('Please upload an image file');
+      toast.error('Please upload an image file');
       return;
     }
     
@@ -124,10 +125,10 @@ export default function SponsorProfilePage() {
       }, { merge: true });
       
       setCompanyLogo(compressedBase64);
-      alert('Company logo updated successfully!');
+      toast.success('Great job! Your completion has been recorded.');
     } catch (error) {
       console.error('Error uploading logo:', error);
-      alert(error instanceof Error ? error.message : 'Failed to upload logo. Please try again.');
+      toast.error(error instanceof Error ? error.message : 'Failed to upload logo. Please try again.');
     } finally {
       setUploading(false);
     }
@@ -149,10 +150,10 @@ export default function SponsorProfilePage() {
       
       setCompanyName(editCompanyName);
       setShowEditModal(false);
-      alert('Company profile updated successfully!');
+      toast.success('Great job! Your completion has been recorded.');
     } catch (error) {
       console.error('Error updating profile:', error);
-      alert('Failed to update profile. Please try again.');
+      toast.error('Failed to update profile. Please try again.');
     } finally {
       setUploading(false);
     }

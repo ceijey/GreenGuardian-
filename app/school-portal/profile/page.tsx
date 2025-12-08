@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/lib/AuthContext';
+import toast, { Toaster } from 'react-hot-toast';
 import { db, storage } from '@/lib/firebase';
 import { doc, getDoc, updateDoc, collection, query, where, getDocs, limit } from 'firebase/firestore';
 import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
@@ -256,10 +257,10 @@ export default function SchoolProfilePage() {
       setContactEmail(editContactEmail);
       setContactPhone(editContactPhone);
       setShowEditModal(false);
-      alert('Profile updated successfully!');
+      toast.success('Profile updated successfully!');
     } catch (error) {
       console.error('Error updating profile:', error);
-      alert('Failed to update profile. Please try again.');
+      toast.error('Failed to update profile. Please try again.');
     } finally {
       setUploading(false);
     }
@@ -270,7 +271,7 @@ export default function SchoolProfilePage() {
 
     const file = e.target.files[0];
     if (file.size > 5 * 1024 * 1024) {
-      alert('File size must be less than 5MB');
+      toast.error('File size must be less than 5MB');
       return;
     }
 
@@ -288,10 +289,10 @@ export default function SchoolProfilePage() {
       await updateProfile(user, { photoURL });
 
       setProfilePhotoURL(photoURL);
-      alert('Profile photo updated successfully!');
+      toast.success('Profile photo updated successfully!');
     } catch (error) {
       console.error('Error uploading photo:', error);
-      alert('Failed to upload photo. Please try again.');
+      toast.error('Failed to upload photo. Please try again.');
     } finally {
       setUploading(false);
     }
@@ -310,10 +311,10 @@ export default function SchoolProfilePage() {
       });
 
       setShowSettingsModal(false);
-      alert('Settings updated successfully!');
+      toast.success('Settings updated successfully!');
     } catch (error) {
       console.error('Error updating settings:', error);
-      alert('Failed to update settings. Please try again.');
+      toast.error('Failed to update settings. Please try again.');
     }
   };
 
@@ -670,6 +671,11 @@ export default function SchoolProfilePage() {
           </div>
         </div>
       )}
+
+      <Toaster position="top-center" toastOptions={{
+        style: { zIndex: 99999 },
+        duration: 3000,
+      }} />
       </div>
     </>
   );

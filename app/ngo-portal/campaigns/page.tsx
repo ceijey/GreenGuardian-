@@ -3,6 +3,8 @@
 import { useAuth } from '@/lib/AuthContext';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
+import toast, { Toaster } from 'react-hot-toast';
+import ConfirmModal from '@/components/ConfirmModal';
 import { 
   doc, 
   getDoc, 
@@ -160,7 +162,7 @@ export default function CampaignsPage() {
         createdAt: serverTimestamp()
       });
 
-      alert('Campaign created successfully!');
+      toast.success('Campaign created successfully!');
       setShowCreateModal(false);
       setNewChallenge({
         title: '',
@@ -171,21 +173,31 @@ export default function CampaignsPage() {
       });
     } catch (error) {
       console.error('Error creating challenge:', error);
-      alert('Failed to create campaign. Please try again.');
+      toast.error('Failed to create campaign. Please try again.');
     } finally {
       setSubmitting(false);
     }
   };
 
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [campaignToDelete, setCampaignToDelete] = useState<string | null>(null);
+
   const handleDeleteChallenge = async (challengeId: string) => {
-    if (!confirm('Are you sure you want to delete this campaign?')) return;
+    setCampaignToDelete(challengeId);
+    setShowDeleteModal(true);
+  };
+
+  const confirmDelete = async () => {
+    if (!campaignToDelete) return;
 
     try {
-      await deleteDoc(doc(db, 'challenges', challengeId));
-      alert('Campaign deleted successfully!');
+      await deleteDoc(doc(db, 'challenges', campaignToDelete));
+      toast.success('Campaign deleted successfully!');
+      setShowDeleteModal(false);
+      setCampaignToDelete(null);
     } catch (error) {
       console.error('Error deleting challenge:', error);
-      alert('Failed to delete campaign.');
+      toast.error('Failed to delete campaign.');
     }
   };
 
@@ -196,7 +208,7 @@ export default function CampaignsPage() {
       });
     } catch (error) {
       console.error('Error updating challenge status:', error);
-      alert('Failed to update campaign status.');
+      toast.error('Failed to update campaign status.');
     }
   };
 
@@ -522,6 +534,23 @@ export default function CampaignsPage() {
           </div>
         </div>
       )}
+
+      <Toaster position="top-center" toastOptions={{
+        style: { zIndex: 99999 },
+        duration: 3000,
+      }} />
+
+      <ConfirmModal
+        isOpen={showDeleteModal}
+        onClose={() => {
+          setShowDeleteModal(false);
+          setCampaignToDelete(null);
+        }}
+        onConfirm={confirmDelete}
+        title="Delete Campaign"
+        message="Are you sure you want to delete this campaign? This action cannot be undone."
+        confirmText="Delete"
+      />
     </div>
   );
 }

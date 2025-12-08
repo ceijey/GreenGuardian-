@@ -3,6 +3,7 @@
 import { useAuth } from '@/lib/AuthContext';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
+import toast from 'react-hot-toast';
 import { 
   doc, 
   getDoc, 
@@ -264,10 +265,10 @@ export default function SponsorshipsPage() {
         )
       );
 
-      alert('✅ Participant verified successfully! They can now generate their certificate.');
+      toast.success('Great job! Your completion has been recorded.');
     } catch (error) {
       console.error('Error verifying participant:', error);
-      alert('Failed to verify participant. Please try again.');
+      toast.error('Failed to verify participant. Please try again.');
     }
   };
 

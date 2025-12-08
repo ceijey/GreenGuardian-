@@ -3,6 +3,7 @@
 import { useAuth } from '@/lib/AuthContext';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
+import toast, { Toaster } from 'react-hot-toast';
 import { 
   doc, 
   getDoc, 
@@ -400,7 +401,7 @@ export default function AnalyticsPage() {
     document.body.removeChild(a);
     URL.revokeObjectURL(url);
 
-    alert('Report exported successfully!');
+    toast.success('Report exported successfully!');
   };
 
   const exportCSV = () => {
@@ -420,7 +421,7 @@ export default function AnalyticsPage() {
     document.body.removeChild(a);
     URL.revokeObjectURL(url);
 
-    alert('CSV exported successfully!');
+    toast.success('CSV exported successfully!');
   };
 
   if (loading || isLoading) {
@@ -987,6 +988,11 @@ export default function AnalyticsPage() {
             </div>
           </div>
         </section>
+
+      <Toaster position="top-center" toastOptions={{
+        style: { zIndex: 99999 },
+        duration: 3000,
+      }} />
       </main>
     </>
   );

@@ -5,6 +5,7 @@ import { useAuth } from '@/lib/AuthContext';
 import GovHeader from '@/components/GovHeader';
 import { doc, getDoc, updateDoc, serverTimestamp } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
+import toast from 'react-hot-toast';
 import styles from '../gov-portal.module.css';
 
 interface EnvironmentalData {
@@ -64,10 +65,10 @@ export default function GovEnvironmentalPage() {
       });
       setEnvData(editedData);
       setEditing(false);
-      alert('Environmental data updated successfully!');
+      toast.success('Great job! Your completion has been recorded.');
     } catch (error) {
       console.error('Error updating environmental data:', error);
-      alert('Failed to update environmental data');
+      toast.error('Failed to update environmental data');
     }
   };
 

@@ -4,6 +4,8 @@ import { useState, useEffect } from 'react';
 import { useAuth } from '@/lib/AuthContext';
 import CitizenOnly from '@/components/CitizenOnly';
 import Header from '../../components/Header';
+import toast, { Toaster } from 'react-hot-toast';
+import InfoModal from '@/components/InfoModal';
 import { 
   collection, 
   addDoc, 
@@ -61,6 +63,8 @@ export default function VolunteerPage() {
   const [loading, setLoading] = useState(true);
   const [filterType, setFilterType] = useState<'all' | 'cleanup' | 'tree-planting' | 'workshop' | 'community-service'>('all');
   const [showCreateModal, setShowCreateModal] = useState(false);
+  const [showSuccessModal, setShowSuccessModal] = useState(false);
+  const [successMessage, setSuccessMessage] = useState('');
   
   // Form states
   type NewEventForm = {
@@ -178,10 +182,10 @@ export default function VolunteerPage() {
         requirements: ''
       });
       setShowCreateModal(false);
-      alert('Event created successfully!');
+      toast.success('Event created successfully!');
     } catch (error) {
       console.error('Error creating event:', error);
-      alert('Failed to create event');
+      toast.error('Failed to create event');
     }
   };
 
@@ -201,10 +205,13 @@ export default function VolunteerPage() {
         eventsAttended: (userProfile?.eventsAttended || 0)
       });
 
-      alert('Successfully joined the event!');
+      const event = events.find(e => e.id === eventId);
+      const message = `🎉 Successfully joined "${event?.title || 'the event'}"!\n\n📅 Next Steps:\n1. Check event details in your dashboard\n2. Prepare any required materials\n3. Arrive on time at the location\n\n💡 Tip: Set a reminder so you don't miss it!`;
+      setSuccessMessage(message);
+      setShowSuccessModal(true);
     } catch (error) {
       console.error('Error joining event:', error);
-      alert('Failed to join event');
+      toast.error('Failed to join event');
     }
   };
 
@@ -223,10 +230,10 @@ export default function VolunteerPage() {
         upcomingEvents: arrayRemove(eventId)
       });
 
-      alert('Successfully left the event');
+      toast.success('Successfully left the event');
     } catch (error) {
       console.error('Error leaving event:', error);
-      alert('Failed to leave event');
+      toast.error('Failed to leave event');
     }
   };
 
@@ -558,6 +565,15 @@ export default function VolunteerPage() {
           </div>
         )}
       </div>
+
+      <Toaster position="top-center" />
+      
+      <InfoModal
+        isOpen={showSuccessModal}
+        onClose={() => setShowSuccessModal(false)}
+        title="Success!"
+        message={successMessage}
+      />
     </>
   );
 }

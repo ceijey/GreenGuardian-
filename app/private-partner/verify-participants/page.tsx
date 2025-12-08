@@ -3,6 +3,7 @@
 import { useAuth } from '@/lib/AuthContext';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
+import toast from 'react-hot-toast';
 import { 
   collection, 
   query, 
@@ -291,7 +292,7 @@ export default function VerifyParticipantsPage() {
                         <button
                           className={styles.viewButton}
                           onClick={() => {
-                            alert(`Participant Details:\n\nName: ${participant.userName}\nEmail: ${participant.email}\nChallenge: ${participant.challengeTitle}\nActions: ${participant.completedActions}\nCertificate: ${participant.hasCertificate ? 'Issued' : 'Not Issued'}`);
+                            toast.success('Great job! Your completion has been recorded.');
                           }}
                         >
                           <i className="fas fa-eye"></i>

@@ -47,45 +47,75 @@
 
 .statsGrid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-  gap: 20px;
-  margin-bottom: 40px;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 24px;
+  margin-bottom: 50px;
 }
 
 .statCard {
-  background: linear-gradient(135deg, #47cd6d 0%, #017526 100%);
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
   color: white;
-  padding: 25px;
-  border-radius: 16px;
+  padding: 28px;
+  border-radius: 20px;
   display: flex;
   align-items: center;
   gap: 20px;
-  box-shadow: 0 4px 20px rgba(102, 126, 234, 0.3);
-  transition: transform 0.3s ease;
+  box-shadow: 0 8px 24px rgba(16, 185, 129, 0.25);
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+  overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.statCard::before {
+  content: '';
+  position: absolute;
+  top: -50%;
+  right: -50%;
+  width: 200px;
+  height: 200px;
+  background: radial-gradient(circle, rgba(255, 255, 255, 0.15) 0%, transparent 70%);
+  border-radius: 50%;
+  animation: float 6s ease-in-out infinite;
+}
+
+@keyframes float {
+  0%, 100% { transform: translate(0, 0); }
+  50% { transform: translate(-20px, -20px); }
 }
 
 .statCard:hover {
-  transform: translateY(-5px);
+  transform: translateY(-8px) scale(1.02);
+  box-shadow: 0 16px 40px rgba(16, 185, 129, 0.35);
 }
 
 .statIcon {
-  font-size: 40px;
+  font-size: 48px;
+  opacity: 0.95;
+  filter: drop-shadow(0 4px 8px rgba(0,0,0,0.15));
+  z-index: 1;
 }
 
 .statContent {
   flex: 1;
   text-align: left;
+  z-index: 1;
 }
 
 .statValue {
-  font-size: 32px;
-  font-weight: bold;
-  margin-bottom: 5px;
+  font-size: 36px;
+  font-weight: 800;
+  margin-bottom: 6px;
+  text-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  letter-spacing: -0.5px;
 }
 
 .statLabel {
-  font-size: 13px;
-  opacity: 0.9;
+  font-size: 14px;
+  opacity: 0.95;
+  font-weight: 500;
+  letter-spacing: 0.3px;
+  text-shadow: 0 1px 2px rgba(0,0,0,0.1);
 }
 
 .badgesSection {
@@ -110,55 +140,99 @@
 
 .mainTabs {
   display: flex;
-  gap: 15px;
-  margin-bottom: 30px;
+  gap: 20px;
+  margin-bottom: 40px;
   justify-content: center;
+  flex-wrap: wrap;
 }
 
 .mainTab {
   flex: 1;
+  min-width: 280px;
   max-width: 400px;
   background: white;
-  border: 3px solid #e0e0e0;
-  padding: 20px;
-  border-radius: 12px;
+  border: 3px solid transparent;
+  padding: 24px 28px;
+  border-radius: 16px;
   cursor: pointer;
-  transition: all 0.3s ease;
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
   display: flex;
   align-items: center;
   justify-content: center;
   gap: 12px;
   font-size: 18px;
-  font-weight: 600;
-  color: #000;
+  font-weight: 700;
+  color: #2c3e50;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+  position: relative;
+  overflow: hidden;
+}
+
+.mainTab::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(16, 185, 129, 0.1), transparent);
+  transition: left 0.6s ease;
+}
+
+.mainTab:hover::before {
+  left: 100%;
 }
 
 .mainTab i {
-  font-size: 24px;
+  font-size: 28px;
+  transition: all 0.3s ease;
+}
+
+.mainTab:hover i {
+  transform: scale(1.15) rotate(5deg);
 }
 
 .mainTab .badge {
-  background: #e0e0e0;
-  color: #000;
-  padding: 4px 10px;
-  border-radius: 12px;
+  background: #e8f5e9;
+  color: #2e7d32;
+  padding: 6px 14px;
+  border-radius: 20px;
   font-size: 14px;
+  font-weight: 700;
+  min-width: 32px;
+  text-align: center;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
 }
 
 .mainTab:hover {
-  border-color: #667eea;
-  color: #667eea;
+  transform: translateY(-4px);
+  box-shadow: 0 12px 28px rgba(16, 185, 129, 0.25);
+  border-color: #10b981;
+  color: #10b981;
 }
 
 .mainTab.active {
- background: linear-gradient(135deg, #47cd6d 0%, #017526 100%);
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
   color: white;
-  border-color: transparent;
+  border-color: #10b981;
+  box-shadow: 0 12px 32px rgba(16, 185, 129, 0.4);
+  transform: translateY(-4px);
+}
+
+.mainTab.active::before {
+  display: none;
 }
 
 .mainTab.active .badge {
-  background: rgba(255,255,255,0.3);
+  background: rgba(255, 255, 255, 0.25);
   color: white;
+  backdrop-filter: blur(10px);
+  box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+}
+
+.mainTab.active i {
+  transform: scale(1.1);
+  filter: drop-shadow(0 2px 4px rgba(0,0,0,0.2));
 }
 
 .section {
@@ -635,8 +709,7 @@
   .eventFilters {
     justify-content: center;
   }
-
-  /* ...existing code... */
+}
 
 /* NEW: Related Items Styling (Option 4) */
 .challengeWrapper,
@@ -748,158 +821,413 @@
   color: white;
 }
 
-/* NEW: Activity Feed Styling (Option 3) - improved visuals and spacing */
+/* Activity Feed Styling - Enhanced UI/UX */
 .section > .activityHeader {
   text-align: center;
-  margin-bottom: 28px;
+  margin-bottom: 40px;
+  padding: 25px;
+  background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%);
+  border-radius: 16px;
+  border: 2px solid #10b981;
 }
 
 .section > .activityHeader h2 {
-  color: #2c3e50;
+  color: #065f46;
   margin-bottom: 8px;
-  display: inline-flex;
+  font-size: 28px;
+  font-weight: 800;
+  display: flex;
   align-items: center;
   justify-content: center;
-  gap: 10px;
-  font-size: 20px;
+  gap: 12px;
 }
 
 .section > .activityHeader p {
-  color: #7f8c8d;
-  font-size: 15px;
+  color: #047857;
+  font-size: 16px;
   margin: 0;
+  font-weight: 500;
 }
 
-.activityFeed {
+/* Journey Header - v2.1 FIXED */
+.journeyHeader {
+  text-align: center;
+  margin-bottom: 40px;
+  padding: 30px;
+  background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%);
+  border-radius: 20px;
+  border: 2px solid #10b981;
+  box-shadow: 0 4px 20px rgba(16, 185, 129, 0.15);
+}
+
+.journeyHeader h1 {
+  color: #065f46;
+  font-size: 32px;
+  font-weight: 800;
+  margin-bottom: 12px;
+}
+
+.journeyHeader p {
+  color: #047857;
+  font-size: 18px;
+  margin: 0;
+  font-weight: 500;
+  line-height: 1.5;
+}
+
+/* Activity Grid - Shows cards in a grid layout */
+.activityGrid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
   gap: 25px;
 }
 
-.activityCard {
-  background: #ffffff;
-  border-radius: 12px;
-  padding: 24px;
-  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.07);
+/* Activity Card Container */
+.activityCardContainer {
   display: flex;
   flex-direction: column;
-  gap: 16px;
+}
+
+/* Individual Activity Card */
+.activityCard {
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 2px 15px rgba(0,0,0,0.08);
   transition: all 0.3s ease;
-  border: 1px solid #f0f0f0;
+  border: 1px solid #e5e7eb;
+  overflow: hidden;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
 }
 
 .activityCard:hover {
   transform: translateY(-5px);
-  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 8px 30px rgba(0,0,0,0.12);
 }
 
-.activityHeader {
+/* Activity Card Header */
+.activityCardHeader {
   display: flex;
   justify-content: space-between;
-  align-items: flex-start;
+  align-items: center;
+  padding: 16px 20px;
+  border-bottom: 1px solid #e5e7eb;
+  background: #f8fafc;
 }
 
-.activityHeader h3 {
-  font-size: 1.3rem;
+.activityTypeBadge {
+  display: flex;
+  align-items: center;
+}
+
+.activityTypeLabel {
+  padding: 6px 16px;
+  border-radius: 20px;
+  font-size: 12px;
   font-weight: 700;
-  color: #1a202c;
-  margin: 0;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: white;
+  background: linear-gradient(135deg, #3B82F6 0%, #1D4ED8 100%);
 }
 
-.activityType {
-  display: inline-block;
-  font-size: 0.75rem;
-  font-weight: 600;
-  color: var(--activity-color, #4338ca);
-  background-color: var(--activity-bg-color, #e0e7ff);
-  padding: 5px 12px;
-  border-radius: 16px;
+.activityStatusBadge {
+  display: flex;
+  align-items: center;
 }
 
-.activityDesc {
-  font-size: 0.95rem;
-  color: #4a5568;
-  margin: 0;
+.statusLabel {
+  padding: 6px 16px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.statusLabel.past {
+  background: #f3f4f6;
+  color: #6b7280;
+  border: 1px solid #d1d5db;
+}
+
+.statusLabel.completed {
+  background: #dcfce7;
+  color: #166534;
+  border: 1px solid #86efac;
+}
+
+.statusLabel.active {
+  background: #dbeafe;
+  color: #1e40af;
+  border: 1px solid #93c5fd;
+}
+
+.statusLabel.upcoming {
+  background: #fef3c7;
+  color: #92400e;
+  border: 1px solid #fde68a;
+}
+
+/* Activity Card Body */
+.activityCardBody {
+  padding: 20px;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.activityTitle {
+  font-size: 20px;
+  color: #2c3e50;
+  margin: 0 0 8px 0;
+  font-weight: 700;
+  line-height: 1.3;
+}
+
+.activityDescription {
+  color: #000;
+  font-size: 14px;
   line-height: 1.6;
+  margin: 0 0 12px 0;
+  flex: 1;
 }
 
+/* Activity Details Grid */
 .activityDetails {
   display: grid;
   grid-template-columns: 1fr;
   gap: 12px;
-  padding: 16px 0;
-  border-top: 1px solid #edf2f7;
-  border-bottom: 1px solid #edf2f7;
+  margin: 12px 0;
 }
 
-.activityDetails span {
+.activityDetailItem {
   display: flex;
   align-items: center;
-  gap: 12px;
-  font-size: 0.9rem;
-  color: #2d3748;
-}
-
-.activityDetails span svg {
-  color: #4299e1;
-  font-size: 1.1rem;
-}
-
-.activityFooter {
-  margin-top: auto;
-  display: flex;
-  flex-direction: column;
   gap: 10px;
+  color: #000;
+  font-size: 13px;
 }
 
-.statusBadge {
-  display: inline-block;
-  padding: 5px 12px;
-  border-radius: 9999px;
-  font-size: 0.7rem;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-  align-self: flex-start;
+.activityDetailItem i {
+  color: #667eea;
+  width: 16px;
+  text-align: center;
 }
 
-.statusBadge.active {
-  background-color: #dcfce7;
-  color: #166534;
+/* Action Buttons */
+.leaveEventBtn {
+  width: 100%;
+  padding: 12px;
+  background: #e74c3c;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+  margin-top: auto;
 }
 
-.statusBadge.upcoming {
-  background-color: #fef3c7;
-  color: #92400e;
+.leaveEventBtn:hover {
+  background: #c0392b;
 }
 
-.statusBadge.completed {
-  background-color: #dbeafe;
-  color: #1e40af;
+.joinChallengeBtn {
+  width: 100%;
+  padding: 12px;
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+  margin-top: auto;
 }
 
-.statusBadge.past {
-  background-color: #f3f4f6;
-  color: #4b5563;
+.joinChallengeBtn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
 }
 
-.activityPoints {
-  background: linear-gradient(135deg, #fde047, #f59e0b);
-  color: #854d0e;
-  padding: 6px 12px;
-  border-radius: 9999px;
-  font-size: 0.8rem;
-  font-weight: 700;
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  align-self: flex-end;
+/* Responsive Design */
+@media (max-width: 768px) {
+  .journeyHeader {
+    padding: 20px;
+    margin-bottom: 30px;
+  }
+  
+  .journeyHeader h1 {
+    font-size: 24px;
+  }
+  
+  .journeyHeader p {
+    font-size: 16px;
+  }
+  
+  .activityGrid {
+    grid-template-columns: 1fr;
+    gap: 20px;
+  }
+  
+  .activityCard {
+    margin-bottom: 0;
+  }
 }
 
-/* Responsive adjustments */
+@media (max-width: 480px) {
+  .journeyHeader h1 {
+    font-size: 22px;
+  }
+  
+  .activityTitle {
+    font-size: 18px;
+  }
+  
+  .activityDetailItem {
+    font-size: 12px;
+  }
+  
+  .activityCardHeader {
+    padding: 12px 16px;
+  }
+  
+  .activityCardBody {
+    padding: 16px;
+  }
+}
+
+/* Responsive Design */
+@media (max-width: 1024px) {
+  .activityGrid {
+    gap: 16px;
+  }
+
+  .mainTab {
+    min-width: 240px;
+    padding: 20px 24px;
+    font-size: 17px;
+  }
+}
+
 @media (max-width: 768px) {
   .statsGrid {
     grid-template-columns: repeat(2, 1fr);
+    gap: 16px;
   }
-} 
+
+  .statCard {
+    padding: 22px;
+    flex-direction: column;
+    text-align: center;
+  }
+
+  .statIcon {
+    font-size: 42px;
+  }
+
+  .statValue {
+    font-size: 30px;
+  }
+
+  .mainTabs {
+    gap: 12px;
+  }
+
+  .mainTab {
+    min-width: 100%;
+    padding: 18px 20px;
+  }
+
+  .mainTab span:not(.badge) {
+    font-size: 16px;
+  }
+
+  .mainTab i {
+    font-size: 24px;
+  }
+
+  .activityCard {
+    flex-direction: column;
+  }
+
+  .activityLeftBar {
+    width: 100%;
+    height: 4px;
+  }
+
+  .activityContent {
+    padding: 16px;
+  }
+
+  .activityHeaderRow {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+  }
+
+  .activityFooter {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+  }
+
+  .section > .activityHeader {
+    padding: 20px;
+    margin-bottom: 30px;
+  }
+
+  .section > .activityHeader h2 {
+    font-size: 24px;
+  }
+}
+
+@media (max-width: 480px) {
+  .statsGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .statCard {
+    padding: 20px;
+  }
+
+  .statValue {
+    font-size: 28px;
+  }
+
+  .mainTab {
+    padding: 16px;
+  }
+
+  .mainTab .badge {
+    padding: 4px 10px;
+    font-size: 12px;
+  }
+
+  .activityTitle {
+    font-size: 16px;
+  }
+
+  .activityDescription {
+    font-size: 13px;
+  }
+
+  .activityTypeLabel,
+  .statusLabel,
+  .sponsoredBadge {
+    font-size: 11px;
+    padding: 3px 8px;
+  }
+
+  .pointsBadge {
+    padding: 5px 12px;
+    font-size: 13px;
+  }
+
+  .section > .activityHeader h2 {
+    font-size: 20px;
+  }
 }
