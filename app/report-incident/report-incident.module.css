@@ -264,6 +264,14 @@
   background: #d32f2f;
 }
 
+.mapContainer {
+  margin-top: 1rem;
+  border: 2px solid #4CAF50;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+
 .fileInput {
   padding: 12px;
   border: 2px dashed #e0e0e0;
@@ -523,6 +531,27 @@
 .reportPhotos img:hover {
   transform: scale(1.05);
   box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+}
+
+.reportMap {
+  margin-top: 20px;
+  padding: 20px;
+  background: white;
+  border-radius: 10px;
+  border: 2px solid #e0e0e0;
+}
+
+.reportMap h4 {
+  color: #2c3e50;
+  font-size: 16px;
+  margin-bottom: 15px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.reportMap h4 i {
+  color: #4CAF50;
 }
 
 .govResponse {

@@ -10,6 +10,26 @@ import { storage } from '@/lib/firebase';
 import styles from './report-incident.module.css';
 import toast from 'react-hot-toast';
 import ConfirmModal from '@/components/ConfirmModal';
+import dynamic from 'next/dynamic';
+import 'leaflet/dist/leaflet.css';
+
+// Dynamically import MapContainer and related components with no SSR
+const MapContainer = dynamic(
+  () => import('react-leaflet').then((mod) => mod.MapContainer),
+  { ssr: false }
+);
+const TileLayer = dynamic(
+  () => import('react-leaflet').then((mod) => mod.TileLayer),
+  { ssr: false }
+);
+const Marker = dynamic(
+  () => import('react-leaflet').then((mod) => mod.Marker),
+  { ssr: false }
+);
+const Popup = dynamic(
+  () => import('react-leaflet').then((mod) => mod.Popup),
+  { ssr: false }
+);
 
 interface IncidentReport {
   id: string;
@@ -62,6 +82,19 @@ export default function ReportIncidentPage() {
   const [loading, setLoading] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [showForm, setShowForm] = useState(true);
+  
+  // Fix Leaflet default icon issue with Next.js
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const L = require('leaflet');
+      delete (L.Icon.Default.prototype as any)._getIconUrl;
+      L.Icon.Default.mergeOptions({
+        iconRetinaUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon-2x.png',
+        iconUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon.png',
+        shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png',
+      });
+    }
+  }, []);
   
   // Form state
   const [incidentType, setIncidentType] = useState<'illegal-dumping' | 'pollution' | 'tree-cutting' | 'water-contamination' | 'air-pollution' | 'other'>('illegal-dumping');
@@ -689,17 +722,18 @@ export default function ReportIncidentPage() {
 
               {/* GPS Coordinates */}
               <div className={styles.formGroup}>
-                <label>GPS Coordinates (Recommended)</label>
+                <label>GPS Location (Recommended)</label>
                 <div className={styles.gpsSection}>
                   {gpsCoordinates ? (
                     <div className={styles.gpsData}>
                       <i className="fas fa-map-marker-alt" style={{ color: '#4CAF50' }}></i>
                       <div>
                         <strong>Location Captured</strong>
-                        <p>
+                        <p>{address || 'Address captured'}</p>
+                        <small style={{ color: '#666', fontSize: '0.85em' }}>
                           Lat: {gpsCoordinates.latitude.toFixed(6)}, 
                           Lng: {gpsCoordinates.longitude.toFixed(6)}
-                        </p>
+                        </small>
                       </div>
                       <button
                         type="button"
@@ -721,6 +755,28 @@ export default function ReportIncidentPage() {
                     </button>
                   )}
                 </div>
+                
+                {/* Interactive Map */}
+                {gpsCoordinates && (
+                  <div className={styles.mapContainer}>
+                    <MapContainer
+                      center={[gpsCoordinates.latitude, gpsCoordinates.longitude]}
+                      zoom={15}
+                      style={{ height: '300px', width: '100%', borderRadius: '8px', marginTop: '1rem' }}
+                    >
+                      <TileLayer
+                        url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+                        attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+                      />
+                      <Marker position={[gpsCoordinates.latitude, gpsCoordinates.longitude]}>
+                        <Popup>
+                          <strong>Incident Location</strong><br />
+                          {address}
+                        </Popup>
+                      </Marker>
+                    </MapContainer>
+                  </div>
+                )}
               </div>
 
               {/* Photo Upload */}
@@ -906,6 +962,33 @@ export default function ReportIncidentPage() {
                           {report.photos.map((photo, index) => (
                             <img key={index} src={photo} alt={`Evidence ${index + 1}`} />
                           ))}
+                        </div>
+                      )}
+
+                      {/* Location Map */}
+                      {report.location.coordinates && (
+                        <div className={styles.reportMap}>
+                          <h4>
+                            <i className="fas fa-map"></i>
+                            Incident Location
+                          </h4>
+                          <MapContainer
+                            center={[report.location.coordinates.latitude, report.location.coordinates.longitude]}
+                            zoom={15}
+                            style={{ height: '250px', width: '100%', borderRadius: '8px' }}
+                            scrollWheelZoom={false}
+                          >
+                            <TileLayer
+                              url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+                              attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+                            />
+                            <Marker position={[report.location.coordinates.latitude, report.location.coordinates.longitude]}>
+                              <Popup>
+                                <strong>{report.title}</strong><br />
+                                {report.location.address}
+                              </Popup>
+                            </Marker>
+                          </MapContainer>
                         </div>
                       )}
 
