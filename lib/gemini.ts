@@ -5,6 +5,48 @@ const apiKey = process.env.GEMINI_API_KEY || '';
 console.log('🔍 Gemini API Key check:', apiKey ? `Found (${apiKey.substring(0, 10)}...)` : 'NOT FOUND');
 const genAI = new GoogleGenerativeAI(apiKey);
 
+// Rate limiting - track requests
+const rateLimiter = {
+  requests: [] as number[],
+  maxRequestsPerMinute: 10, // Conservative limit (free tier allows 15)
+  maxRequestsPerDay: 1000, // Conservative limit (free tier allows 1500)
+  
+  canMakeRequest(): boolean {
+    const now = Date.now();
+    const oneMinuteAgo = now - 60 * 1000;
+    const oneDayAgo = now - 24 * 60 * 60 * 1000;
+    
+    // Clean old requests
+    this.requests = this.requests.filter(time => time > oneDayAgo);
+    
+    // Check limits
+    const recentRequests = this.requests.filter(time => time > oneMinuteAgo);
+    const dailyRequests = this.requests.length;
+    
+    return recentRequests.length < this.maxRequestsPerMinute && 
+           dailyRequests < this.maxRequestsPerDay;
+  },
+  
+  recordRequest(): void {
+    this.requests.push(Date.now());
+  },
+  
+  getWaitTime(): number {
+    const now = Date.now();
+    const oneMinuteAgo = now - 60 * 1000;
+    const recentRequests = this.requests.filter(time => time > oneMinuteAgo);
+    
+    if (recentRequests.length >= this.maxRequestsPerMinute) {
+      const oldestRequest = Math.min(...recentRequests);
+      return Math.ceil((oldestRequest + 60 * 1000 - now) / 1000);
+    }
+    return 0;
+  }
+};
+
+// Helper function for delays
+const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
+
 export interface GeminiScanResult {
   category: string;
   confidence: number;
@@ -19,12 +61,59 @@ export interface GeminiScanResult {
 }
 
 /**
- * Analyze waste/product image using Gemini AI
+ * Analyze waste/product image using Gemini AI with retry logic
  */
 export async function analyzeWasteWithGemini(
-  imageData: string
+  imageData: string,
+  maxRetries: number = 2
 ): Promise<GeminiScanResult> {
+  let lastError: Error | null = null;
+  
+  for (let attempt = 0; attempt <= maxRetries; attempt++) {
+    try {
+      // Wait before retry (exponential backoff)
+      if (attempt > 0) {
+        const waitTime = Math.pow(2, attempt) * 1000; // 2s, 4s, 8s...
+        console.log(`⏳ Retry attempt ${attempt}/${maxRetries} after ${waitTime/1000}s...`);
+        await delay(waitTime);
+      }
+      
+      return await performGeminiAnalysis(imageData);
+    } catch (error) {
+      lastError = error as Error;
+      
+      // Don't retry on quota/rate limit errors
+      if (lastError.message.includes('quota') || 
+          lastError.message.includes('429') ||
+          lastError.message.includes('Rate limit')) {
+        throw lastError;
+      }
+      
+      // Log retry info
+      if (attempt < maxRetries) {
+        console.warn(`⚠️ Attempt ${attempt + 1} failed, retrying...`);
+      }
+    }
+  }
+  
+  throw lastError || new Error('Failed to analyze image after retries');
+}
+
+/**
+ * Internal function to perform the actual Gemini API call
+ */
+async function performGeminiAnalysis(imageData: string): Promise<GeminiScanResult> {
   try {
+    // Check rate limit before making request
+    if (!rateLimiter.canMakeRequest()) {
+      const waitTime = rateLimiter.getWaitTime();
+      throw new Error(
+        `Rate limit exceeded. Please wait ${waitTime} seconds before scanning again. ` +
+        `Free tier limit: ${rateLimiter.maxRequestsPerMinute} requests/minute, ` +
+        `${rateLimiter.maxRequestsPerDay} requests/day.`
+      );
+    }
+    
     console.log('🔍 Gemini: Starting analysis...');
     console.log('🔍 Image data length:', imageData.length);
     
@@ -84,6 +173,9 @@ export async function analyzeWasteWithGemini(
       console.log('🔍 Gemini: Extracted base64 from data URL');
     }
     console.log('🔍 Gemini: Base64 data length:', base64Data.length);
+    
+    // Record this request for rate limiting
+    rateLimiter.recordRequest();
     
     const result = await model.generateContent([
       prompt,
@@ -147,8 +239,22 @@ export async function analyzeWasteWithGemini(
     console.error('❌ Gemini AI analysis failed:', error);
     if (error instanceof Error) {
       console.error('Error message:', error.message);
-      if (error.message.includes('429') || error.message.includes('quota')) {
+      
+      // Enhanced error messages for quota issues
+      if (error.message.includes('429') || error.message.includes('quota') || error.message.includes('Too Many Requests')) {
         console.error('🚫 QUOTA EXCEEDED - API plan upgrade needed');
+        throw new Error(
+          '⚠️ Gemini API quota exceeded! Options:\n' +
+          '1. Wait 24 hours for quota reset\n' +
+          '2. Get a new API key at https://ai.google.dev/\n' +
+          '3. Upgrade to paid plan for higher limits\n\n' +
+          'Free tier: 15 requests/min, 1,500 requests/day'
+        );
+      }
+      
+      // Rate limit error
+      if (error.message.includes('Rate limit exceeded')) {
+        throw error; // Already has good error message
       }
     }
     throw error;

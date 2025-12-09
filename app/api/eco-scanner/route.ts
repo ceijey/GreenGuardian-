@@ -41,7 +41,26 @@ export async function POST(req: Request) {
         }, { status: 200 });
       } catch (geminiError) {
         console.error('❌ Gemini AI failed:', geminiError);
-        // Fall through to TensorFlow fallback
+        
+        // Return user-friendly error for quota issues
+        if (geminiError instanceof Error && 
+            (geminiError.message.includes('quota') || 
+             geminiError.message.includes('429') ||
+             geminiError.message.includes('Rate limit'))) {
+          return NextResponse.json({
+            success: false,
+            method: 'gemini-ai',
+            error: 'API_QUOTA_EXCEEDED',
+            message: '⚠️ Gemini API quota exceeded. Please:\n' +
+                    '1. Wait a few minutes and try again\n' +
+                    '2. Get a new API key at https://ai.google.dev/\n' +
+                    '3. Use the TensorFlow.js fallback option',
+            useTensorFlow: true, // Suggest fallback
+          }, { status: 429 });
+        }
+        
+        // For other errors, fall through to TensorFlow fallback
+        console.log('⚡ Falling back to TensorFlow.js...');
       }
     }
 
