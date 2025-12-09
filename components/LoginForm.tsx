@@ -271,7 +271,7 @@ export default function LoginForm() {
                 disabled={isLoading}
                 aria-required="true"
               />
-              <span>
+              <span style={{ color: 'white' }}>
                 I agree to the{' '}
                 <button
                   type="button"
