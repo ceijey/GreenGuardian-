@@ -6,6 +6,7 @@ import CitizenOnly from '@/components/CitizenOnly';
 import Header from '../../components/Header';
 import ChallengeCard from '@/components/ChallengeCard';
 import BadgeDisplay from '@/components/BadgeDisplay';
+import SuccessModal from '@/components/SuccessModal';
 import { useSearchParams } from 'next/navigation';
 import { 
   collection, 
@@ -131,6 +132,7 @@ export default function CommunityHubPage() {
   // Modals
   const [selectedChallenge, setSelectedChallenge] = useState<Challenge | null>(null); // NEW: For showing related events
   const [selectedEvent, setSelectedEvent] = useState<VolunteerEvent | null>(null); // NEW: For showing related challenges
+  const [successModal, setSuccessModal] = useState({ isOpen: false, title: '', message: '' });
 
   const categories = [
     'all', 'plastic-reduction', 'food-waste', 'energy-saving',
@@ -473,7 +475,7 @@ export default function CommunityHubPage() {
           message += `\n\n🤝 ${relatedEvents.length} related volunteer event(s) available to boost your progress!`;
         }
         
-        toast.success('Great job! Your completion has been recorded.');
+        setSuccessModal({ isOpen: true, title: 'Challenge Joined!', message: 'Great job! You have successfully joined the challenge.' });
       }
     } catch (error) {
       console.error('Error:', error);
@@ -488,7 +490,7 @@ export default function CommunityHubPage() {
       await updateDoc(doc(db, 'challenges', challengeId), {
         participants: arrayRemove(user.uid)
       });
-      toast.success('Successfully left the challenge');
+      setSuccessModal({ isOpen: true, title: 'Challenge Left', message: 'Successfully left the challenge' });
     } catch (error) {
       console.error('Error:', error);
       toast.error('Failed to leave challenge');
@@ -557,9 +559,9 @@ export default function CommunityHubPage() {
       }, { merge: true });
       
       if (relatedChallenges.length > 0) {
-        toast.success(`✅ Successfully joined! 🏆 You earned ${pointsAwarded} points in ${relatedChallenges.length} related challenge(s)!`);
+        setSuccessModal({ isOpen: true, title: 'Event Joined!', message: `You successfully joined! 🏆 You earned ${pointsAwarded} points in ${relatedChallenges.length} related challenge(s)!` });
       } else {
-        toast.success('Successfully joined the event!');
+        setSuccessModal({ isOpen: true, title: 'Event Joined!', message: 'Successfully joined the event!' });
       }
     } catch (error) {
       console.error('Error:', error);
@@ -577,7 +579,7 @@ export default function CommunityHubPage() {
       await updateDoc(profileRef, {
         upcomingEvents: arrayRemove(eventId)
       });
-      toast.success('Successfully left the event');
+      setSuccessModal({ isOpen: true, title: 'Event Left', message: 'Successfully left the event' });
     } catch (error) {
       console.error('Error:', error);
       toast.error('Failed to leave event');
@@ -1130,6 +1132,14 @@ export default function CommunityHubPage() {
         )}
       </div>
       </main>
+
+      <SuccessModal
+        isOpen={successModal.isOpen}
+        onClose={() => setSuccessModal({ isOpen: false, title: '', message: '' })}
+        title={successModal.title}
+        message={successModal.message}
+        autoCloseTime={3000}
+      />
     </>
   );
 }

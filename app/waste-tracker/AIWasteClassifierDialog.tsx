@@ -102,7 +102,7 @@ class ModelManager {
 
 interface AIWasteClassifierDialogProps {
   isOpen: boolean;
-  onClose: () => void;
+  onClose?: () => void;
   onClassified?: (result: ClassificationResult) => void;
 }
 
@@ -133,6 +133,7 @@ export default function AIWasteClassifierDialog({ isOpen, onClose, onClassified 
   const [detectedItem, setDetectedItem] = useState<ClassificationResult | null>(null);
   const [showResult, setShowResult] = useState(false);
   const [isScanning, setIsScanning] = useState(true);
+  const [scannedCount, setScannedCount] = useState(0);
 
   // Waste classification database mapping COCO-SSD objects to waste categories
   const wasteClassificationDB: Record<string, ClassificationResult> = {
@@ -601,7 +602,10 @@ export default function AIWasteClassifierDialog({ isOpen, onClose, onClassified 
 
   // Log classification to Firebase
   const handleLogClassification = async () => {
-    if (!detectedItem || !user) return;
+    if (!detectedItem || !user) {
+      toast.error('Unable to log classification. Please try again.');
+      return;
+    }
 
     try {
       await addDoc(collection(db, 'wasteClassifications'), {
@@ -615,6 +619,8 @@ export default function AIWasteClassifierDialog({ isOpen, onClose, onClassified 
         scanDate: new Date().toISOString().split('T')[0],
       });
 
+      // Increment scanned count
+      setScannedCount(prev => prev + 1);
       console.log(`✅ Classification logged: ${detectedItem.category}`);
       
       // Callback to parent if provided
@@ -622,7 +628,7 @@ export default function AIWasteClassifierDialog({ isOpen, onClose, onClassified 
         onClassified(detectedItem);
       }
       
-      toast.success('Classification logged successfully!');
+      toast.success('Great job! Your completion has been recorded.');
     } catch (error) {
       console.error('❌ Error logging classification:', error);
       toast.error('Failed to log classification.');
@@ -635,6 +641,20 @@ export default function AIWasteClassifierDialog({ isOpen, onClose, onClassified 
     setIsScanning(true);
   };
 
+  const handleClearAllScans = () => {
+    try {
+      setDetectedItem(null);
+      setShowResult(false);
+      setIsScanning(true);
+      setScannedCount(0);
+      console.log('🔄 All scans cleared and reset to zero');
+      toast.success('Scans reset to 0. Ready to scan again!');
+    } catch (error) {
+      console.error('❌ Error clearing scans:', error);
+      toast.error('Failed to reset scans.');
+    }
+  };
+
   const handleRetryModelLoad = () => {
     window.location.reload();
   };
@@ -643,7 +663,9 @@ export default function AIWasteClassifierDialog({ isOpen, onClose, onClassified 
     setDetectedItem(null);
     setShowResult(false);
     setIsScanning(true);
-    onClose();
+    if (onClose) {
+      onClose();
+    }
   };
 
   return (
@@ -651,14 +673,63 @@ export default function AIWasteClassifierDialog({ isOpen, onClose, onClassified 
       <div className="fixed inset-0 bg-black/60 backdrop-blur-sm" aria-hidden="true" />
       <div className="fixed inset-0 flex items-center justify-center p-4">
         <Dialog.Panel className="bg-white rounded-2xl p-6 shadow-xl w-full max-w-4xl max-h-[90vh] overflow-y-auto">
-          <Toaster containerStyle={{ zIndex: 9999 }} />
+          <Toaster 
+            position="top-center"
+            toastOptions={{
+              duration: 3000,
+              style: {
+                background: '#10b981',
+                color: '#fff',
+                padding: '16px',
+                borderRadius: '10px',
+                fontSize: '15px',
+                fontWeight: '500',
+              },
+              success: {
+                iconTheme: {
+                  primary: '#fff',
+                  secondary: '#10b981',
+                },
+              },
+              error: {
+                style: {
+                  background: '#ef4444',
+                  color: '#fff',
+                },
+                iconTheme: {
+                  primary: '#fff',
+                  secondary: '#ef4444',
+                },
+              },
+            }}
+            containerStyle={{ zIndex: 99999 }} 
+          />
           <Dialog.Title className="text-2xl font-semibold text-green-700 mb-4 flex items-center justify-between">
-            <span className="flex items-center gap-2">
-              🧠 AI Waste Classifier
-            </span>
-            <button onClick={handleClose} className="text-gray-500 hover:text-gray-700">
-              <i className="fas fa-times text-xl"></i>
-            </button>
+            <div className="flex items-center gap-3">
+              <span className="flex items-center gap-2">
+                🧠 AI Waste Classifier
+              </span>
+              {scannedCount > 0 && (
+                <div className="bg-green-100 text-green-800 px-3 py-1 rounded-full text-sm font-medium">
+                  <i className="fas fa-check-circle mr-1"></i>
+                  {scannedCount} Scanned
+                </div>
+              )}
+            </div>
+            <div className="flex items-center gap-2">
+              {!loading && !error && (showResult && detectedItem) && (
+                <button 
+                  onClick={handleClearAllScans}
+                  className="text-sm px-3 py-1 bg-red-500 text-white rounded hover:bg-red-600 transition-colors"
+                  title="Clear all scans and reset"
+                >
+                  <i className="fas fa-trash mr-1"></i>Clear
+                </button>
+              )}
+              <button onClick={handleClose} className="text-gray-500 hover:text-gray-700">
+                <i className="fas fa-times text-xl"></i>
+              </button>
+            </div>
           </Dialog.Title>
 
           {loading && (

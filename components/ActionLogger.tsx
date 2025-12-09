@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { useAuth } from '@/lib/AuthContext';
 import { collection, addDoc, serverTimestamp, doc, updateDoc, increment, setDoc } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
+import SuccessModal from './SuccessModal';
 import styles from './ActionLogger.module.css';
 
 interface ActionLoggerProps {
@@ -18,6 +19,7 @@ export default function ActionLogger({ isOpen, onClose }: ActionLoggerProps) {
   const [customDescription, setCustomDescription] = useState('');
   const [quantity, setQuantity] = useState(1);
   const [loading, setLoading] = useState(false);
+  const [successModal, setSuccessModal] = useState({ isOpen: false, title: '', message: '' });
 
   const actionTypes = [
     {
@@ -194,11 +196,23 @@ export default function ActionLogger({ isOpen, onClose }: ActionLoggerProps) {
       setCustomDescription('');
       setQuantity(1);
       
-      alert('Action logged successfully! You earned ' + totalPoints + ' points!');
-      onClose();
+      setSuccessModal({ 
+        isOpen: true, 
+        title: 'Great job!', 
+        message: `Your completion has been recorded. You earned ${totalPoints} points!` 
+      });
+      
+      // Close the form after a short delay
+      setTimeout(() => {
+        onClose();
+      }, 500);
     } catch (error) {
       console.error('Error logging action:', error);
-      alert('Failed to log action. Please try again.');
+      setSuccessModal({ 
+        isOpen: true, 
+        title: 'Error', 
+        message: 'Failed to log action. Please try again.' 
+      });
     } finally {
       setLoading(false);
     }
@@ -325,6 +339,14 @@ export default function ActionLogger({ isOpen, onClose }: ActionLoggerProps) {
           </div>
         </form>
       </div>
+
+      <SuccessModal
+        isOpen={successModal.isOpen}
+        onClose={() => setSuccessModal({ isOpen: false, title: '', message: '' })}
+        title={successModal.title}
+        message={successModal.message}
+        autoCloseTime={3000}
+      />
     </div>
   );
 }

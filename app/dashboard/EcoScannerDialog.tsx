@@ -49,6 +49,15 @@ class GeminiScannerManager {
     this.lastScanTime = Date.now();
 
     try {
+      // Validate image data
+      if (!imageData || imageData.length < 100) {
+        console.error('❌ Invalid image data - too small or empty');
+        this.consecutiveErrors++;
+        return null;
+      }
+
+      console.log('📤 Sending to /api/eco-scanner - image size:', imageData.length);
+      
       // Call the API route instead of direct Gemini call
       const response = await fetch('/api/eco-scanner', {
         method: 'POST',
@@ -56,19 +65,43 @@ class GeminiScannerManager {
         body: JSON.stringify({ image: imageData }),
       });
 
+      console.log('📥 API response status:', response.status);
+
       if (!response.ok) {
-        throw new Error(`API request failed: ${response.status}`);
+        const errorText = await response.text();
+        console.error(`❌ API request failed: ${response.status} - ${errorText}`);
+        this.consecutiveErrors++;
+        return null;
       }
 
       const data = await response.json();
+      console.log('📊 API response data:', {
+        success: data.success,
+        method: data.method,
+        hasResult: !!data.result,
+        message: data.message
+      });
       
-      if (data.success && data.method === 'gemini-ai') {
+      if (data.success && data.method === 'gemini-ai' && data.result) {
         // Success! Reset error counter
         this.consecutiveErrors = 0;
+        console.log('✅ Gemini scan successful:', data.result.category);
         return data.result;
       }
       
+      if (!data.success) {
+        console.warn('⚠️ API returned failure:', data.message);
+        this.consecutiveErrors++;
+        return null;
+      }
+      
+      if (data.method === 'tensorflow-fallback') {
+        console.log('⚡ TensorFlow fallback requested');
+        return null; // Let client-side TensorFlow handle it
+      }
+      
       // No result but not an error
+      console.warn('⚠️ No result in API response');
       return null;
     } catch (error) {
       console.error('❌ Gemini scan error:', error);
@@ -88,7 +121,7 @@ class GeminiScannerManager {
 
 interface EcoScannerDialogProps {
   isOpen: boolean;
-  onClose: () => void;
+  onClose?: () => void;
 }
 
 interface ProductFootprint {
@@ -482,7 +515,7 @@ export default function EcoScannerDialog({ isOpen, onClose }: EcoScannerDialogPr
         // Scan with Gemini AI
         console.log('🔄 Calling Gemini scanner...');
         const result = await scannerManager.scan(imageData);
-        console.log('📊 Scan result:', result);
+        console.log('📊 Scan result object:', result);
 
         // Check if scanner needs reinitialization
         if (scannerManager.needsReinit()) {
@@ -532,6 +565,8 @@ export default function EcoScannerDialog({ isOpen, onClose }: EcoScannerDialogPr
             instructions: result.instructions
           };
 
+          console.log('📦 Created product data:', productData);
+
           // Draw detection box and info
           const getEcoColor = (score: number) => {
             if (score <= 4) return '#ef4444'; // red
@@ -567,6 +602,15 @@ export default function EcoScannerDialog({ isOpen, onClose }: EcoScannerDialogPr
           setShowConfirmation(true);
           setIsPaused(true);
           setIsScanning(false);
+        } else if (result) {
+          // Log why the result wasn't processed
+          console.warn('⏭️ Result detected but not processed:', {
+            hasResult: !!result,
+            recyclable: result?.recyclable,
+            category: result?.category,
+            isPaused,
+            showConfirmation
+          });
         }
 
       } catch (error) {
@@ -659,7 +703,9 @@ export default function EcoScannerDialog({ isOpen, onClose }: EcoScannerDialogPr
     setIsPaused(false);
     
     console.log('🔄 Scanner closed and reset');
-    onClose();
+    if (onClose) {
+      onClose();
+    }
   };
 
   return (

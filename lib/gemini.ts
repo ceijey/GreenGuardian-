@@ -26,6 +26,8 @@ export async function analyzeWasteWithGemini(
 ): Promise<GeminiScanResult> {
   try {
     console.log('🔍 Gemini: Starting analysis...');
+    console.log('🔍 Image data length:', imageData.length);
+    
     // Using Gemini 2.0 Flash - supports multimodal (text + images)
     const model = genAI.getGenerativeModel({ model: 'gemini-2.0-flash' });
 
@@ -74,12 +76,21 @@ export async function analyzeWasteWithGemini(
     Remember: Use EXACTLY the carbon values from the list above. Do not recalculate. Only analyze waste/recyclable products - ignore people, pets, and furniture.`;
 
     console.log('🔍 Gemini: Calling API...');
+    
+    // Extract base64 data - handle both data URLs and raw base64
+    let base64Data = imageData;
+    if (imageData.includes(',')) {
+      base64Data = imageData.split(',')[1];
+      console.log('🔍 Gemini: Extracted base64 from data URL');
+    }
+    console.log('🔍 Gemini: Base64 data length:', base64Data.length);
+    
     const result = await model.generateContent([
       prompt,
       {
         inlineData: {
           mimeType: 'image/jpeg',
-          data: imageData.split(',')[1], // Remove data:image/jpeg;base64, prefix
+          data: base64Data,
         },
       },
     ]);
@@ -97,7 +108,11 @@ export async function analyzeWasteWithGemini(
     }
 
     const parsed = JSON.parse(jsonMatch[0]);
-    console.log('🔍 Gemini: Parsed result:', parsed.category);
+    console.log('🔍 Gemini: Parsed result:', {
+      category: parsed.category,
+      recyclable: parsed.recyclable,
+      confidence: parsed.confidence
+    });
 
     // Map to our result format with icons and colors
     const iconMap: Record<string, { icon: string; color: string }> = {
@@ -129,7 +144,13 @@ export async function analyzeWasteWithGemini(
       color: iconData.color,
     };
   } catch (error) {
-    console.error('Gemini AI analysis failed:', error);
+    console.error('❌ Gemini AI analysis failed:', error);
+    if (error instanceof Error) {
+      console.error('Error message:', error.message);
+      if (error.message.includes('429') || error.message.includes('quota')) {
+        console.error('🚫 QUOTA EXCEEDED - API plan upgrade needed');
+      }
+    }
     throw error;
   }
 }
