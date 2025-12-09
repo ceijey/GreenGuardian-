@@ -777,7 +777,8 @@ export default function PrivatePartnerPage() {
       });
       setShowAnnouncementModal(false);
     } catch (error) {
-      console.error('Error creating announcement:', error);\n      toast.error('Failed to create announcement. Please try again.');
+      console.error('Error creating announcement:', error);
+      toast.error('Failed to create announcement. Please try again.');
     }
   };
 
