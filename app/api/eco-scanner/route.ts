@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { analyzeWasteWithGemini, isGeminiAvailable } from '@/lib/gemini';
+import { getRedisClient } from '@/lib/redis';
 
 interface EcoScannerRequest {
   image?: string; // Base64 image data
@@ -29,11 +30,42 @@ export async function POST(req: Request) {
         console.log('🤖 Using Gemini AI for waste analysis...');
         console.log('📸 Image data length:', image.length);
         console.log('📸 Image prefix:', image.substring(0, 50));
-        
+
+        // Create cache key based on image hash
+        const crypto = await import('crypto');
+        const imageHash = crypto.default.createHash('md5').update(image).digest('hex');
+        const cacheKey = `eco-scanner:gemini:${imageHash}`;
+
+        // Check cache first
+        const redis = getRedisClient();
+        try {
+          const cachedResult = await redis.get(cacheKey);
+          if (cachedResult) {
+            console.log('✅ Cache hit for Gemini analysis');
+            const parsedResult = JSON.parse(cachedResult);
+            return NextResponse.json({
+              success: true,
+              method: 'gemini-ai-cached',
+              result: parsedResult,
+            }, { status: 200 });
+          }
+        } catch (cacheError) {
+          console.warn('⚠️ Redis cache error:', cacheError);
+          // Continue without cache
+        }
+
         const result = await analyzeWasteWithGemini(image);
-        
+
         console.log('✅ Gemini analysis complete:', result.category);
-        
+
+        // Cache the result for 1 hour (3600 seconds)
+        try {
+          await redis.setex(cacheKey, 3600, JSON.stringify(result));
+          console.log('💾 Cached Gemini result');
+        } catch (cacheError) {
+          console.warn('⚠️ Failed to cache result:', cacheError);
+        }
+
         return NextResponse.json({
           success: true,
           method: 'gemini-ai',
@@ -48,7 +80,7 @@ export async function POST(req: Request) {
     // Method 2: TensorFlow.js Fallback (BACKUP)
     if (image) {
       console.log('⚡ Using TensorFlow.js fallback...');
-      
+
       // Return a flag to trigger client-side TensorFlow
       return NextResponse.json({
         success: true,

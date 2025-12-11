@@ -1,7 +1,8 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  // No custom turbopack or loader config needed
+  // Enable standalone output for Docker deployment
+  output: "standalone",
 };
 
 export default nextConfig;

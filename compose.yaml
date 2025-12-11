@@ -2,19 +2,78 @@
 # If you need more help, visit the Docker Compose reference guide at
 # https://docs.docker.com/go/compose-spec-reference/
 
-# Here the instructions define your application as a service called "server".
-# This service is built from the Dockerfile in the current directory.
-# You can add other services your application may depend on here, such as a
-# database or a cache. For examples, see the Awesome Compose repository:
-# https://github.com/docker/awesome-compose
+# GreenGuardian Production Stack with Nginx, Redis, and Next.js
+
 services:
-  server:
+  # Nginx Reverse Proxy
+  nginx:
+    image: nginx:alpine
+    container_name: greenguardian-nginx
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./nginx/ssl:/etc/nginx/ssl:ro
+    depends_on:
+      - app
+    restart: unless-stopped
+    networks:
+      - greenguardian-network
+
+  # Next.js Application
+  app:
     build:
       context: .
+      args:
+        - GEMINI_API_KEY=${GEMINI_API_KEY}
+        - NEXT_PUBLIC_FIREBASE_API_KEY=${NEXT_PUBLIC_FIREBASE_API_KEY}
+        - NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN=${NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN}
+        - NEXT_PUBLIC_FIREBASE_PROJECT_ID=${NEXT_PUBLIC_FIREBASE_PROJECT_ID}
+        - NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET=${NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET}
+        - NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID=${NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID}
+        - NEXT_PUBLIC_FIREBASE_APP_ID=${NEXT_PUBLIC_FIREBASE_APP_ID}
+        - NEXT_PUBLIC_FIREBASE_MEASUREMENT_ID=${NEXT_PUBLIC_FIREBASE_MEASUREMENT_ID}
+    container_name: greenguardian-app
+    env_file:
+      - .env.local
     environment:
       NODE_ENV: production
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      GEMINI_API_KEY: ${GEMINI_API_KEY}
+    expose:
+      - "3000"
+    depends_on:
+      - redis
+    restart: unless-stopped
+    networks:
+      - greenguardian-network
+
+  # Redis Cache
+  redis:
+    image: redis:alpine
+    container_name: greenguardian-redis
+    command: redis-server --appendonly yes
+    volumes:
+      - redis-data:/data
     ports:
-      - 3000:3000
+      - "6379:6379"
+    restart: unless-stopped
+    networks:
+      - greenguardian-network
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+networks:
+  greenguardian-network:
+    driver: bridge
+
+volumes:
+  redis-data:
 
 # The commented out section below is an example of how to define a PostgreSQL
 # database that your application can use. `depends_on` tells Docker Compose to
